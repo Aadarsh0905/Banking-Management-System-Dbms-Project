@@ -1,0 +1,314 @@
+{
+  "info": {
+    "name": "Banking Management System API",
+    "description": "Complete API test collection for Banking Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl",      "value": "http://localhost:8080/api" },
+    { "key": "accessToken",  "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Customer",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Password@123\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\",\n  \"phone\": \"9876543299\",\n  \"gender\": \"MALE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const r = pm.response.json();",
+                "if(r.data?.accessToken) {",
+                "  pm.collectionVariables.set('accessToken', r.data.accessToken);",
+                "  pm.collectionVariables.set('refreshToken', r.data.refreshToken);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"rahul.sharma\",\n  \"password\": \"Customer@123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin Login",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const r = pm.response.json();",
+                "if(r.data?.accessToken) pm.collectionVariables.set('accessToken', r.data.accessToken);"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"admin\",\n  \"password\": \"Admin@123\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/forgot-password",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"rahul@email.com\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Submit KYC",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users/kyc",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aadhaarNumber\": \"123456789013\",\n  \"panNumber\": \"ABCDE1234Z\",\n  \"addressLine1\": \"123 Test Street\",\n  \"city\": \"Mumbai\",\n  \"state\": \"Maharashtra\",\n  \"pincode\": \"400001\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Beneficiaries",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/beneficiaries",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Add Beneficiary",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/users/beneficiaries",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"Friend\",\n  \"accountNumber\": \"ACC1000000003\",\n  \"ifscCode\": \"BANK0000002\",\n  \"bankName\": \"Our Bank\",\n  \"beneficiaryName\": \"Arjun Mehta\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Get My Accounts",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/accounts",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Open Savings Account",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/accounts/open",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountTypeId\": 1,\n  \"branchId\": 1,\n  \"nomineeName\": \"Family Member\",\n  \"nomineeRelation\": \"SPOUSE\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Account Types",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/accounts/types",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "Deposit",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transactions/deposit",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": 1,\n  \"amount\": 5000,\n  \"description\": \"Test deposit\",\n  \"channel\": \"BRANCH\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Withdrawal",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transactions/withdraw",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountId\": 1,\n  \"amount\": 1000,\n  \"description\": \"Test withdrawal\",\n  \"channel\": \"ATM\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Fund Transfer",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/transactions/transfer",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromAccountId\": 1,\n  \"toAccountNumber\": \"ACC1000000002\",\n  \"amount\": 500,\n  \"description\": \"Test transfer\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Transaction History",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/transactions?page=0&size=10", "query": [{ "key": "page", "value": "0" }, { "key": "size", "value": "10" }] },
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loans",
+      "item": [
+        {
+          "name": "Get Loan Types",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/loans/types",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "EMI Calculator",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/loans/calculate?loanTypeId=1&amount=200000&tenureMonths=24",
+              "query": [{ "key": "loanTypeId", "value": "1" }, { "key": "amount", "value": "200000" }, { "key": "tenureMonths", "value": "24" }]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Apply for Loan",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/loans/apply",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"loanTypeId\": 1,\n  \"accountId\": 1,\n  \"amountRequested\": 100000,\n  \"tenureMonths\": 12,\n  \"purpose\": \"Home renovation\",\n  \"annualIncome\": 600000,\n  \"employmentType\": \"SALARIED\",\n  \"employerName\": \"Tech Corp\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/dashboard",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Get Customers",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/customers?page=0&size=10",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Pending KYC",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/kyc/pending",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "Pending Loans",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/loans/pending",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        },
+        {
+          "name": "All Transactions",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/transactions?page=0",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}

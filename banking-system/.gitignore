@@ -1,0 +1,53 @@
+# ============================================================
+# .gitignore — Banking Management System
+# ============================================================
+
+# ── Environment & Secrets ─────────────────────────────────
+.env
+*.env.local
+*.env.production
+
+# ── Java / Maven ──────────────────────────────────────────
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/**/*.class
+backend/**/*.jar
+!backend/pom.xml
+
+# ── Node / Frontend ───────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+*.log
+npm-debug.log*
+
+# ── IDE ───────────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Docker ────────────────────────────────────────────────
+# Keep docker-compose but ignore overrides
+docker-compose.override.yml
+
+# ── Uploads ───────────────────────────────────────────────
+backend/uploads/
+uploads/
+
+# ── Logs ─────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Test reports ──────────────────────────────────────────
+backend/target/surefire-reports/
+backend/target/site/
+
+# ── OS ────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db

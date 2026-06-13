@@ -1,0 +1,83 @@
+version: '3.9'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: banking_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-banking_db}
+      MYSQL_USER: ${DB_USER:-banking_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-banking_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: banking_backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${DB_NAME:-banking_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-banking_user}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-banking_password}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: false
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+    container_name: banking_frontend
+    environment:
+      REACT_APP_API_BASE_URL: ${REACT_APP_API_BASE_URL:-http://localhost:8080/api}
+      REACT_APP_ENV: ${REACT_APP_ENV:-development}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - banking-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  banking-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
