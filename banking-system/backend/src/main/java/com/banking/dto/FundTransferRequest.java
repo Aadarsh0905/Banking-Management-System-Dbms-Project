@@ -14,4 +14,13 @@ public class FundTransferRequest {
     @NotNull @DecimalMin("1.00") public BigDecimal amount;
     public String description;
     public String ifscCode;
+
+    public FundTransferRequest(Long fromAccountId, String toAccountNumber, BigDecimal amount, String description) {
+        this.fromAccountId = fromAccountId;
+        this.toAccountNumber = toAccountNumber;
+        this.amount = amount;
+        this.description = description;
+        this.ifscCode = null;
+    }
 }
+
