@@ -95,7 +95,13 @@ export function RegisterPage() {
       toast.success('Registration successful! Please login.');
       navigate('/login');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed');
+      const respData = err.response?.data;
+      if (respData?.data && typeof respData.data === 'object') {
+        const details = Object.values(respData.data).join(', ');
+        toast.error(`${respData.message}: ${details}`);
+      } else {
+        toast.error(respData?.message || 'Registration failed');
+      }
     } finally { setLoading(false); }
   }
 
