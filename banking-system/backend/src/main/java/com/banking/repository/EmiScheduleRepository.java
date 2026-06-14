@@ -18,7 +18,7 @@ public interface EmiScheduleRepository extends JpaRepository<EmiSchedule, Long> 
     @Query("SELECT e FROM EmiSchedule e WHERE e.dueDate = :date AND e.status = 'UPCOMING' AND e.loan.user.id = :userId")
     List<EmiSchedule> findUpcomingEmiForUser(@Param("userId") Long userId, @Param("date") LocalDate date);
 
-    @Query("SELECT e FROM EmiSchedule e WHERE e.dueDate < :date AND e.status = 'UPCOMING'")
+    @Query("SELECT e FROM EmiSchedule e WHERE e.dueDate < :date AND e.status = :status")
     List<EmiSchedule> findByDueDateBeforeAndStatus(
         @Param("date") LocalDate date,
         @Param("status") EmiSchedule.EmiStatus status);
