@@ -314,7 +314,7 @@ public class TransactionService {
                 .build();
 
         st = scheduledRepo.save(st);
-        return Map.of(
+        return Map.<String, Object>of(
             "id", st.getId(),
             "fromAccount", from.getAccountNumber(),
             "toAccount", to.getAccountNumber(),
@@ -327,7 +327,7 @@ public class TransactionService {
 
     public List<Map<String, Object>> getScheduledTransfers(Long userId) {
         return scheduledRepo.findByFromAccountUserId(userId).stream()
-                .map(st -> (Map<String, Object>) Map.of(
+                .map(st -> Map.<String, Object>of(
                     "id",                  st.getId(),
                     "fromAccount",         st.getFromAccount().getAccountNumber(),
                     "toAccount",           st.getToAccount().getAccountNumber(),
