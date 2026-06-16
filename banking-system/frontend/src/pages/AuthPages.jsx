@@ -209,6 +209,7 @@ export function LoginPage() {
             </div>
             <p className="text-[9px] text-slate-400 mt-2 italic">Password is Customer@123 (Aadarsh@123 for Aadarsh)</p>
           </div>
+        </div>
       </div>
     </AuthLayout>
   );
