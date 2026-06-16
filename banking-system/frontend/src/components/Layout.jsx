@@ -158,8 +158,8 @@ function Navbar({ onToggleSidebar }) {
           <span className="text-sm font-semibold text-slate-300">{user?.firstName} {user?.lastName}</span>
         </button>
 
-        <button onClick={handleLogout} className="flex items-center gap-1.5 px-4.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors shadow-lg shadow-red-600/20 active:scale-95">
-          <FaSignOutAlt />
+        <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-600 hover:text-white text-red-400 text-sm font-bold transition-all active:scale-[0.97] shadow-sm hover:shadow-red-600/10">
+          <FaSignOutAlt className="text-base" />
           <span className="hidden sm:inline">Logout</span>
         </button>
       </div>

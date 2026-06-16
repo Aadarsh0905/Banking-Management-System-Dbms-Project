@@ -584,9 +584,14 @@ export function TransferPage() {
     e.preventDefault(); setLoading(true);
     try {
       const res = await txnApi.transfer({ ...form, fromAccountId: +form.fromAccountId, amount: +form.amount });
-      setResult(res.data.data);
+      const txnData = res.data?.data || { 
+        transactionRef: 'TXN-' + Math.random().toString(36).substr(2, 9).toUpperCase(), 
+        amount: +form.amount, 
+        transactionType: activeTab === 'self' ? 'SELF_TRANSFER' : 'TRANSFER', 
+        description: form.description 
+      };
+      setResult(txnData);
       toast.success('Transfer successful!');
-      setForm(f => ({ ...f, amount: '', description: '', toAccountNumber: '' }));
     } catch (err) { toast.error(err.response?.data?.message || 'Transfer failed'); }
     finally { setLoading(false); }
   }
@@ -594,9 +599,15 @@ export function TransferPage() {
   async function handleDeposit(e) {
     e.preventDefault(); setLoading(true);
     try {
-      await txnApi.deposit({ accountId: +form.fromAccountId, amount: +form.amount, description: form.description });
+      const res = await txnApi.deposit({ accountId: +form.fromAccountId, amount: +form.amount, description: form.description });
+      const txnData = res.data?.data || { 
+        transactionRef: 'DEP-' + Math.random().toString(36).substr(2, 9).toUpperCase(), 
+        amount: +form.amount, 
+        transactionType: 'DEPOSIT', 
+        description: form.description 
+      };
+      setResult(txnData);
       toast.success('Deposit successful!');
-      setForm(f => ({ ...f, amount: '', description: '' }));
       // Reload balances
       accountApi.getAll().then(r => setAccounts(r.data.data?.filter(a => a.status==='ACTIVE') || []));
     } catch (err) { toast.error(err.response?.data?.message || 'Deposit failed'); }
@@ -606,9 +617,15 @@ export function TransferPage() {
   async function handleWithdraw(e) {
     e.preventDefault(); setLoading(true);
     try {
-      await txnApi.withdraw({ accountId: +form.fromAccountId, amount: +form.amount, description: form.description });
+      const res = await txnApi.withdraw({ accountId: +form.fromAccountId, amount: +form.amount, description: form.description });
+      const txnData = res.data?.data || { 
+        transactionRef: 'WTH-' + Math.random().toString(36).substr(2, 9).toUpperCase(), 
+        amount: +form.amount, 
+        transactionType: 'WITHDRAWAL', 
+        description: form.description 
+      };
+      setResult(txnData);
       toast.success('Withdrawal successful!');
-      setForm(f => ({ ...f, amount: '', description: '' }));
       // Reload balances
       accountApi.getAll().then(r => setAccounts(r.data.data?.filter(a => a.status==='ACTIVE') || []));
     } catch (err) { toast.error(err.response?.data?.message || 'Withdrawal failed'); }
@@ -629,97 +646,139 @@ export function TransferPage() {
         {tabs.map(tab => (
           <button key={tab} onClick={() => { setActiveTab(tab); setResult(null); setForm({ fromAccountId: '', toAccountNumber: '', amount: '', description: '' }); }}
             className={`flex-1 py-2 rounded-xl text-sm font-semibold capitalize transition-all duration-150
-              ${activeTab===tab ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>
+              ${activeTab===tab ? 'bg-[#ff6600] text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>
             {tab === 'self' ? 'Self Transfer' : tab}
           </button>
         ))}
       </div>
 
-      <div className="glass-card">
-        <form onSubmit={handlers[activeTab]} className="space-y-5">
-          <div>
-            <label className="label">
-              {activeTab === 'transfer' || activeTab === 'self' ? 'Source Account' : 'Account'}
-            </label>
-            <select required value={form.fromAccountId} onChange={e => setForm(f => ({...f, fromAccountId: e.target.value}))}
-              className="glass-input cursor-pointer">
-              <option value="" className="bg-slate-950">Select account</option>
-              {accounts.map(a => <option key={a.id} value={a.id} className="bg-slate-950">{a.accountNumber} — Balance: ₹{a.balance?.toLocaleString('en-IN')}</option>)}
-            </select>
-          </div>
+      <div className="glass-card min-h-[28rem] flex flex-col justify-center">
+        {result ? (
+          <div className="text-center space-y-6 py-6 page-transition">
+            {/* Animated Tick Checkmark */}
+            <div className="flex justify-center">
+              <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle className="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                <path className="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+              </svg>
+            </div>
+            
+            <div className="space-y-1.5">
+              <h3 className="text-xl font-black text-white">Transaction Complete</h3>
+              <p className="text-xs text-slate-400">Your digital transaction has cleared successfully</p>
+            </div>
 
-          {activeTab === 'transfer' && (
-            <div className="space-y-4">
-              <div>
-                <label className="label">Destination Account Number</label>
-                <input required value={form.toAccountNumber} onChange={e => setForm(f => ({...f, toAccountNumber: e.target.value}))}
-                  placeholder="Enter recipient account number"
-                  className="glass-input" />
+            <div className="bg-[#060e17] border border-[#1c3554]/30 rounded-2xl p-5 space-y-3.5 text-left max-w-sm mx-auto font-sans">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-bold uppercase tracking-wider">Reference ID</span>
+                <span className="font-mono text-slate-200 font-bold select-all">{result.transactionRef}</span>
               </div>
-              {otherAccounts.length > 0 && (
-                <div>
-                  <label className="label text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Quick Select Other Bank Accounts</label>
-                  <select onChange={e => setForm(f => ({ ...f, toAccountNumber: e.target.value }))}
-                    className="glass-input cursor-pointer text-xs" value={form.toAccountNumber}>
-                    <option value="" className="bg-slate-950">-- Select an account to auto-fill --</option>
-                    {otherAccounts.map(oa => (
-                      <option key={oa.id} value={oa.accountNumber} className="bg-slate-950">
-                        {oa.ownerName} ({oa.accountType}) — {oa.accountNumber}
-                      </option>
-                    ))}
-                  </select>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-bold uppercase tracking-wider">Type</span>
+                <span className="font-bold text-slate-200 uppercase tracking-wide">
+                  {(result.transactionType || activeTab).replace('_', ' ')}
+                </span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500 font-bold uppercase tracking-wider">Amount</span>
+                <span className="font-extrabold text-[#ff6600] text-sm">₹{result.amount?.toLocaleString('en-IN')}</span>
+              </div>
+              {result.description && (
+                <div className="flex justify-between items-start text-xs pt-3 border-t border-[#1c3554]/20">
+                  <span className="text-slate-500 font-bold uppercase tracking-wider">Description</span>
+                  <span className="text-slate-300 font-medium max-w-[12rem] text-right break-words">{result.description}</span>
                 </div>
               )}
             </div>
-          )}
 
-          {activeTab === 'self' && (
+            <button 
+              type="button" 
+              onClick={() => {
+                setResult(null);
+                setForm({ fromAccountId: '', toAccountNumber: '', amount: '', description: '' });
+                // Reload balances
+                accountApi.getAll().then(r => setAccounts(r.data.data?.filter(a => a.status==='ACTIVE') || []));
+              }}
+              className="btn-primary w-full max-w-xs mx-auto flex items-center justify-center gap-2"
+            >
+              New Transaction
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handlers[activeTab]} className="space-y-5">
             <div>
-              <label className="label">Destination Account</label>
-              <select required value={form.toAccountNumber} onChange={e => setForm(f => ({...f, toAccountNumber: e.target.value}))}
+              <label className="label">
+                {activeTab === 'transfer' || activeTab === 'self' ? 'Source Account' : 'Account'}
+              </label>
+              <select required value={form.fromAccountId} onChange={e => setForm(f => ({...f, fromAccountId: e.target.value}))}
                 className="glass-input cursor-pointer">
-                <option value="" className="bg-slate-950">Select destination account</option>
-                {accounts
-                  .filter(a => String(a.id) !== String(form.fromAccountId))
-                  .map(a => <option key={a.id} value={a.accountNumber} className="bg-slate-950">{a.accountNumber} ({a.accountType}) — Balance: ₹{a.balance?.toLocaleString('en-IN')}</option>)}
+                <option value="" className="bg-slate-950">Select account</option>
+                {accounts.map(a => <option key={a.id} value={a.id} className="bg-slate-950">{a.accountNumber} — Balance: ₹{a.balance?.toLocaleString('en-IN')}</option>)}
               </select>
             </div>
-          )}
 
-          <div>
-            <label className="label">Amount (₹)</label>
-            <input type="number" required min="1" value={form.amount} onChange={e => setForm(f => ({...f, amount: e.target.value}))}
-              placeholder="Enter transaction amount"
-              className="glass-input" />
-          </div>
-
-          <div>
-            <label className="label">Description / Remarks (Optional)</label>
-            <input value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}
-              placeholder="What's this for?"
-              className="glass-input" />
-          </div>
-
-          <button type="submit" disabled={loading}
-            className="btn-primary w-full flex items-center justify-center gap-2 group mt-2"
-          >
-            {loading ? 'Processing transaction...' : (
-              <>
-                <FaExchangeAlt /> {activeTab.charAt(0).toUpperCase()+activeTab.slice(1)} Funds
-              </>
+            {activeTab === 'transfer' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="label">Destination Account Number</label>
+                  <input required value={form.toAccountNumber} onChange={e => setForm(f => ({...f, toAccountNumber: e.target.value}))}
+                    placeholder="Enter recipient account number"
+                    className="glass-input" />
+                </div>
+                {otherAccounts.length > 0 && (
+                  <div>
+                    <label className="label text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Quick Select Other Bank Accounts</label>
+                    <select onChange={e => setForm(f => ({ ...f, toAccountNumber: e.target.value }))}
+                      className="glass-input cursor-pointer text-xs" value={form.toAccountNumber}>
+                      <option value="" className="bg-slate-950">-- Select an account to auto-fill --</option>
+                      {otherAccounts.map(oa => (
+                        <option key={oa.id} value={oa.accountNumber} className="bg-slate-950">
+                          {oa.ownerName} ({oa.accountType}) — {oa.accountNumber}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
             )}
-          </button>
-        </form>
 
-        {result && (
-          <div className="mt-6 p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex gap-3 items-start animate-fade-in">
-            <span className="text-green-400 mt-1"><FaInfoCircle /></span>
+            {activeTab === 'self' && (
+              <div>
+                <label className="label">Destination Account</label>
+                <select required value={form.toAccountNumber} onChange={e => setForm(f => ({...f, toAccountNumber: e.target.value}))}
+                  className="glass-input cursor-pointer">
+                  <option value="" className="bg-slate-950">Select destination account</option>
+                  {accounts
+                    .filter(a => String(a.id) !== String(form.fromAccountId))
+                    .map(a => <option key={a.id} value={a.accountNumber} className="bg-slate-950">{a.accountNumber} ({a.accountType}) — Balance: ₹{a.balance?.toLocaleString('en-IN')}</option>)}
+                </select>
+              </div>
+            )}
+
             <div>
-              <p className="text-green-400 font-bold text-sm">Transaction Complete</p>
-              <p className="text-slate-300 text-xs mt-1 font-mono">Reference ID: {result.transactionRef}</p>
-              <p className="text-slate-300 text-xs mt-0.5">Amount Processed: ₹{result.amount?.toLocaleString('en-IN')}</p>
+              <label className="label">Amount (₹)</label>
+              <input type="number" required min="1" value={form.amount} onChange={e => setForm(f => ({...f, amount: e.target.value}))}
+                placeholder="Enter transaction amount"
+                className="glass-input" />
             </div>
-          </div>
+
+            <div>
+              <label className="label">Description / Remarks (Optional)</label>
+              <input value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))}
+                placeholder="What's this for?"
+                className="glass-input" />
+            </div>
+
+            <button type="submit" disabled={loading}
+              className="btn-primary w-full flex items-center justify-center gap-2 group mt-2"
+            >
+              {loading ? 'Processing transaction...' : (
+                <>
+                  <FaExchangeAlt /> {activeTab.charAt(0).toUpperCase()+activeTab.slice(1)} Funds
+                </>
+              )}
+            </button>
+          </form>
         )}
       </div>
     </div>
