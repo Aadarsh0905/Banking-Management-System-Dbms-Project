@@ -87,12 +87,12 @@ function Sidebar({ open }) {
   }
 
   return (
-    <aside className="w-60 flex-shrink-0 bg-[#131a26] border-r border-slate-800 text-white flex flex-col shadow-xl overflow-y-auto">
-      <div className="p-4 border-b border-slate-800 flex-shrink-0">
+    <aside className="w-60 flex-shrink-0 bg-[#0c192c] border-r border-[#1c3554] text-white flex flex-col shadow-xl overflow-y-auto">
+      <div className="p-4 border-b border-[#1c3554] flex-shrink-0">
         <div className="flex items-center gap-2">
-          <FaUniversity className="text-2xl text-blue-500" />
+          <FaUniversity className="text-2xl text-orange-500" />
           <div>
-            <p className="font-extrabold text-base leading-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">BankPortal</p>
+            <p className="font-extrabold text-base leading-tight bg-gradient-to-r from-orange-400 to-amber-500 bg-clip-text text-transparent">BankPortal</p>
             <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Management System</p>
           </div>
         </div>
@@ -136,27 +136,23 @@ function Navbar({ onToggleSidebar }) {
   }
 
   return (
-    <header className="flex-shrink-0 bg-[#131a26]/80 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between z-10">
-      <button onClick={onToggleSidebar} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-800 transition-all">
+    <header className="flex-shrink-0 bg-[#0c192c]/80 backdrop-blur-md border-b border-[#1c3554] px-4 py-3 flex items-center justify-between z-10">
+      <button onClick={onToggleSidebar} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-[#1c3554] transition-all">
         <FaBars className="text-slate-300" />
       </button>
 
       <div className="flex items-center gap-3">
-        <button onClick={toggleTheme} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-800 transition-all">
-          {theme === 'dark' ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-slate-300" />}
-        </button>
-
-        <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-800 transition-all">
+        <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-[#1c3554] transition-all">
           <FaBell className="text-slate-300" />
           {unread > 0 && (
-            <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-black shadow-lg shadow-red-500/30">
+            <span className="absolute -top-1 -right-1 bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-black shadow-lg shadow-orange-500/30">
               {unread > 9 ? '9+' : unread}
             </span>
           )}
         </button>
 
-        <button onClick={() => navigate('/profile')} className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-800 transition-colors">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+        <button onClick={() => navigate('/profile')} className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#1c3554] transition-colors">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
           <span className="text-sm font-semibold text-slate-300">{user?.firstName} {user?.lastName}</span>
@@ -174,13 +170,23 @@ function Navbar({ onToggleSidebar }) {
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
+  const [loadingPage, setLoadingPage] = useState(false);
+
+  useEffect(() => {
+    setLoadingPage(true);
+    const timer = setTimeout(() => setLoadingPage(false), 450);
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-[#0b0f19] overflow-hidden">
+    <div className="flex h-screen bg-[#000000] overflow-hidden">
+      {loadingPage && (
+        <div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-amber-400 to-orange-600 z-50 animate-loading-bar" />
+      )}
       <Sidebar open={sidebarOpen} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Navbar onToggleSidebar={() => setSidebarOpen((open) => !open)} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#0b0f19]/20">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#000000]">
           <div key={location.pathname} className="page-transition">
             <Outlet />
           </div>
