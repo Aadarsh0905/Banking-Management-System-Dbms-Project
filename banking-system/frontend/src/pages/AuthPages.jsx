@@ -17,6 +17,10 @@ export function LoginPage() {
   const { login } = useAuth();
   const navigate  = useNavigate();
 
+  const handleQuickLogin = (username, password) => {
+    setForm({ usernameOrEmail: username, password: password });
+  };
+
   async function handleSubmit(e) {
     e.preventDefault(); setLoading(true);
     try {
@@ -68,6 +72,41 @@ export function LoginPage() {
         <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           Don't have an account? <Link to="/register" className="text-blue-600 font-medium hover:underline">Register</Link>
         </p>
+
+        {/* Demo Accounts Panel */}
+        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 text-center">Demo Accounts (Click to Fill)</p>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg text-xs">
+              <span className="font-semibold text-gray-700 dark:text-gray-300">Admin:</span>
+              <button type="button" onClick={() => handleQuickLogin('admin', 'Admin@123')}
+                className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors font-mono">
+                admin / Admin@123
+              </button>
+            </div>
+            <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg text-xs">
+              <span className="font-semibold text-gray-700 dark:text-gray-300">Employee:</span>
+              <button type="button" onClick={() => handleQuickLogin('emp.kumar', 'Admin@123')}
+                className="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-1 rounded hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors font-mono">
+                emp.kumar / Admin@123
+              </button>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg text-xs">
+              <span className="font-semibold text-gray-700 dark:text-gray-300 block mb-1">Customers:</span>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                <button type="button" onClick={() => handleQuickLogin('rahul.sharma', 'Customer@123')}
+                  className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors font-mono">
+                  rahul.sharma
+                </button>
+                <button type="button" onClick={() => handleQuickLogin('priya.patel', 'Customer@123')}
+                  className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-colors font-mono">
+                  priya.patel
+                </button>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-1">Password for customers is Customer@123</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

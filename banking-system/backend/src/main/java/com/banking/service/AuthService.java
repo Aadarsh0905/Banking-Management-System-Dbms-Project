@@ -4,6 +4,14 @@ import com.banking.dto.AuthDTOs;
 import com.banking.dto.UserResponse;
 import com.banking.entity.Role;
 import com.banking.entity.User;
+import com.banking.entity.Account;
+import com.banking.entity.AccountType;
+import com.banking.entity.Branch;
+import com.banking.repository.AccountRepository;
+import com.banking.repository.AccountTypeRepository;
+import com.banking.repository.BranchRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import com.banking.exception.BankingException;
 import com.banking.repository.RoleRepository;
 import com.banking.repository.UserRepository;
@@ -37,6 +45,9 @@ public class AuthService {
     private final BankUserDetailsService userDetailsService;
     private final AuthenticationManager authManager;
     private final NotificationService notificationService;
+    private final AccountRepository accountRepo;
+    private final BranchRepository branchRepo;
+    private final AccountTypeRepository accountTypeRepo;
 
     @Transactional
     public UserResponse register(AuthDTOs.RegisterRequest req) {
@@ -67,6 +78,36 @@ public class AuthService {
             .build();
 
         user = userRepo.save(user);
+
+        // Auto-create a default Savings Bank Account for the new user
+        try {
+            Branch defaultBranch = branchRepo.findByBranchCode("BR001").orElse(null);
+            AccountType savingsType = accountTypeRepo.findByTypeCode("SAVINGS").orElse(null);
+            if (defaultBranch != null && savingsType != null) {
+                String accNumber = "ACC" + (1000000000L + (long)(Math.random() * 9000000000L));
+                while (accountRepo.findByAccountNumber(accNumber).isPresent()) {
+                    accNumber = "ACC" + (1000000000L + (long)(Math.random() * 9000000000L));
+                }
+                Account defaultAccount = Account.builder()
+                    .accountNumber(accNumber)
+                    .user(user)
+                    .branch(defaultBranch)
+                    .accountType(savingsType)
+                    .balance(BigDecimal.ZERO)
+                    .availableBalance(BigDecimal.ZERO)
+                    .currency("INR")
+                    .status(Account.AccountStatus.ACTIVE)
+                    .openedAt(LocalDate.now())
+                    .nomineeName("Self")
+                    .nomineeRelation("SELF")
+                    .build();
+                accountRepo.save(defaultAccount);
+                log.info("Auto-created default savings account {} for user {}", accNumber, user.getUsername());
+            }
+        } catch (Exception e) {
+            log.error("Failed to auto-create default bank account for registered user: {}", e.getMessage());
+        }
+
         notificationService.sendWelcomeEmail(user);
         log.info("New user registered: {}", user.getUsername());
         return mapToUserResponse(user);
