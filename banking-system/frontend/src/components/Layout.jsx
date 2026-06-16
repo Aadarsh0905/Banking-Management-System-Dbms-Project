@@ -95,11 +95,15 @@ function Sidebar({ open }) {
       </div>
 
       <nav className="flex-1 py-2">
-        <SectionLabel label="Banking" />
-        {customerNav.map((item) => <NavItem key={item.to} {...item} />)}
+        {!isAdmin && (
+          <>
+            <SectionLabel label="Banking" />
+            {customerNav.map((item) => <NavItem key={item.to} {...item} />)}
 
-        <SectionLabel label="AI Features" />
-        {aiNav.map((item) => <NavItem key={item.to} {...item} />)}
+            <SectionLabel label="AI Features" />
+            {aiNav.map((item) => <NavItem key={item.to} {...item} />)}
+          </>
+        )}
 
         {isAdmin && (
           <>

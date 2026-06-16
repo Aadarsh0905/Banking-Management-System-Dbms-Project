@@ -15,9 +15,10 @@ import {
   FaTrash,
   FaUser,
   FaUsers,
+  FaUniversity,
 } from 'react-icons/fa';
 import { useAuth } from '../context/Contexts';
-import { notifApi, userApi } from '../services/api';
+import { notifApi, userApi, accountApi } from '../services/api';
 
 
 export function ProfilePage() {
@@ -25,10 +26,15 @@ export function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ firstName: '', lastName: '', phone: '', gender: '' });
   const [uploading, setUploading] = useState(false);
+  const [accounts, setAccounts] = useState([]);
 
   useEffect(() => {
     if (user) setForm({ firstName: user.firstName, lastName: user.lastName, phone: user.phone, gender: user.gender });
   }, [user]);
+
+  useEffect(() => {
+    accountApi.getAll().then(r => setAccounts(r.data.data || [])).catch(() => {});
+  }, []);
 
   async function updateProfile(e) {
     e.preventDefault();
@@ -145,6 +151,35 @@ export function ProfilePage() {
             <span className="dark:text-gray-300">KYC: {user?.kycStatus || 'PENDING'}</span>
           </div>
         </div>
+      </div>
+
+      {/* Opened Bank Accounts */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <h2 className="font-semibold dark:text-white mb-4 flex items-center gap-2">
+          <FaUniversity className="text-blue-500" /> Opened Bank Accounts
+        </h2>
+        {accounts.length === 0 ? (
+          <p className="text-gray-500 dark:text-gray-400 text-sm">No opened bank accounts found.</p>
+        ) : (
+          <div className="space-y-3">
+            {accounts.map(acc => (
+              <div key={acc.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <div>
+                  <p className="font-medium text-sm dark:text-white">{acc.accountType}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">{acc.accountNumber} — {acc.branchName}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-sm dark:text-white">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
+                  <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded-full ${
+                    acc.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
+                    acc.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>{acc.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
