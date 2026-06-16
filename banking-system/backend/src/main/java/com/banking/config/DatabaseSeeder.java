@@ -22,6 +22,7 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final AccountTypeRepository accountTypeRepo;
     private final LoanTypeRepository loanTypeRepo;
     private final UserRepository userRepo;
+    private final AccountRepository accountRepo;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -240,6 +241,64 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .emailVerified(true)
                 .roles(Set.of(employeeRole))
                 .build());
+        }
+
+        // Fetch users for seeding accounts
+        User rahul = userRepo.findByUsername("rahul.sharma").orElse(null);
+        User priya = userRepo.findByUsername("priya.patel").orElse(null);
+
+        // Fetch branches & types for seeding accounts
+        Branch mainBranch = branchRepo.findByBranchCode("BR001").orElse(null);
+        AccountType savingsType = accountTypeRepo.findByTypeCode("SAVINGS").orElse(null);
+        AccountType fdType = accountTypeRepo.findByTypeCode("FIXED_DEPOSIT").orElse(null);
+
+        // 6. Seed Accounts individually
+        if (rahul != null && mainBranch != null && savingsType != null) {
+            if (accountRepo.findByAccountNumber("ACC1000000001").isEmpty()) {
+                log.info("Seeding Account ACC1000000001 for rahul.sharma...");
+                accountRepo.save(Account.builder()
+                    .accountNumber("ACC1000000001")
+                    .user(rahul)
+                    .branch(mainBranch)
+                    .accountType(savingsType)
+                    .balance(new BigDecimal("85000.00"))
+                    .availableBalance(new BigDecimal("85000.00"))
+                    .currency("INR")
+                    .status(Account.AccountStatus.ACTIVE)
+                    .openedAt(LocalDate.of(2022, 3, 10))
+                    .build());
+            }
+            if (fdType != null && accountRepo.findByAccountNumber("ACC1000000004").isEmpty()) {
+                log.info("Seeding Account ACC1000000004 for rahul.sharma...");
+                accountRepo.save(Account.builder()
+                    .accountNumber("ACC1000000004")
+                    .user(rahul)
+                    .branch(mainBranch)
+                    .accountType(fdType)
+                    .balance(new BigDecimal("100000.00"))
+                    .availableBalance(new BigDecimal("100000.00"))
+                    .currency("INR")
+                    .status(Account.AccountStatus.ACTIVE)
+                    .openedAt(LocalDate.of(2023, 1, 15))
+                    .build());
+            }
+        }
+
+        if (priya != null && mainBranch != null && savingsType != null) {
+            if (accountRepo.findByAccountNumber("ACC1000000002").isEmpty()) {
+                log.info("Seeding Account ACC1000000002 for priya.patel...");
+                accountRepo.save(Account.builder()
+                    .accountNumber("ACC1000000002")
+                    .user(priya)
+                    .branch(mainBranch)
+                    .accountType(savingsType)
+                    .balance(new BigDecimal("42500.00"))
+                    .availableBalance(new BigDecimal("42500.00"))
+                    .currency("INR")
+                    .status(Account.AccountStatus.ACTIVE)
+                    .openedAt(LocalDate.of(2022, 5, 20))
+                    .build());
+            }
         }
 
         log.info("Database validation and seeding completed successfully.");

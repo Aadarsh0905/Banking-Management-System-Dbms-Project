@@ -43,7 +43,7 @@ export function DashboardPage() {
   const [loans, setLoans] = useState([]);
 
   useEffect(() => {
-    accountApi.getAll().then(r => setAccounts(r.data.data)).catch(() => {});
+    accountApi.getAll().then(r => setAccounts(r.data.data || [])).catch(() => {});
     txnApi.getHistory(0, 10).then(r => setTransactions(r.data.data?.content || [])).catch(() => {});
     loanApi.getLoans().then(r => setLoans(r.data.data || [])).catch(() => {});
   }, []);
