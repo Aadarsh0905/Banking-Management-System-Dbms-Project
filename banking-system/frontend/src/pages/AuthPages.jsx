@@ -105,11 +105,14 @@ export function RegisterPage() {
     } finally { setLoading(false); }
   }
 
-  const field = (label, key, type='text', placeholder='') => (
+  const field = (label, key, type='text', placeholder='', helpText='') => (
     <div key={key}>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{label}</label>
       <input type={type} required value={form[key]} onChange={set(key)} placeholder={placeholder}
         className="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+      {helpText && (
+        <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1 leading-normal">{helpText}</p>
+      )}
     </div>
   );
 
@@ -125,8 +128,8 @@ export function RegisterPage() {
           {field('Last Name','lastName','text','Doe')}
           {field('Username','username','text','johndoe')}
           {field('Email','email','email','john@email.com')}
-          {field('Phone','phone','tel','9876543210')}
-          {field('Password','password','password','Min 8 chars')}
+          {field('Phone','phone','tel','9876543210', '10-digit Indian number (starts with 6-9)')}
+          {field('Password','password','password','Min 8 chars', 'Must contain upper, lower, digit & special char')}
           <div className="col-span-2">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gender</label>
             <select value={form.gender} onChange={set('gender')}
