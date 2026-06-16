@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
@@ -21,7 +21,7 @@ import {
   FaInfoCircle
 } from 'react-icons/fa';
 import { useAuth } from '../context/Contexts';
-import { accountApi, loanApi, txnApi } from '../services/api';
+import { accountApi, loanApi, txnApi, authApi } from '../services/api';
 
 Chart.register(...registerables);
 
@@ -43,7 +43,10 @@ function StatCard({ title, value, icon, color, link }) {
 }
 
 export function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  if (isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loans, setLoans] = useState([]);
@@ -219,6 +222,23 @@ export function AccountsPage() {
   const [passbookAccount, setPassbookAccount] = useState(null);
   const [passbookTxns, setPassbookTxns] = useState([]);
   const [loadingPassbook, setLoadingPassbook] = useState(false);
+  const [addMoneyAccount, setAddMoneyAccount] = useState(null);
+  const [addMoneyAmount, setAddMoneyAmount] = useState('10000');
+
+  async function submitAddDemoMoney() {
+    if (!addMoneyAmount || isNaN(addMoneyAmount) || +addMoneyAmount <= 0) {
+      toast.error("Please enter a valid amount");
+      return;
+    }
+    try {
+      await authApi.addDemoMoney(addMoneyAccount.id, +addMoneyAmount);
+      toast.success(`Demo money of ₹${(+addMoneyAmount).toLocaleString('en-IN')} added successfully!`);
+      setAddMoneyAccount(null);
+      accountApi.getAll().then(r => setAccounts(r.data.data || []));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to add demo money');
+    }
+  }
 
   async function openPassbook(acc) {
     setPassbookAccount(acc);
@@ -299,7 +319,7 @@ export function AccountsPage() {
               <div>
                 <label className="label">Account Type</label>
                 <select required value={form.accountTypeId} onChange={e => setForm(f => ({...f, accountTypeId: e.target.value}))}
-                  className="w-full bg-slate-900/60 border border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl px-4 py-3 text-white focus:outline-none transition-all duration-300 text-sm cursor-pointer">
+                  className="glass-input cursor-pointer">
                   <option value="" className="bg-slate-950">Select account type</option>
                   {types.map(t => <option key={t.id} value={t.id} className="bg-slate-950">{t.typeName}</option>)}
                 </select>
@@ -307,7 +327,7 @@ export function AccountsPage() {
               <div>
                 <label className="label">Preferred Branch</label>
                 <select required value={form.branchId} onChange={e => setForm(f => ({...f, branchId: e.target.value}))}
-                  className="w-full bg-slate-900/60 border border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl px-4 py-3 text-white focus:outline-none transition-all duration-300 text-sm cursor-pointer">
+                  className="glass-input cursor-pointer">
                   <option value="" className="bg-slate-950">Select branch</option>
                   {branches.map(b => <option key={b.id} value={b.id} className="bg-slate-950">{b.branchName} — {b.city}</option>)}
                 </select>
@@ -339,7 +359,7 @@ export function AccountsPage() {
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusColor[acc.status]||'bg-white/5 text-slate-400'}`}>{acc.status}</span>
               </div>
               
-              <div className="bg-gradient-to-r from-[#005CFF] to-[#00BAF2] rounded-2xl p-5 text-white shadow-lg shadow-cyan-600/10">
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-5 text-white shadow-lg shadow-indigo-600/10">
                 <p className="text-[10px] opacity-75 uppercase tracking-wider font-semibold">Available Balance</p>
                 <p className="text-3xl font-black mt-1">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
                 <p className="text-xs font-medium mt-3 opacity-90">{acc.accountType}</p>
@@ -352,14 +372,18 @@ export function AccountsPage() {
               </div>
             </div>
 
-            <div className="flex gap-3 border-t border-white/5 pt-4 mt-6">
+            <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4 mt-6">
               <button onClick={() => downloadStatement(acc.id)}
-                className="flex-1 flex items-center justify-center gap-1.5 border border-white/10 hover:bg-white/5 text-xs font-semibold py-2 rounded-xl text-slate-300 transition-colors">
+                className="flex items-center justify-center gap-1 border border-white/10 hover:bg-white/5 text-[11px] font-semibold py-2 rounded-xl text-slate-300 transition-colors">
                 <FaDownload /> Statement
               </button>
               <button onClick={() => openPassbook(acc)}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#005CFF] to-[#00BAF2] hover:from-[#004ecc] hover:to-[#00a8d6] text-xs font-semibold py-2 rounded-xl text-white transition-all">
+                className="flex items-center justify-center gap-1 bg-blue-600 hover:bg-blue-700 text-[11px] font-semibold py-2 rounded-xl text-white transition-all">
                 <FaFileAlt /> Passbook
+              </button>
+              <button onClick={() => { setAddMoneyAccount(acc); setAddMoneyAmount('10000'); }}
+                className="flex items-center justify-center gap-1 border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/25 text-[11px] font-semibold py-2 rounded-xl text-emerald-400 transition-all">
+                <FaPlus /> Add Demo
               </button>
             </div>
           </div>
@@ -463,6 +487,44 @@ export function AccountsPage() {
           </div>
         </div>
       )}
+
+      {addMoneyAccount && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-frosted rounded-[2.5rem] p-8 w-full max-w-md modal-transition border border-white/10 shadow-2xl">
+            <h2 className="font-extrabold text-xl text-white mb-2">Add Demo Money</h2>
+            <p className="text-xs text-slate-400 mb-6">
+              Add demo funds instantly to account <span className="font-mono text-slate-200">{addMoneyAccount.accountNumber}</span>. No authentication required.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="label">Amount (₹)</label>
+                <input 
+                  type="number" 
+                  value={addMoneyAmount} 
+                  onChange={e => setAddMoneyAmount(e.target.value)} 
+                  className="glass-input" 
+                  placeholder="Enter amount (e.g. 10000)" 
+                />
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button 
+                  onClick={submitAddDemoMoney} 
+                  className="flex-1 btn-primary text-sm bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow-lg shadow-emerald-500/20"
+                >
+                  Add Money
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setAddMoneyAccount(null)} 
+                  className="flex-1 btn-secondary text-sm"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -534,8 +596,8 @@ export function TransferPage() {
       <div className="flex rounded-2xl bg-white/5 border border-white/5 p-1">
         {tabs.map(tab => (
           <button key={tab} onClick={() => { setActiveTab(tab); setResult(null); }}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all duration-300
-              ${activeTab===tab ? 'bg-gradient-to-r from-[#005CFF] to-[#00BAF2] text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold capitalize transition-all duration-150
+              ${activeTab===tab ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>
             {tab}
           </button>
         ))}
@@ -548,7 +610,7 @@ export function TransferPage() {
               {activeTab === 'transfer' ? 'Source Account' : 'Account'}
             </label>
             <select required value={form.fromAccountId} onChange={e => setForm(f => ({...f, fromAccountId: e.target.value}))}
-              className="w-full bg-slate-900/60 border border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl px-4 py-3 text-white focus:outline-none transition-all duration-300 text-sm cursor-pointer">
+              className="glass-input cursor-pointer">
               <option value="" className="bg-slate-950">Select account</option>
               {accounts.map(a => <option key={a.id} value={a.id} className="bg-slate-950">{a.accountNumber} — Balance: ₹{a.balance?.toLocaleString('en-IN')}</option>)}
             </select>

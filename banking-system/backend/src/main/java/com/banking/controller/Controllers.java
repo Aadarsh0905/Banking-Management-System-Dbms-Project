@@ -32,6 +32,7 @@ import java.util.Map;
 @Tag(name = "Authentication", description = "Registration, login, password management")
 class AuthController {
     private final AuthService authService;
+    private final TransactionService txnService;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new customer")
@@ -64,6 +65,14 @@ class AuthController {
     @Operation(summary = "Refresh access token")
     public ResponseEntity<ApiResponse<AuthDTOs.AuthResponse>> refresh(@Valid @RequestBody AuthDTOs.RefreshTokenRequest req) {
         return ResponseEntity.ok(ApiResponse.success(authService.refreshToken(req.refreshToken)));
+    }
+
+    @PostMapping("/add-money-demo")
+    @Operation(summary = "Add demo money without auth")
+    public ResponseEntity<ApiResponse<TransactionResponse>> addMoneyDemo(
+            @RequestParam Long accountId,
+            @RequestParam BigDecimal amount) {
+        return ResponseEntity.ok(ApiResponse.success("Demo money added successfully", txnService.depositDemo(accountId, amount)));
     }
 }
 

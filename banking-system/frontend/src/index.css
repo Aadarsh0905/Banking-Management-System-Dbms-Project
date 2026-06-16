@@ -1,5 +1,5 @@
 /* ============================================================
-   src/index.css — Paytm Signature Dark Contrast Edition
+   src/index.css — Professional Corporate Banking Edition
    ============================================================ */
 @tailwind base;
 @tailwind components;
@@ -8,140 +8,115 @@
 @layer base {
   * { 
     box-sizing: border-box; 
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
   html { 
     scroll-behavior: smooth; 
   }
   body {
-    background-color: #000B1A;
+    background-color: #0b0f19;
     @apply text-slate-100;
-    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(0, 186, 242, 0.15) 0, transparent 60%),
-      radial-gradient(at 50% 0%, rgba(0, 92, 255, 0.1) 0, transparent 60%),
-      radial-gradient(at 100% 0%, rgba(0, 43, 91, 0.2) 0, transparent 60%);
     background-attachment: fixed;
   }
   
-  /* Custom Scrollbar */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: rgba(0, 11, 33, 0.8); }
+  /* Minimal High-Performance Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: #0b0f19; }
   ::-webkit-scrollbar-thumb { 
-    background: linear-gradient(180deg, #005CFF, #00BAF2); 
-    border-radius: 9999px; 
+    background: #243249; 
+    border-radius: 99px; 
   }
-  ::-webkit-scrollbar-thumb:hover { background: #00BAF2; }
+  ::-webkit-scrollbar-thumb:hover { background: #3b5175; }
 }
 
 @layer components {
-  /* Spinning Loader */
+  /* High-Performance Spinner */
   .spinner {
-    @apply w-12 h-12 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin;
-    filter: drop-shadow(0 0 10px rgba(0, 186, 242, 0.4));
+    @apply w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin;
   }
   
-  /* Frosted Glass Cards with Premium Paytm Styling */
+  /* Professional Solid Fintech Cards */
   .glass-card {
-    background: rgba(0, 20, 46, 0.55);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(0, 186, 242, 0.15);
-    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.6);
-    border-radius: 2rem;
-    @apply p-6 transition-all duration-500 ease-out;
+    background: #131a26;
+    border: 1px solid #202b3c;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    @apply p-6 transition-all duration-200 ease-out;
   }
   
   .glass-card-hover {
-    @apply hover:shadow-[0_0_40px_rgba(0,186,242,0.25)] hover:border-cyan-400/40 hover:scale-[1.01] hover:-translate-y-1;
+    @apply hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/5;
   }
 
-  /* Premium Glowing Buttons */
+  /* Corporate Blue Premium Buttons */
   .btn-primary {
-    background: linear-gradient(135deg, #005CFF 0%, #00BAF2 100%);
-    @apply text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-cyan-500/15 transition-all duration-300 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_25px_rgba(0,186,242,0.45)] hover:brightness-110;
+    background: #0052ff;
+    @apply text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 shadow-sm;
   }
   .btn-secondary {
-    background: rgba(0, 186, 242, 0.04);
-    border: 1px solid rgba(0, 186, 242, 0.2);
-    @apply text-cyan-300 hover:bg-cyan-500/10 hover:text-white hover:border-cyan-400/40 font-semibold py-3.5 px-6 rounded-2xl transition-all duration-300 active:scale-[0.97];
+    background: #182232;
+    border: 1px solid #243249;
+    @apply text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-600 font-semibold py-2.5 px-5 rounded-xl transition-all duration-150 active:scale-[0.98];
   }
   .btn-danger {
-    background: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
-    @apply text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg shadow-red-500/15 transition-all duration-300 active:scale-[0.97] hover:shadow-[0_0_25px_rgba(239,68,68,0.4)];
+    background: #d32f2f;
+    @apply text-white font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-all duration-150 active:scale-[0.98] hover:bg-red-700;
   }
   
-  /* Glass Inputs with Smooth Transitions and Neon Accents */
+  /* Crisp Inputs */
   .glass-input {
-    background: rgba(0, 11, 33, 0.7);
-    border: 1px solid rgba(0, 186, 242, 0.18);
+    background: #0b0f19;
+    border: 1px solid #202b3c;
     color: #ffffff;
-    @apply w-full rounded-2xl px-4.5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400/80 placeholder-slate-500 transition-all duration-300 shadow-inner;
+    @apply w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 placeholder-slate-500 transition-all duration-150;
   }
 
   .label {
-    @apply block text-xs font-bold text-cyan-400 uppercase tracking-widest mb-2;
-    text-shadow: 0 0 8px rgba(0, 186, 242, 0.25);
+    @apply block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2;
   }
 }
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent;
   }
   .glass-frosted {
-    background: rgba(0, 16, 40, 0.7);
-    backdrop-filter: blur(28px);
-    -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(0, 186, 242, 0.22);
-    box-shadow: 0 20px 50px 0 rgba(0, 0, 0, 0.7);
+    background: #131a26;
+    border: 1px solid #202b3c;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
   }
 }
 
-/* Animations */
-@keyframes float-slow {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(180deg); }
-  100% { transform: translateY(0px) rotate(360deg); }
-}
-
-@keyframes float-reverse {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(20px) rotate(-180deg); }
-  100% { transform: translateY(0px) rotate(-360deg); }
-}
-
-.animate-float-1 {
-  animation: float-slow 14s ease-in-out infinite;
-}
-
+/* Deactivate resource-heavy floating animations for CPU efficiency */
+.animate-float-1,
 .animate-float-2 {
-  animation: float-reverse 18s ease-in-out infinite;
+  animation: none !important;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.97); filter: blur(5px); }
-  to { opacity: 1; transform: scale(1); filter: blur(0); }
+  from { opacity: 0; transform: scale(0.99); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(25px); filter: blur(4px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .page-transition {
-  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .modal-transition {
-  animation: fadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Form Group Focus Animation */
+/* Minimal Focus Enhancements */
 .focus-glow {
-  @apply transition-all duration-300;
+  @apply transition-all duration-150;
 }
 .focus-glow:focus-within {
-  box-shadow: 0 0 20px rgba(0, 186, 242, 0.15);
+  box-shadow: 0 0 8px rgba(0, 82, 255, 0.1);
 }

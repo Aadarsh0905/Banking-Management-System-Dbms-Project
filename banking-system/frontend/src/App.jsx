@@ -41,7 +41,21 @@ function PrivateRoute({ children, adminOnly = false }) {
 
 function PublicRoute({ children }) {
   const { user } = useAuth();
-  return user ? <Navigate to="/dashboard" replace /> : children;
+  if (user) {
+    if (user.roles?.includes('ROLE_ADMIN')) {
+      return <Navigate to="/admin" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
+  }
+  return children;
+}
+
+function IndexRedirect() {
+  const { user } = useAuth();
+  if (user?.roles?.includes('ROLE_ADMIN')) {
+    return <Navigate to="/admin" replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
 }
 
 export default function App() {
@@ -57,7 +71,7 @@ export default function App() {
 
             {/* Protected */}
             <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route index element={<IndexRedirect />} />
               <Route path="dashboard"         element={<DashboardPage />} />
               <Route path="accounts"          element={<AccountsPage />} />
               <Route path="transactions"      element={<TransactionsPage />} />

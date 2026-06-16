@@ -66,7 +66,7 @@ public class AccountService {
     }
 
     public AccountResponse getAccountById(Long accountId, Long userId) {
-        Account a = accountRepo.findById(accountId)
+        Account a = accountRepo.findByIdWithAssociations(accountId)
             .orElseThrow(() -> new BankingException("Account not found", 404));
         if (!a.getUser().getId().equals(userId))
             throw new BankingException("Unauthorized access", 403);
@@ -75,7 +75,7 @@ public class AccountService {
 
     @Transactional
     public void closeAccount(Long accountId, Long userId) {
-        Account a = accountRepo.findById(accountId)
+        Account a = accountRepo.findByIdWithAssociations(accountId)
             .orElseThrow(() -> new BankingException("Account not found", 404));
         if (!a.getUser().getId().equals(userId))
             throw new BankingException("Unauthorized access", 403);

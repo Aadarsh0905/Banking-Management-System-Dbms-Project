@@ -96,7 +96,11 @@ export function LoginPage() {
     try {
       const user = await login(form);
       toast.success(`Welcome back, ${user.firstName}! 👋`);
-      navigate('/dashboard');
+      if (user.roles?.includes('ROLE_ADMIN')) {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
     } finally {
@@ -267,7 +271,7 @@ export function RegisterPage() {
           <select
             value={form.gender}
             onChange={set('gender')}
-            className="w-full bg-slate-900/60 border border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl px-4 py-3 text-white focus:outline-none transition-all duration-300 text-sm cursor-pointer"
+            className="glass-input cursor-pointer"
           >
             <option value="MALE" className="bg-slate-950">Male</option>
             <option value="FEMALE" className="bg-slate-950">Female</option>
