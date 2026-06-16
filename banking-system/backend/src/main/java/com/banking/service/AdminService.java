@@ -2,6 +2,7 @@ package com.banking.service;
 
 import com.banking.dto.AccountResponse;
 import com.banking.dto.DashboardStats;
+import java.math.BigDecimal;
 import com.banking.dto.LoanApplicationResponse;
 import com.banking.dto.LoanReviewRequest;
 import com.banking.dto.TransactionResponse;

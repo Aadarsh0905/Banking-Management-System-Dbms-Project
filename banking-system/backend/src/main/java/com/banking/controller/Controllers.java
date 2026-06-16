@@ -844,7 +844,7 @@ class AiController {
             if (!loans.isEmpty()) {
                 sb.append("You have **").append(loans.size()).append("** active loan(s):\n\n");
                 for (Loan l : loans) {
-                    sb.append("- **").append(l.getLoanType().getTypeName()).append("** (").append(l.getLoanAccountNumber()).append("): Outstanding ")
+                    sb.append("- **").append(l.getApplication().getLoanType().getTypeName()).append("** (").append(l.getLoanAccountNumber()).append("): Outstanding ")
                       .append("₹").append(String.format("%,.2f", l.getOutstandingBalance())).append(" with EMI ₹").append(String.format("%,.2f", l.getEmiAmount())).append(" (Status: ").append(l.getStatus()).append(")\n");
                 }
                 sb.append("\n");
