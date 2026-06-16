@@ -2,7 +2,7 @@
 // src/pages/AuthPages.jsx — Premium Glassmorphic Edition
 // ============================================================
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { 
@@ -22,57 +22,407 @@ import { authApi } from '../services/api';
 // ── Glassmorphic Background Layout ──────────────────────────
 function AuthLayout({ children, title, subtitle, activeTab, maxWidth = 'max-w-md' }) {
   const navigate = useNavigate();
+  const [sloganIdx, setSloganIdx] = useState(0);
+  const [fade, setFade] = useState(true);
+  const [activeConsoleTab, setActiveConsoleTab] = useState('ledger');
+  const [selectedAccIdx, setSelectedAccIdx] = useState(0);
+  const [cardFrozen, setCardFrozen] = useState(false);
+  const [routingActive, setRoutingActive] = useState(false);
+  const [limitValue, setLimitValue] = useState(50000);
+
+  const slogans = [
+    "intelligent console.",
+    "secure environment.",
+    "real-time analytics.",
+    "lightning-fast routing."
+  ];
+
+  // Rotate slogans using pure React state updates and transitions
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setSloganIdx(prev => (prev + 1) % slogans.length);
+        setFade(true);
+      }, 300);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const accounts = [
+    { id: 'ACC4906528634', type: 'Savings Account', balance: '₹1,000.00', history: [40, 20, 60, 45, 80, 50, 95] },
+    { id: 'ACC1000000003', type: 'Savings Account', balance: '₹50,000.00', history: [85, 90, 75, 88, 98, 92, 100] },
+    { id: 'ACC6244220352', type: 'Fixed Deposit', balance: '₹0.00', history: [10, 10, 10, 10, 10, 10, 10] }
+  ];
+
+  const toggleCardFreeze = () => {
+    setCardFrozen(!cardFrozen);
+    if (!cardFrozen) {
+      toast.warning('Card FROZEN: Online payments blocked.', { id: 'card-status', duration: 2000 });
+    } else {
+      toast.success('Card ACTIVATED: Operational clearance granted.', { id: 'card-status', duration: 2000 });
+    }
+  };
+
+  const triggerRouting = () => {
+    if (routingActive) return;
+    setRoutingActive(true);
+    toast.info('Simulating transit grid tracing...', { id: 'upi-trace', duration: 1500 });
+    setTimeout(() => {
+      setRoutingActive(false);
+      toast.success('Grid route secure. Transfer cleared.', { id: 'upi-trace-success', duration: 1500 });
+    }, 2000);
+  };
+
+  const handleLimitIncrease = () => {
+    if (limitValue === 100000) {
+      toast.info('Maximum transit limit reached.', { id: 'limit-status', duration: 2000 });
+      return;
+    }
+    setLimitValue(100000);
+    toast.success('Simulated request: limit extended to ₹1,00,000.', { id: 'limit-status', duration: 2500 });
+  };
+
   return (
-    <div className="min-h-screen bg-[#000B1A] relative flex items-center justify-center p-4 overflow-hidden font-sans select-none page-transition">
-      {/* Animated Premium Floating Gradient Orbs */}
-      <div className="absolute top-[-25%] left-[-25%] w-[70vw] h-[70vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-tr from-blue-600/15 to-cyan-500/10 blur-[140px] animate-float-1 pointer-events-none"></div>
-      <div className="absolute bottom-[-25%] right-[-25%] w-[70vw] h-[70vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-bl from-cyan-600/10 to-blue-500/10 blur-[140px] animate-float-2 pointer-events-none"></div>
-      <div className="absolute top-[35%] left-[20%] w-96 h-96 rounded-full bg-cyan-500/3 blur-[120px] pointer-events-none"></div>
- 
-      <div className={`w-full ${maxWidth} z-10 my-8`}>
-        {/* Frosted Glass Container with super smooth borders and round corners */}
-        <div className="glass-frosted rounded-[2.5rem] shadow-2xl p-6 sm:p-10 border border-cyan-500/15 hover:border-cyan-400/30 transition-all duration-500 shadow-cyan-500/5">
-          <div className="text-center mb-8">
-            {/* Glowing Bank Portal Logo */}
-            <div className="inline-flex p-4 bg-gradient-to-tr from-blue-600 via-sky-500 to-cyan-400 text-white rounded-[1.75rem] shadow-xl shadow-cyan-500/20 mb-4 transform hover:scale-105 hover:rotate-6 transition-all duration-300">
-              <FaUniversity className="text-3xl" />
-            </div>
-            <h1 className="text-3xl font-black tracking-tight text-white">
-              {title}
+    <div className="min-h-screen bg-[#000000] flex flex-col lg:flex-row overflow-hidden font-sans text-slate-100 select-none page-transition">
+      
+      {/* Column 1: Interactive Dashboard Style Sidebar (Only on large screens) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#020813] to-[#071328] border-r border-[#1c3554]/40 p-12 flex-col justify-between relative overflow-hidden">
+        {/* Floating background glowing orbs */}
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 rounded-full bg-orange-600/10 blur-[100px] pointer-events-none animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 rounded-full bg-cyan-500/10 blur-[100px] pointer-events-none" />
+
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 z-10">
+          <div className="p-3 bg-[#ff6600] text-white rounded-2xl shadow-lg shadow-orange-500/10">
+            <FaUniversity className="text-2xl" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black tracking-tight text-white">BankPortal</h2>
+            <p className="text-[10px] text-cyan-400 font-bold tracking-widest uppercase">Digital Banking System</p>
+          </div>
+        </div>
+
+        {/* Main interactive mockups */}
+        <div className="space-y-6 my-auto z-10 max-w-lg">
+          <div className="space-y-2">
+            <span className="text-[10px] bg-orange-500/10 border border-orange-500/30 text-[#ff6600] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              Interactive Preview
+            </span>
+            <h1 className="text-3.5xl font-black tracking-tight text-white leading-tight min-h-[4.5rem]">
+              Manage assets with an <br />
+              <span className={`text-[#ff6600] inline-block transition-all duration-300 transform ${fade ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1'}`}>
+                {slogans[sloganIdx]}
+              </span>
             </h1>
-            <p className="text-cyan-400 text-xs mt-2 font-bold tracking-widest uppercase">{subtitle}</p>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Hover over or click dashboard elements below to update client metrics. Try signing in using our quick access emulation panel on the right.
+            </p>
           </div>
 
-          {/* Tab Navigation for Seamless Switching */}
-          {activeTab && (
-            <div className="flex rounded-2xl bg-[#000d21]/80 border border-white/5 p-1 mb-8 relative">
-              <button 
-                type="button"
-                onClick={() => navigate('/login')}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 relative
-                  ${activeTab === 'login' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                Sign In
-              </button>
-              <button 
-                type="button"
-                onClick={() => navigate('/register')}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 relative
-                  ${activeTab === 'register' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                Register
-              </button>
-              {/* Sliding background highlight */}
-              <div 
-                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl transition-all duration-500 ease-out shadow-lg shadow-cyan-500/20
-                  ${activeTab === 'login' ? 'left-1' : 'left-[50%]'}`}
-              />
-            </div>
-          )}
+          {/* Console Module Tabs */}
+          <div className="flex border border-[#1c3554]/40 bg-[#060e17]/80 rounded-2xl p-1 relative gap-1">
+            <button 
+              type="button" 
+              onClick={() => setActiveConsoleTab('ledger')}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 z-10 ${activeConsoleTab === 'ledger' ? 'bg-[#ff6600] text-white' : 'text-slate-400 hover:text-slate-200'}`}
+            >
+              Asset Ledger
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setActiveConsoleTab('security')}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 z-10 ${activeConsoleTab === 'security' ? 'bg-[#ff6600] text-white' : 'text-slate-400 hover:text-slate-200'}`}
+            >
+              Security Card
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setActiveConsoleTab('routing')}
+              className={`flex-1 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 z-10 ${activeConsoleTab === 'routing' ? 'bg-[#ff6600] text-white' : 'text-slate-400 hover:text-slate-200'}`}
+            >
+              Transit Grid
+            </button>
+          </div>
 
-          {children}
+          {/* Active Tab View */}
+          <div className="min-h-[12.5rem]">
+            {activeConsoleTab === 'ledger' && (
+              <div className="space-y-4">
+                {/* Account Pills Selection */}
+                <div className="flex gap-2">
+                  {accounts.map((acc, index) => (
+                    <button
+                      key={acc.id}
+                      type="button"
+                      onClick={() => setSelectedAccIdx(index)}
+                      className={`py-1.5 px-3 rounded-lg text-[10px] font-mono tracking-wider transition-all duration-150 ${selectedAccIdx === index ? 'bg-[#1c3554] text-white border border-cyan-500/50' : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border border-[#1c3554]/20'}`}
+                    >
+                      {acc.id.substring(0, 7)}...
+                    </button>
+                  ))}
+                </div>
+
+                {/* Card representation */}
+                <div className="glass-card border border-[#1c3554] p-5 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/5 transition-all duration-300 group cursor-pointer">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{accounts[selectedAccIdx].type}</span>
+                    <span className="text-[9px] px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-full font-bold uppercase tracking-wider animate-pulse">Live Ledger</span>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <p className="text-3.5xl font-black text-white group-hover:text-orange-500 transition-colors duration-300">
+                        {accounts[selectedAccIdx].balance}
+                      </p>
+                      <p className="text-[9px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">Active account verification checks operational</p>
+                    </div>
+                    <div className="text-right text-xs text-slate-400 border-l border-[#1c3554] pl-4">
+                      <p className="font-semibold text-white">Branch Node</p>
+                      <p className="font-mono text-slate-500 mt-0.5">{accounts[selectedAccIdx].id}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CSS Chart */}
+                <div className="flex items-end justify-between h-20 gap-2 pt-4 border-t border-[#1c3554]/40">
+                  {accounts[selectedAccIdx].history.map((val, idx) => (
+                    <div key={idx} className="flex-1 flex flex-col items-center group/bar">
+                      <div className="w-full bg-[#0c192c] border border-[#1c3554] h-full rounded-t-lg overflow-hidden flex items-end">
+                        <div 
+                          style={{ height: `${val}%` }} 
+                          className="w-full bg-[#ff6600]/80 group-hover/bar:bg-[#ff6600] rounded-t transition-all duration-500 relative"
+                        >
+                          <span className="absolute -top-6 left-1/2 -translate-x-1/2 bg-slate-900 border border-[#1c3554] text-[8px] font-mono px-1 py-0.5 rounded opacity-0 group-hover/bar:opacity-100 transition-opacity pointer-events-none text-white whitespace-nowrap z-20 shadow-md">
+                            {val}%
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-[8px] text-slate-500 mt-1.5 font-mono">{idx + 1}d</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeConsoleTab === 'security' && (
+              <div className="space-y-4">
+                {/* Debit Card representation */}
+                <div 
+                  onClick={toggleCardFreeze}
+                  className={`relative p-6 rounded-3xl border transition-all duration-300 group cursor-pointer overflow-hidden ${cardFrozen ? 'border-red-500/40 bg-red-950/15 shadow-red-500/5 shadow-2xl' : 'border-orange-500/30 bg-[#0c192c] hover:border-orange-500/50 hover:shadow-orange-500/5'}`}
+                >
+                  {/* Floating glass overlay effects */}
+                  <div className="absolute top-[-20%] right-[-10%] w-40 h-40 rounded-full bg-white/5 blur-xl" />
+                  
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">BankPortal Visa Platinum</p>
+                      <p className="text-[8px] text-slate-500 font-mono mt-0.5">SECURE CRYPTO CHIP</p>
+                    </div>
+                    <div className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider transition-all duration-300 ${cardFrozen ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                      {cardFrozen ? 'Frozen' : 'Active'}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <p className="text-xl font-mono text-white tracking-widest">4532 •••• •••• 8901</p>
+                    
+                    <div className="flex justify-between items-end">
+                      <div>
+                        <p className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Card Holder</p>
+                        <p className="text-xs font-bold text-slate-200 mt-0.5 uppercase">Demo Customer</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[8px] text-slate-500 uppercase font-bold tracking-wider">Expires</p>
+                        <p className="text-xs font-mono font-bold text-slate-200 mt-0.5">12/30</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3.5 bg-[#060e17] border border-[#1c3554]/40 rounded-2xl">
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-300">Click card to toggle freeze</h4>
+                    <p className="text-[9px] text-slate-500 mt-0.5">Blocks all merchant transactions immediately</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={toggleCardFreeze}
+                    className={`py-1.5 px-3.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 border ${cardFrozen ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400' : 'bg-red-950/40 border-red-500/40 text-red-400'}`}
+                  >
+                    {cardFrozen ? 'Unfreeze' : 'Freeze Card'}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeConsoleTab === 'routing' && (
+              <div className="space-y-4">
+                {/* UPI Router visualizer */}
+                <div className="glass-card border border-[#1c3554] p-5">
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">UPI Transit Channel</span>
+                    <button
+                      type="button"
+                      onClick={triggerRouting}
+                      className="py-1 px-2.5 bg-[#1c3554]/50 hover:bg-[#1c3554] border border-cyan-500/30 text-white rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all"
+                    >
+                      Trace Route
+                    </button>
+                  </div>
+
+                  <div className="flex justify-between items-center bg-[#060e17] border border-[#1c3554]/30 rounded-2xl p-4 relative overflow-hidden">
+                    <div className="text-center z-10">
+                      <div className="w-9 h-9 rounded-full bg-[#0c192c] border border-orange-500/40 flex items-center justify-center text-[10px] font-bold text-slate-200">
+                        SRC
+                      </div>
+                      <span className="text-[8px] text-slate-400 block mt-1.5 font-mono">SAVINGS-AC</span>
+                    </div>
+                    
+                    <div className="flex-1 mx-4 h-0.5 border-t border-dashed border-[#1c3554]/60 relative">
+                      {routingActive && (
+                        <div 
+                          className="absolute top-[-3.5px] w-2 h-2 rounded-full bg-[#ff6600] shadow-md shadow-orange-500"
+                          style={{ animation: 'routingDot 2s linear infinite' }}
+                        />
+                      )}
+                    </div>
+                    
+                    <div className="text-center z-10">
+                      <div className="w-9 h-9 rounded-full bg-[#0c192c] border border-cyan-500/40 flex items-center justify-center text-[10px] font-bold text-slate-200">
+                        DST
+                      </div>
+                      <span className="text-[8px] text-slate-400 block mt-1.5 font-mono">UPI-PAYEE</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Limit utilization */}
+                <div className="p-4 bg-[#060e17] border border-[#1c3554]/40 rounded-2xl space-y-2">
+                  <div className="flex justify-between items-center text-[10px]">
+                    <span className="font-bold text-slate-400 uppercase tracking-wider">Transit Limit remaining</span>
+                    <button
+                      type="button"
+                      onClick={handleLimitIncrease}
+                      className={`text-[9px] font-bold uppercase tracking-wider transition-colors ${limitValue === 100000 ? 'text-slate-500 cursor-not-allowed' : 'text-cyan-400 hover:text-cyan-300'}`}
+                    >
+                      Upgrade Limit
+                    </button>
+                  </div>
+                  <div className="w-full bg-[#0c192c] border border-[#1c3554]/40 h-2 rounded-full overflow-hidden">
+                    <div 
+                      className="bg-[#ff6600] h-full transition-all duration-700 ease-out" 
+                      style={{ width: limitValue === 50000 ? '50%' : '100%' }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[9px] font-mono text-slate-500">
+                    <span>₹{limitValue.toLocaleString()} utilized</span>
+                    <span>Max: ₹1,00,000</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Interactive Feature Highlights Menu */}
+          <div className="space-y-2 pt-2 border-t border-[#1c3554]/30">
+            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Interactive Slogan Mapping</p>
+            <div className="grid grid-cols-1 gap-2">
+              {[
+                { title: "Universal UPI Transfers", desc: "Instantly route funds across any linked UPI address.", tab: 'routing' },
+                { title: "One-Click Card Freeze", desc: "Instantly lock or freeze debit/credit cards for maximum protection.", tab: 'security' },
+                { title: "AI-Powered Budgeting", desc: "Autopilot tracking of monthly flows and category thresholds.", tab: 'ledger' }
+              ].map((f, i) => (
+                <div 
+                  key={i} 
+                  onClick={() => setActiveConsoleTab(f.tab)}
+                  className={`flex gap-3 items-start p-2.5 rounded-xl border transition-all duration-200 cursor-pointer group ${activeConsoleTab === f.tab ? 'bg-[#0c192c] border-[#1c3554] shadow-md shadow-orange-500/5' : 'bg-transparent border-transparent hover:border-[#1c3554]/40 hover:bg-[#0c192c]/30'}`}
+                >
+                  <span className={`mt-1.5 w-1.5 h-1.5 rounded-full transition-transform duration-300 ${activeConsoleTab === f.tab ? 'bg-[#ff6600] scale-125 shadow-sm shadow-orange-500' : 'bg-slate-600 group-hover:bg-[#ff6600]'}`} />
+                  <div>
+                    <h4 className={`text-xs font-bold transition-colors ${activeConsoleTab === f.tab ? 'text-white' : 'text-slate-300 group-hover:text-white'}`}>{f.title}</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5 leading-normal">{f.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Footer info */}
+        <p className="text-[10px] text-slate-500 z-10">
+          © {new Date().getFullYear()} BankPortal Inc. Secured with 256-bit SSL encryption.
+        </p>
+      </div>
+
+      {/* Column 2: Login / Registration Panel */}
+      <div className="flex-1 min-h-screen bg-[#000000] relative flex items-center justify-center p-4 md:p-12 overflow-y-auto">
+        {/* Decorative background glow inside workspace */}
+        <div className="absolute top-[20%] right-[10%] w-72 h-72 rounded-full bg-[#1c3554]/10 blur-[90px] pointer-events-none" />
+        
+        <div className={`w-full ${maxWidth} z-10 my-8`}>
+          <div className="glass-card border border-[#1c3554] shadow-2xl p-0 overflow-hidden rounded-[2.5rem] flex flex-col">
+            
+            {/* Header top bar for Professional Dashboard look */}
+            <div className="flex justify-between items-center px-6 md:px-8 py-3 bg-[#060e17] border-b border-[#1c3554] text-[9px] md:text-[10px] font-mono tracking-wider text-slate-400">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-bold text-slate-300">GATEWAY ONLINE</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-cyan-400 uppercase font-bold text-[9px]">NODE: HOST-1</span>
+                <span className="text-slate-600">/</span>
+                <span className="text-orange-500 font-bold text-[9px]">SECURED</span>
+              </div>
+            </div>
+
+            {/* Content Container */}
+            <div className="p-6 md:p-8 flex-1 flex flex-col justify-center">
+              
+              {/* Header for small screens (brand logo) */}
+              <div className="text-center mb-6">
+                <div className="lg:hidden inline-flex p-3 bg-[#ff6600] text-white rounded-2xl shadow-lg shadow-orange-500/10 mb-4">
+                  <FaUniversity className="text-xl" />
+                </div>
+                <h1 className="text-2xl font-black tracking-tight text-white leading-none">
+                  {title}
+                </h1>
+                <p className="text-cyan-400 text-[9px] mt-1.5 font-bold tracking-widest uppercase">{subtitle}</p>
+              </div>
+
+              {/* Tab navigation for Switching */}
+              {activeTab && (
+                <div className="flex rounded-2xl bg-[#0c192c]/85 border border-[#1c3554] p-1 mb-6 relative">
+                  <button 
+                    type="button"
+                    onClick={() => navigate('/login')}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 relative
+                      ${activeTab === 'login' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    Sign In
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => navigate('/register')}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 relative
+                      ${activeTab === 'register' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'}`}
+                  >
+                    Register
+                  </button>
+                  {/* Sliding background highlight - solid orange instead of multicolor gradient */}
+                  <div 
+                    className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-[#ff6600] rounded-xl transition-all duration-500 ease-out shadow-lg shadow-orange-500/20
+                      ${activeTab === 'login' ? 'left-1' : 'left-[50%]'}`}
+                  />
+                </div>
+              )}
+
+              {children}
+            </div>
+          </div>
         </div>
       </div>
+      
     </div>
   );
 }
@@ -111,7 +461,7 @@ export function LoginPage() {
   return (
     <AuthLayout title="BankPortal" subtitle="Secure Digital Gateway" activeTab="login" maxWidth="max-w-md">
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="focus-glow">
+        <div className="focus-glow text-left">
           <label className="label">Username or Email</label>
           <div className="relative group">
             <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
@@ -126,7 +476,7 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div className="focus-glow">
+        <div className="focus-glow text-left">
           <div className="flex justify-between items-center mb-2">
             <label className="label mb-0">Password</label>
             <Link to="/forgot-password" className="text-xs text-cyan-400 hover:text-cyan-300 font-bold hover:underline tracking-wider uppercase">
@@ -171,43 +521,43 @@ export function LoginPage() {
         <p className="text-[10px] font-bold text-cyan-400/80 uppercase tracking-widest mb-4 text-center">
           Quick Access Demo Portals
         </p>
-        <div className="space-y-2.5">
-          <div className="flex justify-between items-center bg-white/5 border border-white/5 p-3 rounded-2xl">
-            <span className="font-bold text-xs text-slate-300">Manager Access</span>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center bg-[#060e17] border border-[#1c3554]/30 p-3.5 rounded-2xl">
+            <span className="font-extrabold text-xs text-slate-300 uppercase tracking-wider">Manager Access</span>
             <button
               type="button"
               onClick={() => handleQuickLogin('admin', 'Admin@123')}
-              className="bg-blue-500/15 text-blue-300 hover:bg-blue-500/25 px-3 py-1.5 rounded-xl border border-blue-500/20 active:scale-95 transition-all text-xs font-mono"
+              className="py-2 px-3.5 bg-[#0c192c] border border-[#1c3554] hover:bg-[#13263e] hover:border-[#2b4c75] text-slate-300 hover:text-white rounded-xl text-xs font-mono transition-all duration-200 active:scale-[0.97]"
             >
               admin / Admin@123
             </button>
           </div>
-          <div className="bg-white/5 border border-white/5 p-3 rounded-2xl">
-            <span className="font-bold text-xs text-slate-300 block mb-2">Customer Portals</span>
+          <div className="bg-[#060e17] border border-[#1c3554]/30 p-3.5 rounded-2xl">
+            <span className="font-extrabold text-xs text-slate-300 block mb-2 text-left uppercase tracking-wider">Customer Portals</span>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => handleQuickLogin('rahul.sharma', 'Customer@123')}
-                className="bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 px-3 py-1.5 rounded-xl border border-emerald-500/20 active:scale-95 transition-all text-xs font-mono"
+                className="py-2 px-3.5 bg-[#0c192c] border border-[#1c3554] hover:bg-[#13263e] hover:border-[#2b4c75] text-slate-300 hover:text-white rounded-xl text-xs font-mono transition-all duration-200 active:scale-[0.97]"
               >
                 rahul.sharma
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickLogin('priya.patel', 'Customer@123')}
-                className="bg-emerald-500/15 text-emerald-300 hover:bg-emerald-500/25 px-3 py-1.5 rounded-xl border border-emerald-500/20 active:scale-95 transition-all text-xs font-mono"
+                className="py-2 px-3.5 bg-[#0c192c] border border-[#1c3554] hover:bg-[#13263e] hover:border-[#2b4c75] text-slate-300 hover:text-white rounded-xl text-xs font-mono transition-all duration-200 active:scale-[0.97]"
               >
                 priya.patel
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickLogin('Aadarsh', 'Aadarsh@123')}
-                className="bg-purple-500/15 text-purple-300 hover:bg-purple-500/25 px-3 py-1.5 rounded-xl border border-purple-500/20 active:scale-95 transition-all text-xs font-mono"
+                className="py-2 px-3.5 bg-[#0c192c] border border-[#1c3554] hover:bg-[#13263e] hover:border-[#2b4c75] text-slate-300 hover:text-white rounded-xl text-xs font-mono transition-all duration-200 active:scale-[0.97]"
               >
                 Aadarsh
               </button>
             </div>
-            <p className="text-[9px] text-slate-400 mt-2 italic">Password is Customer@123 (Aadarsh@123 for Aadarsh)</p>
+            <p className="text-[9px] text-slate-500 mt-2.5 italic text-left tracking-wide font-medium">Authentication Key: Customer@123 (Aadarsh@123 for client Aadarsh)</p>
           </div>
         </div>
       </div>
@@ -247,7 +597,7 @@ export function RegisterPage() {
   }
 
   const renderField = (label, key, type = 'text', placeholder = '', helpText = '') => (
-    <div key={key} className="space-y-1.5 focus-glow">
+    <div key={key} className="space-y-1.5 focus-glow text-left">
       <label className="label">{label}</label>
       <input
         type={type}
@@ -273,7 +623,7 @@ export function RegisterPage() {
         {renderField('Phone', 'phone', 'tel', '9876543210', '10-digit number')}
         {renderField('Password', 'password', 'password', 'Min 8 characters', 'Alphanumeric + symbol')}
 
-        <div className="md:col-span-2 space-y-1.5 focus-glow">
+        <div className="md:col-span-2 space-y-1.5 focus-glow text-left">
           <label className="label">Gender</label>
           <select
             value={form.gender}
@@ -325,7 +675,7 @@ export function ForgotPasswordPage() {
   return (
     <AuthLayout title="Reset Password" subtitle="Recover Your Portal Account" maxWidth="max-w-md">
       {sent ? (
-        <div className="text-center bg-white/5 border border-white/5 p-6 rounded-2xl space-y-4">
+        <div className="text-center bg-[#060e17] border border-[#1c3554]/30 p-6 rounded-2xl space-y-4">
           <div className="inline-flex p-3.5 bg-green-500/10 text-green-400 rounded-full mb-1">
             <FaCheckCircle className="text-4xl" />
           </div>
@@ -336,7 +686,7 @@ export function ForgotPasswordPage() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="focus-glow">
+          <div className="focus-glow text-left">
             <label className="label">Registered Email Address</label>
             <div className="relative group">
               <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />

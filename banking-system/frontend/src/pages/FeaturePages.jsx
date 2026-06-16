@@ -25,6 +25,7 @@ import {
   FaInfoCircle
 } from 'react-icons/fa';
 import { accountApi, cardApi, loanApi, txnApi, upiApi } from '../services/api';
+import { TableSkeleton, CardsSkeleton, UpiSkeleton } from '../components/Skeletons';
 
 // ── Transactions Page ────────────────────────────────────────
 export function TransactionsPage() {
@@ -67,6 +68,10 @@ export function TransactionsPage() {
     DEPOSIT: 'text-green-400', WITHDRAWAL: 'text-red-400',
     TRANSFER: 'text-cyan-400', UPI_CREDIT: 'text-green-400', UPI_DEBIT: 'text-red-400',
   };
+
+  if (loading) {
+    return <TableSkeleton rows={8} cols={9} />;
+  }
 
   return (
     <div className="space-y-6 page-transition">
@@ -114,13 +119,8 @@ export function TransactionsPage() {
       )}
 
       <div className="glass-card overflow-hidden p-0 border border-white/5 shadow-2xl">
-        {loading ? (
-          <div className="flex justify-center items-center h-48">
-            <div className="spinner" />
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
               <thead>
                 <tr className="bg-white/[0.02] text-slate-400 border-b border-white/5 text-xs font-bold uppercase tracking-wider">
                   {['Ref No','Type','From','To','Amount','Balance After','Status','Date','Receipt'].map(h => (
@@ -162,7 +162,6 @@ export function TransactionsPage() {
               </tbody>
             </table>
           </div>
-        )}
 
         {totalPages > 1 && (
           <div className="flex justify-between items-center px-5 py-4 border-t border-white/5 bg-white/[0.01]">
@@ -190,12 +189,16 @@ export function LoansPage() {
   const [emiSchedule, setEmiSchedule] = useState([]);
   const [form, setForm] = useState({ loanTypeId:'', accountId:'', amountRequested:'', tenureMonths:'', purpose:'', annualIncome:'', employmentType:'SALARIED', employerName:'' });
   const [calcForm, setCalcForm] = useState({ loanTypeId:'', amount:'', tenureMonths:'' });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loanApi.getLoans().then(r => setLoans(r.data.data || [])).catch(()=>{});
-    loanApi.getApplications().then(r => setApps(r.data.data || [])).catch(()=>{});
-    loanApi.getTypes().then(r => setTypes(r.data.data || [])).catch(()=>{});
-    accountApi.getAll().then(r => setAccounts((r.data.data || []).filter(a => a.status==='ACTIVE'))).catch(()=>{});
+    setLoading(true);
+    Promise.all([
+      loanApi.getLoans().then(r => setLoans(r.data.data || [])).catch(()=>{}),
+      loanApi.getApplications().then(r => setApps(r.data.data || [])).catch(()=>{}),
+      loanApi.getTypes().then(r => setTypes(r.data.data || [])).catch(()=>{}),
+      accountApi.getAll().then(r => setAccounts((r.data.data || []).filter(a => a.status==='ACTIVE'))).catch(()=>{})
+    ]).finally(() => setLoading(false));
   }, []);
 
   async function calculate(e) {
@@ -234,6 +237,10 @@ export function LoansPage() {
     CLOSED:'bg-white/5 text-slate-400 border border-white/5', 
     DRAFT:'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' 
   };
+
+  if (loading) {
+    return <TableSkeleton rows={5} cols={6} />;
+  }
 
   return (
     <div className="space-y-6 page-transition">
@@ -469,10 +476,14 @@ export function CardsPage() {
   const [showPin, setShowPin] = useState(null);
   const [form, setForm]       = useState({ accountId:'', cardType:'DEBIT', cardNetwork:'RUPAY' });
   const [pinForm, setPinForm] = useState({ pin:'', cvv:'' });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    cardApi.getAll().then(r => setCards(r.data.data || [])).catch(()=>{});
-    accountApi.getAll().then(r => setAccounts((r.data.data||[]).filter(a=>a.status==='ACTIVE'))).catch(()=>{});
+    setLoading(true);
+    Promise.all([
+      cardApi.getAll().then(r => setCards(r.data.data || [])).catch(()=>{}),
+      accountApi.getAll().then(r => setAccounts((r.data.data||[]).filter(a=>a.status==='ACTIVE'))).catch(()=>{})
+    ]).finally(() => setLoading(false));
   }, []);
 
   async function requestCard(e) {
@@ -510,6 +521,10 @@ export function CardsPage() {
 
   const networkColor = { VISA:'bg-blue-600', MASTERCARD:'bg-red-500', RUPAY:'bg-orange-500' };
   const cardBg = { DEBIT:'from-blue-600 to-blue-800', CREDIT:'from-purple-600 to-purple-900' };
+
+  if (loading) {
+    return <CardsSkeleton />;
+  }
 
   return (
     <div className="space-y-6 page-transition">
@@ -676,11 +691,15 @@ export function UpiPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [form, setForm]       = useState({ accountId:'', upiId:'' });
   const [sendForm, setSendForm] = useState({ fromUpiId:'', toUpiId:'', amount:'', description:'' });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    upiApi.getAll().then(r => setUpiIds(r.data.data || [])).catch(()=>{});
-    accountApi.getAll().then(r => setAccounts((r.data.data||[]).filter(a=>a.status==='ACTIVE'))).catch(()=>{});
-    upiApi.getOther().then(r => setOtherUpiIds(r.data.data || [])).catch(()=>{});
+    setLoading(true);
+    Promise.all([
+      upiApi.getAll().then(r => setUpiIds(r.data.data || [])).catch(()=>{}),
+      accountApi.getAll().then(r => setAccounts((r.data.data||[]).filter(a=>a.status==='ACTIVE'))).catch(()=>{}),
+      upiApi.getOther().then(r => setOtherUpiIds(r.data.data || [])).catch(()=>{})
+    ]).finally(() => setLoading(false));
   }, []);
 
   async function createUpi(e) {
@@ -707,6 +726,10 @@ export function UpiPage() {
       toast.success('UPI payment successful!');
       setSendForm({ fromUpiId:'', toUpiId:'', amount:'', description:'' });
     } catch (err) { toast.error(err.response?.data?.message || 'Transfer failed'); }
+  }
+
+  if (loading) {
+    return <UpiSkeleton />;
   }
 
   return (

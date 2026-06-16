@@ -30,8 +30,8 @@ import { AdminDashboard, AdminCustomers, AdminAccounts, AdminLoans, AdminKyc, Ad
 function PrivateRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuth();
   if (loading) return (
-    <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    <div className="flex items-center justify-center h-screen bg-[#000000]">
+      <div className="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
     </div>
   );
   if (!user) return <Navigate to="/login" replace />;

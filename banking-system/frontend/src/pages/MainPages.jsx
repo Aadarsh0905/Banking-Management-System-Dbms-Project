@@ -221,6 +221,7 @@ export function AccountsPage() {
   const [loadingPassbook, setLoadingPassbook] = useState(false);
   const [addMoneyAccount, setAddMoneyAccount] = useState(null);
   const [addMoneyAmount, setAddMoneyAmount] = useState('10000');
+  const [loading, setLoading] = useState(true);
 
   async function requestCloseAccount(acc) {
     if (acc.balance > 0) {
@@ -266,14 +267,16 @@ export function AccountsPage() {
   }
 
   useEffect(() => {
-    accountApi.getAll()
-      .then(r => setAccounts(r.data.data || []))
-      .catch((err) => {
-        toast.error(err.response?.data?.message || 'Error loading accounts list');
-      });
-    
-    accountApi.getTypes().then(r => setTypes(r.data.data || [])).catch(() => {});
-    accountApi.getBranches().then(r => setBranches(r.data.data || [])).catch(() => {});
+    setLoading(true);
+    Promise.all([
+      accountApi.getAll().then(r => setAccounts(r.data.data || [])),
+      accountApi.getTypes().then(r => setTypes(r.data.data || [])).catch(() => {}),
+      accountApi.getBranches().then(r => setBranches(r.data.data || [])).catch(() => {})
+    ]).catch((err) => {
+      toast.error(err.response?.data?.message || 'Error loading accounts list');
+    }).finally(() => {
+      setLoading(false);
+    });
   }, []);
 
   async function openAccount(e) {
@@ -311,6 +314,10 @@ export function AccountsPage() {
     CLOSED:'bg-red-500/10 text-red-400',
     PENDING_CLOSE:'bg-orange-500/10 text-orange-400'
   };
+
+  if (loading) {
+    return <AccountsSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
@@ -443,10 +450,7 @@ export function AccountsPage() {
 
             <div className="flex-1 overflow-y-auto min-h-0 pr-1">
               {loadingPassbook ? (
-                <div className="text-center py-16 text-slate-400">
-                  <div className="spinner mx-auto mb-4" />
-                  Loading passbook entries...
-                </div>
+                <TableSkeleton rows={4} cols={6} />
               ) : passbookTxns.length === 0 ? (
                 <div className="text-center py-16 text-slate-500">
                   <FaExchangeAlt className="text-4xl mx-auto mb-3 text-slate-700" />

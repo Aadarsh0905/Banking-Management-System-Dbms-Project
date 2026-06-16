@@ -53,16 +53,16 @@
   /* Orange Premium Buttons */
   .btn-primary {
     background: #ff6600; /* Bright orange */
-    @apply text-white font-bold py-2.5 px-5 rounded-xl transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#ff8000] shadow-md shadow-orange-600/10 hover:shadow-orange-600/25;
+    @apply text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#ff8000] shadow-md shadow-orange-600/10 hover:shadow-orange-600/25;
   }
   .btn-secondary {
     background: #0c192c;
     border: 1px solid #1c3554;
-    @apply text-slate-300 hover:bg-[#13263e] hover:text-white hover:border-[#2b4c75] font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 active:scale-[0.97];
+    @apply text-slate-300 hover:bg-[#13263e] hover:text-white hover:border-[#2b4c75] font-semibold py-3 px-6 rounded-xl transition-all duration-200 active:scale-[0.97];
   }
   .btn-danger {
     background: #d32f2f;
-    @apply text-white font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-all duration-150 active:scale-[0.98] hover:bg-red-700;
+    @apply text-white font-semibold py-3 px-6 rounded-xl shadow-sm transition-all duration-150 active:scale-[0.98] hover:bg-red-700;
   }
   
   /* Input elements matching light blue cards */
@@ -138,3 +138,21 @@
 .focus-glow:focus-within {
   box-shadow: 0 0 12px rgba(255, 102, 0, 0.15);
 }
+
+@keyframes loadingBar {
+  0% { width: 0%; opacity: 1; }
+  50% { width: 70%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
+
+.animate-loading-bar {
+  animation: loadingBar 0.45s ease-out forwards;
+}
+
+@keyframes routingDot {
+  0% { left: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+

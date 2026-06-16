@@ -15,6 +15,7 @@ import {
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { accountApi, txnApi, aiApi } from '../services/api';
+import { DashboardSkeleton, TableSkeleton } from '../components/Skeletons';
 
 
 Chart.register(...registerables);
@@ -98,11 +99,7 @@ export function SpendingInsightsPage() {
     } finally { setAiLoading(false); }
   }
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-96">
-      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="space-y-6">
@@ -211,8 +208,12 @@ export function FraudDetectionPage() {
   const [flagged, setFlagged]           = useState([]);
   const [analyzing, setAnalyzing]       = useState(false);
   const [aiReport, setAiReport]         = useState(null);
+  const [loading, setLoading]           = useState(true);
 
-  useEffect(() => { loadAndAnalyze(); }, []);
+  useEffect(() => {
+    setLoading(true);
+    loadAndAnalyze().finally(() => setLoading(false));
+  }, []);
 
   async function loadAndAnalyze() {
     setAnalyzing(true);
@@ -298,6 +299,10 @@ export function FraudDetectionPage() {
 
   const riskColor = { HIGH: 'text-red-600 bg-red-100', MEDIUM: 'text-yellow-600 bg-yellow-100', LOW: 'text-green-600 bg-green-100' };
   const reportBg  = { HIGH: 'from-red-600 to-red-800', MEDIUM: 'from-yellow-500 to-orange-600', LOW: 'from-green-500 to-emerald-600' };
+
+  if (loading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <div className="space-y-6">

@@ -19,6 +19,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../context/Contexts';
 import { notifApi, userApi, accountApi } from '../services/api';
+import { DashboardSkeleton } from '../components/Skeletons';
 
 
 export function ProfilePage() {
@@ -239,7 +240,7 @@ export function KycPage() {
     }
   }
 
-  if (loading) return <div className="flex justify-center items-center h-96"><div className="spinner" /></div>;
+  if (loading) return <DashboardSkeleton />;
 
   const statusIcon = {
     VERIFIED: <FaCheckCircle className="text-green-500 text-2xl" />,
@@ -381,7 +382,7 @@ export function BeneficiariesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {beneficiaries.map(b => (
-          <div key={b.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
+          <div key={b.id} className="glass-card glass-card-hover border border-[#1c3554]">
             <div className="flex justify-between items-start mb-3">
               <h3 className="font-semibold dark:text-white">{b.nickname}</h3>
               <button onClick={() => removeBeneficiary(b.id)} className="text-red-500 hover:text-red-700 p-1">
@@ -405,9 +406,9 @@ export function BeneficiariesPage() {
       </div>
 
       {showAdd && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md modal-transition">
-            <h2 className="font-bold text-lg dark:text-white mb-4">Add Beneficiary</h2>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-frosted rounded-[2.5rem] p-8 w-full max-w-md modal-transition border border-white/10 shadow-2xl">
+            <h2 className="font-extrabold text-xl text-white mb-6">Add Beneficiary</h2>
             <form onSubmit={addBeneficiary} className="space-y-4">
               <input required value={form.nickname} onChange={e => setForm(f => ({...f, nickname: e.target.value}))}
                 placeholder="Nickname (e.g., Mom, Brother)"
@@ -478,7 +479,18 @@ export function NotificationsPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-12"><div className="spinner" /></div>
+        <div className="space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="glass-card border border-white/5 p-5 animate-pulse flex items-start gap-3">
+              <div className="skeleton-loading w-6 h-6 rounded-full flex-shrink-0" />
+              <div className="flex-1 space-y-2.5">
+                <div className="skeleton-loading h-4 w-1/3 rounded" />
+                <div className="skeleton-loading h-3.5 w-3/4 rounded" />
+                <div className="skeleton-loading h-3 w-1/4 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : notifications.length === 0 ? (
         <div className="text-center py-16 text-gray-400">
           <FaBell className="text-5xl mx-auto mb-3 opacity-30" />

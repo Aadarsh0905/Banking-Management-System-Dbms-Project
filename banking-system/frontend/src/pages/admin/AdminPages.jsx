@@ -9,6 +9,7 @@ import {
 import { useState, useEffect } from 'react';
 
 import { adminApi } from '../../services/api';
+import { DashboardSkeleton, TableSkeleton } from '../../components/Skeletons';
 
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
 
@@ -81,11 +82,7 @@ export function AdminDashboard() {
     }]
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-96">
-      <div className="spinner" />
-    </div>
-  );
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="space-y-6">
@@ -160,6 +157,8 @@ export function AdminCustomers() {
     catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
   }
 
+  if (loading) return <TableSkeleton rows={8} cols={8} />;
+
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">Customer Management</h1>
@@ -180,9 +179,7 @@ export function AdminCustomers() {
               ))}</tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={8} className="text-center py-12 text-gray-400">Loading...</td></tr>
-              ) : customers.length === 0 ? (
+              {customers.length === 0 ? (
                 <tr><td colSpan={8} className="text-center py-12 text-gray-400">No customers found</td></tr>
               ) : customers.map(c => (
                 <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
@@ -250,16 +247,19 @@ export function AdminLoans() {
   const [total, setTotal]   = useState(0);
   const [modal, setModal]   = useState(null); // { id, decision }
   const [remarks, setRemarks] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { load(); }, [page]);
 
   async function load() {
+    setLoading(true);
     try {
       const res = await adminApi.getPendingLoans(page);
       const d   = res.data.data;
       setLoans(d?.content || []);
       setTotal(d?.totalPages || 0);
     } catch { toast.error('Failed to load'); }
+    finally { setLoading(false); }
   }
 
   async function review() {
@@ -271,6 +271,8 @@ export function AdminLoans() {
       load();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
   }
+
+  if (loading) return <TableSkeleton rows={6} cols={10} />;
 
   return (
     <div className="space-y-5">
@@ -362,16 +364,19 @@ export function AdminKyc() {
   const [modal, setModal]   = useState(null);
   const [remarks, setRemarks] = useState('');
   const [decision, setDecision] = useState('VERIFIED');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { load(); }, [page]);
 
   async function load() {
+    setLoading(true);
     try {
       const res = await adminApi.getPendingKyc(page);
       const d   = res.data.data;
       setList(d?.content || []);
       setTotal(d?.totalPages || 0);
     } catch { toast.error('Failed to load KYC list'); }
+    finally { setLoading(false); }
   }
 
   async function review() {
@@ -382,6 +387,8 @@ export function AdminKyc() {
       load();
     } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
   }
+
+  if (loading) return <TableSkeleton rows={6} cols={8} />;
 
   return (
     <div className="space-y-5">
@@ -491,18 +498,15 @@ export function AdminTransactions() {
   };
   const typeColor = { DEPOSIT:'text-green-600', WITHDRAWAL:'text-red-600', TRANSFER:'text-blue-600' };
 
+  if (loading) return <TableSkeleton rows={8} cols={8} />;
+
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">Transaction Monitoring</h1>
 
       <div className="glass-card p-0 overflow-hidden">
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="spinner" />
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
               <thead className="bg-white/[0.02]">
                 <tr className="text-slate-400 border-b border-white/5">{['Ref No','Type','Amount','From Account','To Account','Status','Channel','Date'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
@@ -528,7 +532,6 @@ export function AdminTransactions() {
               </tbody>
             </table>
           </div>
-        )}
         {total > 1 && (
           <div className="flex justify-between items-center px-4 py-3 border-t dark:border-gray-700">
             <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Previous</button>
@@ -580,6 +583,8 @@ export function AdminCards() {
     }
   }
 
+  if (loading) return <TableSkeleton rows={6} cols={7} />;
+
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">ATM Card Requests</h1>
@@ -595,9 +600,7 @@ export function AdminCards() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Loading...</td></tr>
-              ) : requests.length === 0 ? (
+              {requests.length === 0 ? (
                 <tr><td colSpan={7} className="text-center py-12 text-gray-400">No pending card requests</td></tr>
               ) : requests.map(r => (
                 <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
@@ -673,6 +676,8 @@ export function AdminTerminations() {
     }
   }
 
+  if (loading) return <TableSkeleton rows={6} cols={7} />;
+
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">Account Terminations</h1>
@@ -688,9 +693,7 @@ export function AdminTerminations() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Loading...</td></tr>
-              ) : requests.length === 0 ? (
+              {requests.length === 0 ? (
                 <tr><td colSpan={7} className="text-center py-12 text-gray-400">No pending termination requests</td></tr>
               ) : requests.map(a => (
                 <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
@@ -774,6 +777,8 @@ export function AdminAccounts() {
     }
   }
 
+  if (loading) return <TableSkeleton rows={6} cols={7} />;
+
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">Account Management</h1>
@@ -789,9 +794,7 @@ export function AdminAccounts() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Loading...</td></tr>
-              ) : accounts.length === 0 ? (
+              {accounts.length === 0 ? (
                 <tr><td colSpan={7} className="text-center py-12 text-gray-400">No accounts found</td></tr>
               ) : accounts.map(a => (
                 <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
