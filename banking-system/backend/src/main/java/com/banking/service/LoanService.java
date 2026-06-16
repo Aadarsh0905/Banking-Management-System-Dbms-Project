@@ -131,7 +131,13 @@ public class LoanService {
             app.setStatus(LoanApplication.LoanApplicationStatus.REJECTED);
         }
         loanAppRepo.save(app);
-        notificationService.sendLoanStatusEmail(app);
+
+        notificationService.sendLoanStatusEmail(
+            app.getUser().getId(),
+            app.getUser().getEmail(),
+            app.getApplicationNo(),
+            app.getStatus().name()
+        );
     }
 
     private void disburseLoan(LoanApplication app) {
@@ -160,6 +166,32 @@ public class LoanService {
             .build();
 
         loan = loanRepo.save(loan);
+
+        // Disburse funds to user's bank account
+        Account acc = app.getAccount();
+        BigDecimal before = acc.getBalance();
+        BigDecimal amount = app.getAmountRequested();
+        acc.setBalance(before.add(amount));
+        acc.setAvailableBalance(acc.getAvailableBalance().add(amount));
+        acc.setLastTransactionAt(LocalDateTime.now());
+        accountRepo.save(acc);
+
+        // Record a transaction for the disbursal
+        Transaction txn = Transaction.builder()
+            .transactionRef("TXN" + System.currentTimeMillis())
+            .toAccount(acc)
+            .transactionType(Transaction.TransactionType.DEPOSIT)
+            .amount(amount)
+            .balanceBefore(before)
+            .balanceAfter(acc.getBalance())
+            .description("Disbursal of Loan Application " + app.getApplicationNo())
+            .status(Transaction.TransactionStatus.SUCCESS)
+            .channel(Transaction.Channel.BRANCH)
+            .initiatedAt(LocalDateTime.now())
+            .completedAt(LocalDateTime.now())
+            .build();
+        txnRepo.save(txn);
+
         app.setStatus(LoanApplication.LoanApplicationStatus.DISBURSED);
         generateEmiSchedule(loan);
     }
@@ -210,6 +242,9 @@ public class LoanService {
             .purpose(a.getPurpose())
             .submittedAt(a.getSubmittedAt())
             .createdAt(a.getCreatedAt())
+            .customerName(a.getUser() != null ? a.getUser().getFirstName() + " " + a.getUser().getLastName() : null)
+            .annualIncome(a.getAnnualIncome())
+            .employmentType(a.getEmploymentType() != null ? a.getEmploymentType().name() : null)
             .build();
     }
 
@@ -268,6 +303,9 @@ public class LoanService {
                             .purpose(app.getPurpose())
                             .submittedAt(app.getSubmittedAt())
                             .createdAt(app.getCreatedAt())
+                            .customerName(app.getUser() != null ? app.getUser().getFirstName() + " " + app.getUser().getLastName() : null)
+                            .annualIncome(app.getAnnualIncome())
+                            .employmentType(app.getEmploymentType() != null ? app.getEmploymentType().name() : null)
                             .build();
                 })
                 .collect(Collectors.toList());

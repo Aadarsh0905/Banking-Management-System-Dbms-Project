@@ -27,20 +27,33 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final AccountRepository accountRepo;
     private final PasswordEncoder passwordEncoder;
     private final EntityManager entityManager;
+    private final javax.sql.DataSource dataSource;
 
     @Override
-    @Transactional
     public void run(String... args) throws Exception {
         log.info("Checking database configuration and seeding state...");
 
-        try {
-            entityManager.createNativeQuery("ALTER TABLE accounts MODIFY COLUMN status VARCHAR(30) DEFAULT 'PENDING'")
-                .executeUpdate();
-            log.info("Successfully altered accounts table status column to VARCHAR(30).");
+        try (java.sql.Connection conn = dataSource.getConnection();
+             java.sql.Statement stmt = conn.createStatement()) {
+            stmt.execute("ALTER TABLE accounts MODIFY COLUMN status VARCHAR(30) DEFAULT 'PENDING'");
+            log.info("Successfully altered accounts table status column to VARCHAR(30) via JDBC.");
         } catch (Exception e) {
-            log.warn("Could not alter accounts table status column: {}", e.getMessage());
+            log.warn("Could not alter accounts table status column via JDBC: {}", e.getMessage());
         }
 
+        try (java.sql.Connection conn = dataSource.getConnection();
+             java.sql.Statement stmt = conn.createStatement()) {
+            stmt.execute("ALTER TABLE cards MODIFY COLUMN status VARCHAR(30) DEFAULT 'REQUESTED'");
+            log.info("Successfully altered cards table status column to VARCHAR(30) via JDBC.");
+        } catch (Exception e) {
+            log.warn("Could not alter cards table status column via JDBC: {}", e.getMessage());
+        }
+
+        seedDatabase();
+    }
+
+    @Transactional
+    public void seedDatabase() {
         // 1. Seed Roles individually
         if (roleRepo.findByName("ROLE_CUSTOMER").isEmpty()) {
             log.info("Seeding ROLE_CUSTOMER...");

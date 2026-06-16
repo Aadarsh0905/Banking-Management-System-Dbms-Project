@@ -99,12 +99,14 @@ public class UserService {
     }
 
     public Map<String, Object> getKycStatus(Long userId) {
-        return kycRepo.findByUserId(userId).map(k -> Map.<String,Object>of(
-            "status", k.getKycStatus().name(),
-            "city", k.getCity(),
-            "state", k.getState(),
-            "verifiedAt", k.getVerifiedAt() != null ? k.getVerifiedAt().toString() : null
-        )).orElse(Map.of("status", "NOT_SUBMITTED"));
+        return kycRepo.findByUserId(userId).map(k -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("status", k.getKycStatus().name());
+            map.put("city", k.getCity());
+            map.put("state", k.getState());
+            map.put("verifiedAt", k.getVerifiedAt() != null ? k.getVerifiedAt().toString() : null);
+            return map;
+        }).orElse(Map.of("status", "NOT_SUBMITTED"));
     }
 
     public List<BeneficiaryResponse> getBeneficiaries(Long userId) {

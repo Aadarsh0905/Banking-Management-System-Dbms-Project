@@ -155,15 +155,26 @@ public class AdminService {
 
     public Page<LoanApplicationResponse> getPendingLoans(int page, int size) {
         return loanAppRepo.findByStatus(LoanApplication.LoanApplicationStatus.SUBMITTED, PageRequest.of(page, size))
-            .map(a -> LoanApplicationResponse.builder()
-                .id(a.getId()).applicationNo(a.getApplicationNo())
-                .loanType(a.getLoanType().getTypeName())
-                .amountRequested(a.getAmountRequested())
-                .tenureMonths(a.getTenureMonths())
-                .status(a.getStatus().name())
-                .purpose(a.getPurpose())
-                .submittedAt(a.getSubmittedAt())
-                .build());
+            .map(a -> {
+                BigDecimal emi = LoanService.calculateEmi(
+                    a.getAmountRequested(),
+                    a.getLoanType().getInterestRate(),
+                    a.getTenureMonths()
+                );
+                return LoanApplicationResponse.builder()
+                    .id(a.getId()).applicationNo(a.getApplicationNo())
+                    .loanType(a.getLoanType().getTypeName())
+                    .amountRequested(a.getAmountRequested())
+                    .tenureMonths(a.getTenureMonths())
+                    .status(a.getStatus().name())
+                    .purpose(a.getPurpose())
+                    .submittedAt(a.getSubmittedAt())
+                    .emiEstimate(emi)
+                    .customerName(a.getUser().getFirstName() + " " + a.getUser().getLastName())
+                    .annualIncome(a.getAnnualIncome())
+                    .employmentType(a.getEmploymentType() != null ? a.getEmploymentType().name() : null)
+                    .build();
+            });
     }
 
     @Transactional

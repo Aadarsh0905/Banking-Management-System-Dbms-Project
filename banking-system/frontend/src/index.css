@@ -1,5 +1,5 @@
 /* ============================================================
-   src/index.css — Professional Corporate Banking Edition
+   src/index.css — Dark Black, Orange, and Light Blue Edition
    ============================================================ */
 @tailwind base;
 @tailwind components;
@@ -14,63 +14,63 @@
     scroll-behavior: smooth; 
   }
   body {
-    background-color: #0b0f19;
+    background-color: #000000; /* Pure dark black background */
     @apply text-slate-100;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     background-attachment: fixed;
   }
   
-  /* Minimal High-Performance Scrollbar */
+  /* Minimal High-Performance Scrollbar matching dark blue-black style */
   ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: #0b0f19; }
+  ::-webkit-scrollbar-track { background: #000000; }
   ::-webkit-scrollbar-thumb { 
-    background: #243249; 
+    background: #1c3554; 
     border-radius: 99px; 
   }
-  ::-webkit-scrollbar-thumb:hover { background: #3b5175; }
+  ::-webkit-scrollbar-thumb:hover { background: #ff6600; }
 }
 
 @layer components {
-  /* High-Performance Spinner */
+  /* High-Performance Spinner in Glowing Orange */
   .spinner {
-    @apply w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin;
+    @apply w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin;
   }
   
-  /* Professional Solid Fintech Cards */
+  /* Light blue container pages/cards under dark mode */
   .glass-card {
-    background: #131a26;
-    border: 1px solid #202b3c;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-    border-radius: 1rem;
-    @apply p-6 transition-all duration-200 ease-out;
+    background: #0c192c; /* Beautiful light blue tinted dark card background */
+    border: 1px solid #1c3554; /* Light blue border */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+    border-radius: 1.5rem;
+    @apply p-6 transition-all duration-300 ease-out;
   }
   
   .glass-card-hover {
-    @apply hover:border-blue-500/40 hover:shadow-md hover:shadow-blue-500/5;
+    @apply hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/5 hover:-translate-y-0.5;
   }
 
-  /* Corporate Blue Premium Buttons */
+  /* Orange Premium Buttons */
   .btn-primary {
-    background: #0052ff;
-    @apply text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-150 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 shadow-sm;
+    background: #ff6600; /* Bright orange */
+    @apply text-white font-bold py-2.5 px-5 rounded-xl transition-all duration-200 active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#ff8000] shadow-md shadow-orange-600/10 hover:shadow-orange-600/25;
   }
   .btn-secondary {
-    background: #182232;
-    border: 1px solid #243249;
-    @apply text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-600 font-semibold py-2.5 px-5 rounded-xl transition-all duration-150 active:scale-[0.98];
+    background: #0c192c;
+    border: 1px solid #1c3554;
+    @apply text-slate-300 hover:bg-[#13263e] hover:text-white hover:border-[#2b4c75] font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 active:scale-[0.97];
   }
   .btn-danger {
     background: #d32f2f;
     @apply text-white font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-all duration-150 active:scale-[0.98] hover:bg-red-700;
   }
   
-  /* Crisp Inputs */
+  /* Input elements matching light blue cards */
   .glass-input {
-    background: #0b0f19;
-    border: 1px solid #202b3c;
+    background: #060e17; /* Darker background inside card */
+    border: 1px solid #1c3554;
     color: #ffffff;
-    @apply w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500 placeholder-slate-500 transition-all duration-150;
+    @apply w-full rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 placeholder-slate-600 transition-all duration-200;
   }
 
   .label {
@@ -80,37 +80,55 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent;
   }
   .glass-frosted {
-    background: #131a26;
-    border: 1px solid #202b3c;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+    background: #0c192c; /* Light blue container card */
+    border: 1px solid #1c3554;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
   }
 }
 
-/* Deactivate resource-heavy floating animations for CPU efficiency */
+/* Shimmer Loading Background Styles */
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-loading {
+  background: linear-gradient(90deg, #071221 25%, #152b48 50%, #071221 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.5s infinite linear;
+}
+
+/* Deactivate floating background glow */
 .animate-float-1,
 .animate-float-2 {
   animation: none !important;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.99); }
-  to { opacity: 1; transform: scale(1); }
+  from { opacity: 0; transform: scale(0.96) translateY(5px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes modalBounce {
+  0% { opacity: 0; transform: scale(0.9) translateY(20px); }
+  50% { opacity: 0.5; transform: scale(1.02) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .page-transition {
-  animation: slideUp 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .modal-transition {
-  animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: modalBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 /* Minimal Focus Enhancements */
@@ -118,5 +136,5 @@
   @apply transition-all duration-150;
 }
 .focus-glow:focus-within {
-  box-shadow: 0 0 8px rgba(0, 82, 255, 0.1);
+  box-shadow: 0 0 12px rgba(255, 102, 0, 0.15);
 }

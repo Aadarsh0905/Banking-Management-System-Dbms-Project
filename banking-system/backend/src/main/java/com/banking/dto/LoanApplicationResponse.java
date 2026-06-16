@@ -19,4 +19,7 @@ public class LoanApplicationResponse {
     public String purpose;
     public LocalDateTime submittedAt;
     public LocalDateTime createdAt;
+    public String customerName;
+    public BigDecimal annualIncome;
+    public String employmentType;
 }

@@ -22,6 +22,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Optional;
 
 // ============================================================
 // Auth Controller
@@ -756,6 +759,7 @@ class AdminController {
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "AI", description = "AI Assistant and Spending Insights")
+@org.springframework.transaction.annotation.Transactional(readOnly = true)
 class AiController {
     private final UserRepository userRepo;
     private final AccountRepository accountRepo;

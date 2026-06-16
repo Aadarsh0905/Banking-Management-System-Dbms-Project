@@ -6,6 +6,7 @@ import com.banking.entity.Transaction;
 import com.banking.entity.User;
 import com.banking.entity.LoanApplication;
 import com.banking.repository.NotificationRepository;
+import com.banking.repository.UserRepository;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 public class NotificationService {
     private final NotificationRepository notifRepo;
     private final JavaMailSender mailSender;
+    private final UserRepository userRepo;
 
     @Async
     public void sendWelcomeEmail(User user) {
@@ -49,11 +51,14 @@ public class NotificationService {
     }
 
     @Async
-    public void sendLoanStatusEmail(LoanApplication app) {
-        String status = app.getStatus().name();
-        sendEmail(app.getUser().getEmail(), "Loan Application Update",
-            "<p>Your loan application " + app.getApplicationNo() + " has been <strong>" + status + "</strong>.</p>");
-        saveInApp(app.getUser(), "Loan Status Update", "Your loan application is now " + status);
+    @Transactional
+    public void sendLoanStatusEmail(Long userId, String email, String appNo, String status) {
+        sendEmail(email, "Loan Application Update",
+            "<p>Your loan application " + appNo + " has been <strong>" + status + "</strong>.</p>");
+        User user = userRepo.findById(userId).orElse(null);
+        if (user != null) {
+            saveInApp(user, "Loan Status Update", "Your loan application " + appNo + " is now " + status);
+        }
     }
 
     private void sendEmail(String to, String subject, String htmlBody) {

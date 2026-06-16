@@ -292,7 +292,7 @@ export function KycPage() {
             </div>
             <div>
               <label className="label">PAN Card</label>
-              <input required value={form.panNumber} onChange={e => setForm(f => ({...f, panNumber: e.target.value}))}
+              <input required value={form.panNumber} onChange={e => setForm(f => ({...f, panNumber: e.target.value.toUpperCase()}))}
                 placeholder="10-character PAN" maxLength={10} style={{ textTransform: 'uppercase' }}
                 className="glass-input" />
             </div>
