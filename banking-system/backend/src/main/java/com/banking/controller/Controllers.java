@@ -699,6 +699,13 @@ class AdminController {
         return ResponseEntity.ok(ApiResponse.success(adminService.getAllAccounts(page, size)));
     }
 
+    @DeleteMapping("/accounts/{id}")
+    @Operation(summary = "Delete account")
+    public ResponseEntity<ApiResponse<Void>> deleteAccount(@PathVariable Long id) {
+        adminService.deleteAccount(id);
+        return ResponseEntity.ok(ApiResponse.success("Account deleted successfully", null));
+    }
+
     @PatchMapping("/accounts/{id}/freeze")
     public ResponseEntity<ApiResponse<Void>> freezeAccount(@PathVariable Long id) {
         adminService.setAccountStatus(id, "FROZEN");

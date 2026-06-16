@@ -25,7 +25,7 @@ import AiChatbotPage                    from './pages/AiChatbotPage';
 import { SpendingInsightsPage, FraudDetectionPage } from './pages/AiPages';
 
 // Admin
-import { AdminDashboard, AdminCustomers, AdminLoans, AdminKyc, AdminTransactions, AdminCards, AdminTerminations } from './pages/admin/AdminPages';
+import { AdminDashboard, AdminCustomers, AdminAccounts, AdminLoans, AdminKyc, AdminTransactions, AdminCards, AdminTerminations } from './pages/admin/AdminPages';
 
 function PrivateRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuth();
@@ -88,6 +88,7 @@ export default function App() {
               <Route path="fraud-detection"   element={<FraudDetectionPage />} />
               <Route path="admin"              element={<PrivateRoute adminOnly><AdminDashboard /></PrivateRoute>} />
               <Route path="admin/customers"    element={<PrivateRoute adminOnly><AdminCustomers /></PrivateRoute>} />
+              <Route path="admin/accounts"     element={<PrivateRoute adminOnly><AdminAccounts /></PrivateRoute>} />
               <Route path="admin/cards"        element={<PrivateRoute adminOnly><AdminCards /></PrivateRoute>} />
               <Route path="admin/terminations" element={<PrivateRoute adminOnly><AdminTerminations /></PrivateRoute>} />
               <Route path="admin/loans"        element={<PrivateRoute adminOnly><AdminLoans /></PrivateRoute>} />

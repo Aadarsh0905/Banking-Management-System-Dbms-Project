@@ -212,13 +212,14 @@ export function KycPage() {
     try {
       const res = await userApi.getKycStatus();
       setKyc(res.data.data);
-      if (res.data.data?.status === 'PENDING') {
+      if (res.data.data?.status === 'PENDING' || res.data.data?.status === 'NOT_SUBMITTED') {
         setSubmitted(false);
       } else {
         setSubmitted(true);
       }
     } catch {
       setKyc({ status: 'NOT_SUBMITTED' });
+      setSubmitted(false);
     } finally {
       setLoading(false);
     }

@@ -56,6 +56,7 @@ function Sidebar({ open }) {
   const adminNav = [
     { to: '/admin', label: 'Admin Dashboard', icon: <FaChartBar /> },
     { to: '/admin/customers', label: 'Customers', icon: <FaUsers /> },
+    { to: '/admin/accounts', label: 'All Accounts', icon: <FaUniversity /> },
     { to: '/admin/cards', label: 'Card Requests', icon: <FaCreditCard /> },
     { to: '/admin/terminations', label: 'Account Closures', icon: <FaTimesCircle /> },
     { to: '/admin/loans', label: 'Loan Approvals', icon: <FaFileAlt /> },

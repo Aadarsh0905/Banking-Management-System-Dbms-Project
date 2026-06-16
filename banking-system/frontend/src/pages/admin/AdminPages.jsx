@@ -725,3 +725,122 @@ export function AdminTerminations() {
     </div>
   );
 }
+
+export function AdminAccounts() {
+  const [accounts, setAccounts] = useState([]);
+  const [page, setPage]         = useState(0);
+  const [total, setTotal]       = useState(0);
+  const [loading, setLoading]   = useState(false);
+
+  useEffect(() => { load(); }, [page]);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await adminApi.getAllAccounts(page);
+      const d = res.data.data;
+      setAccounts(d?.content || []);
+      setTotal(d?.totalPages || 0);
+    } catch {
+      toast.error('Failed to load accounts');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function toggleStatus(id, currentStatus) {
+    try {
+      if (currentStatus === 'FROZEN') {
+        await adminApi.activateAccount(id);
+        toast.success('Account activated successfully');
+      } else {
+        await adminApi.freezeAccount(id);
+        toast.success('Account frozen successfully');
+      }
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update account status');
+    }
+  }
+
+  async function deleteAccount(id) {
+    if (!confirm('Are you sure you want to PERMANENTLY DELETE this account? All associated transaction histories, card requests, UPI IDs, and loan applications will be deleted immediately. This action is irreversible.')) return;
+    try {
+      await adminApi.deleteAccount(id);
+      toast.success('Account deleted successfully');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to delete account');
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <h1 className="text-2xl font-bold dark:text-white">Account Management</h1>
+
+      <div className="glass-card p-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-white/[0.02]">
+              <tr className="text-slate-400 border-b border-white/5">
+                {['Account Number', 'Account Type', 'Branch Name', 'Balance', 'Status', 'Opened At', 'Actions'].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              {loading ? (
+                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Loading...</td></tr>
+              ) : accounts.length === 0 ? (
+                <tr><td colSpan={7} className="text-center py-12 text-gray-400">No accounts found</td></tr>
+              ) : accounts.map(a => (
+                <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <td className="px-4 py-3 font-mono text-xs dark:text-gray-300">{a.accountNumber}</td>
+                  <td className="px-4 py-3 dark:text-gray-300">{a.accountType}</td>
+                  <td className="px-4 py-3 dark:text-gray-300">{a.branchName}</td>
+                  <td className="px-4 py-3 font-semibold dark:text-white">₹{a.balance?.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      a.status === 'ACTIVE' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      a.status === 'FROZEN' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                      a.status === 'CLOSED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                      'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    }`}>
+                      {a.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-400">{a.openedAt ? new Date(a.openedAt).toLocaleDateString() : '—'}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      {a.status !== 'CLOSED' && (
+                        <button onClick={() => toggleStatus(a.id, a.status)}
+                          className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold transition-all ${
+                            a.status === 'FROZEN'
+                              ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20'
+                              : 'bg-yellow-500/10 text-yellow-400 hover:bg-yellow-500/20'
+                          }`}>
+                          {a.status === 'FROZEN' ? 'Activate' : 'Freeze'}
+                        </button>
+                      )}
+                      <button onClick={() => deleteAccount(a.id)}
+                        className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded text-xs font-semibold transition-all">
+                        <FaTimes /> Delete
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {total > 1 && (
+          <div className="flex justify-between items-center px-6 py-4 border-t border-white/5">
+            <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="btn-secondary py-1.5 px-4 text-xs">Previous</button>
+            <span className="text-xs text-slate-400 font-semibold">Page {page + 1} of {total}</span>
+            <button disabled={page >= total - 1} onClick={() => setPage(p => p + 1)} className="btn-secondary py-1.5 px-4 text-xs">Next</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -45,6 +45,50 @@ public class AdminService {
     private final LoanService loanService;
     private final AuthService authService;
     private final AccountService accountService;
+    private final jakarta.persistence.EntityManager entityManager;
+
+    @Transactional
+    public void deleteAccount(Long accountId) {
+        // 1. Delete CardTransaction linked to Card
+        entityManager.createQuery("DELETE FROM CardTransaction ct WHERE ct.card.id IN (SELECT c.id FROM Card c WHERE c.account.id = :accountId)")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 2. Delete CardTransaction linked to Transaction
+        entityManager.createQuery("DELETE FROM CardTransaction ct WHERE ct.transaction.id IN (SELECT t.id FROM Transaction t WHERE t.fromAccount.id = :accountId OR t.toAccount.id = :accountId)")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 3. Delete Card
+        entityManager.createQuery("DELETE FROM Card c WHERE c.account.id = :accountId")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 4. Delete UpiId
+        entityManager.createQuery("DELETE FROM UpiId u WHERE u.account.id = :accountId")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 5. Delete ScheduledTransfer
+        entityManager.createQuery("DELETE FROM ScheduledTransfer s WHERE s.fromAccount.id = :accountId OR s.toAccount.id = :accountId")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 6. Delete EmiSchedule
+        entityManager.createQuery("DELETE FROM EmiSchedule es WHERE es.loan.id IN (SELECT l.id FROM Loan l WHERE l.application.id IN (SELECT la.id FROM LoanApplication la WHERE la.account.id = :accountId))")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 7. Delete Loan
+        entityManager.createQuery("DELETE FROM Loan l WHERE l.application.id IN (SELECT la.id FROM LoanApplication la WHERE la.account.id = :accountId)")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 8. Delete LoanApplication
+        entityManager.createQuery("DELETE FROM LoanApplication la WHERE la.account.id = :accountId")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 9. Delete Transaction
+        entityManager.createQuery("DELETE FROM Transaction t WHERE t.fromAccount.id = :accountId OR t.toAccount.id = :accountId")
+            .setParameter("accountId", accountId).executeUpdate();
+
+        // 10. Delete Account
+        entityManager.createQuery("DELETE FROM Account a WHERE a.id = :accountId")
+            .setParameter("accountId", accountId).executeUpdate();
+    }
 
     public DashboardStats getDashboardStats() {
         return DashboardStats.builder()

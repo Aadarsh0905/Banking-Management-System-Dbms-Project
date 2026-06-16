@@ -227,11 +227,29 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .roles(Set.of(customerRole))
                 .build());
         }
+        if (!userRepo.existsByUsername("Aadarsh")) {
+            log.info("Seeding Customer User: Aadarsh...");
+            userRepo.save(User.builder()
+                .username("Aadarsh")
+                .email("aadarsh@email.com")
+                .passwordHash(passwordEncoder.encode("Aadarsh@123"))
+                .firstName("Aadarsh")
+                .lastName("Ranjan")
+                .phone("9876543212")
+                .dateOfBirth(LocalDate.of(2000, 1, 1))
+                .gender(User.Gender.MALE)
+                .isActive(true)
+                .isLocked(false)
+                .emailVerified(true)
+                .roles(Set.of(customerRole))
+                .build());
+        }
 
 
         // Fetch users for seeding accounts
         User rahul = userRepo.findByUsername("rahul.sharma").orElse(null);
         User priya = userRepo.findByUsername("priya.patel").orElse(null);
+        User aadarsh = userRepo.findByUsername("Aadarsh").orElse(null);
 
         // Fetch branches & types for seeding accounts
         Branch mainBranch = branchRepo.findByBranchCode("BR001").orElse(null);
@@ -283,6 +301,23 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .currency("INR")
                     .status(Account.AccountStatus.ACTIVE)
                     .openedAt(LocalDate.of(2022, 5, 20))
+                    .build());
+            }
+        }
+
+        if (aadarsh != null && mainBranch != null && savingsType != null) {
+            if (accountRepo.findByAccountNumber("ACC1000000003").isEmpty()) {
+                log.info("Seeding Account ACC1000000003 for Aadarsh...");
+                accountRepo.save(Account.builder()
+                    .accountNumber("ACC1000000003")
+                    .user(aadarsh)
+                    .branch(mainBranch)
+                    .accountType(savingsType)
+                    .balance(new BigDecimal("50000.00"))
+                    .availableBalance(new BigDecimal("50000.00"))
+                    .currency("INR")
+                    .status(Account.AccountStatus.ACTIVE)
+                    .openedAt(LocalDate.of(2023, 6, 1))
                     .build());
             }
         }

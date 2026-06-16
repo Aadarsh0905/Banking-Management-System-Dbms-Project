@@ -62,6 +62,7 @@ public class AccountService {
         List<Account> accounts = accountRepo.findByUserId(userId);
         log.info("Fetching accounts for userId: {}, found: {}", userId, accounts.size());
         return accounts.stream()
+            .filter(a -> a.getStatus() != Account.AccountStatus.CLOSED)
             .map(this::mapToResponse).collect(Collectors.toList());
     }
 

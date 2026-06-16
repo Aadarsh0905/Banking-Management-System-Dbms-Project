@@ -7,3 +7,4 @@ export { AdminKyc }                     from './AdminPages';
 export { AdminTransactions }            from './AdminPages';
 export { AdminCards }                   from './AdminPages';
 export { AdminTerminations }            from './AdminPages';
+export { AdminAccounts }                from './AdminPages';
