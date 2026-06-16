@@ -199,10 +199,16 @@ export function LoginPage() {
               >
                 priya.patel
               </button>
+              <button
+                type="button"
+                onClick={() => handleQuickLogin('Aadarsh', 'Aadarsh@123')}
+                className="bg-purple-500/15 text-purple-300 hover:bg-purple-500/25 px-3 py-1.5 rounded-xl border border-purple-500/20 active:scale-95 transition-all text-xs font-mono"
+              >
+                Aadarsh
+              </button>
             </div>
-            <p className="text-[9px] text-slate-400 mt-2 italic">Password for customers is Customer@123</p>
+            <p className="text-[9px] text-slate-400 mt-2 italic">Password is Customer@123 (Aadarsh@123 for Aadarsh)</p>
           </div>
-        </div>
       </div>
     </AuthLayout>
   );
