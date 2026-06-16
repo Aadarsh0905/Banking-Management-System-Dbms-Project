@@ -171,7 +171,7 @@ CREATE TABLE accounts (
     balance          DECIMAL(15,2)  NOT NULL DEFAULT 0.00,
     available_balance DECIMAL(15,2) NOT NULL DEFAULT 0.00,
     currency         VARCHAR(5)     DEFAULT 'INR',
-    status           ENUM('PENDING','ACTIVE','DORMANT','FROZEN','CLOSED') DEFAULT 'PENDING',
+    status           ENUM('PENDING','ACTIVE','DORMANT','FROZEN','CLOSED','PENDING_CLOSE') DEFAULT 'PENDING',
     opened_at        DATE           NOT NULL,
     closed_at        DATE           NULL,
     last_transaction_at TIMESTAMP   NULL,

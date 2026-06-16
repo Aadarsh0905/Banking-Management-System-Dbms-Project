@@ -66,5 +66,5 @@ public class Account {
     @CreationTimestamp private LocalDateTime createdAt;
     @UpdateTimestamp   private LocalDateTime updatedAt;
 
-    public enum AccountStatus { PENDING, ACTIVE, DORMANT, FROZEN, CLOSED }
+    public enum AccountStatus { PENDING, ACTIVE, DORMANT, FROZEN, CLOSED, PENDING_CLOSE }
 }

@@ -561,11 +561,53 @@ class NotificationController {
 @Tag(name = "Admin", description = "Admin operations")
 class AdminController {
     private final AdminService adminService;
+    private final CardService cardService;
+    private final AccountService accountService;
 
     @GetMapping("/dashboard")
     @Operation(summary = "Admin dashboard stats")
     public ResponseEntity<ApiResponse<DashboardStats>> getDashboard() {
         return ResponseEntity.ok(ApiResponse.success(adminService.getDashboardStats()));
+    }
+
+    @GetMapping("/cards/pending")
+    @Operation(summary = "Get all pending card requests")
+    public ResponseEntity<ApiResponse<List<CardResponse>>> getPendingCards() {
+        return ResponseEntity.ok(ApiResponse.success(cardService.getPendingCardRequests()));
+    }
+
+    @PatchMapping("/cards/{id}/issue")
+    @Operation(summary = "Issue a requested ATM card")
+    public ResponseEntity<ApiResponse<Void>> issueCard(@PathVariable Long id) {
+        cardService.issueCard(id);
+        return ResponseEntity.ok(ApiResponse.success("Card issued successfully", null));
+    }
+
+    @PatchMapping("/cards/{id}/reject")
+    @Operation(summary = "Reject a requested ATM card")
+    public ResponseEntity<ApiResponse<Void>> rejectCard(@PathVariable Long id) {
+        cardService.rejectCard(id);
+        return ResponseEntity.ok(ApiResponse.success("Card request rejected", null));
+    }
+
+    @GetMapping("/accounts/pending-termination")
+    @Operation(summary = "Get all accounts pending termination")
+    public ResponseEntity<ApiResponse<List<AccountResponse>>> getPendingTerminations() {
+        return ResponseEntity.ok(ApiResponse.success(accountService.getPendingTerminations()));
+    }
+
+    @PatchMapping("/accounts/{id}/approve-termination")
+    @Operation(summary = "Approve account termination request")
+    public ResponseEntity<ApiResponse<Void>> approveTermination(@PathVariable Long id) {
+        accountService.approveAccountTermination(id);
+        return ResponseEntity.ok(ApiResponse.success("Account terminated successfully", null));
+    }
+
+    @PatchMapping("/accounts/{id}/reject-termination")
+    @Operation(summary = "Reject account termination request")
+    public ResponseEntity<ApiResponse<Void>> rejectTermination(@PathVariable Long id) {
+        accountService.rejectAccountTermination(id);
+        return ResponseEntity.ok(ApiResponse.success("Account termination request rejected", null));
     }
 
     @GetMapping("/customers")

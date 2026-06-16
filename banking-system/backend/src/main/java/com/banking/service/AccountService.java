@@ -81,8 +81,36 @@ public class AccountService {
             throw new BankingException("Unauthorized access", 403);
         if (a.getBalance().compareTo(BigDecimal.ZERO) > 0)
             throw new BankingException("Please withdraw all funds before closing", 400);
+        a.setStatus(Account.AccountStatus.PENDING_CLOSE);
+        accountRepo.save(a);
+    }
+
+    public List<AccountResponse> getPendingTerminations() {
+        return accountRepo.findByStatus(Account.AccountStatus.PENDING_CLOSE).stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void approveAccountTermination(Long accountId) {
+        Account a = accountRepo.findById(accountId)
+            .orElseThrow(() -> new BankingException("Account not found", 404));
+        if (a.getStatus() != Account.AccountStatus.PENDING_CLOSE) {
+            throw new BankingException("Account is not pending termination", 400);
+        }
         a.setStatus(Account.AccountStatus.CLOSED);
         a.setClosedAt(LocalDate.now());
+        accountRepo.save(a);
+    }
+
+    @Transactional
+    public void rejectAccountTermination(Long accountId) {
+        Account a = accountRepo.findById(accountId)
+            .orElseThrow(() -> new BankingException("Account not found", 404));
+        if (a.getStatus() != Account.AccountStatus.PENDING_CLOSE) {
+            throw new BankingException("Account is not pending termination", 400);
+        }
+        a.setStatus(Account.AccountStatus.ACTIVE);
         accountRepo.save(a);
     }
 

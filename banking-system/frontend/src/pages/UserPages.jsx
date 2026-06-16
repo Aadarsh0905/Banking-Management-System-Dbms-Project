@@ -179,8 +179,11 @@ export function ProfilePage() {
                   <span className={`inline-block px-2 py-0.5 text-[9px] font-bold rounded-full uppercase tracking-wider mt-1 ${
                     acc.status === 'ACTIVE' ? 'bg-cyan-500/10 text-cyan-400' :
                     acc.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400' :
+                    acc.status === 'PENDING_CLOSE' ? 'bg-orange-500/10 text-orange-400' :
+                    acc.status === 'FROZEN' ? 'bg-blue-500/10 text-blue-400' :
+                    acc.status === 'CLOSED' ? 'bg-red-500/10 text-red-400' :
                     'bg-white/5 text-slate-400'
-                  }`}>{acc.status}</span>
+                  }`}>{acc.status === 'PENDING_CLOSE' ? 'Closure Pending' : acc.status}</span>
                 </div>
               </div>
             ))}
@@ -246,7 +249,7 @@ export function KycPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold dark:text-white">KYC Verification</h1>
 
-      <div className="bg-gradient-to-r from-[#005CFF] to-[#00BAF2] rounded-2xl shadow-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg p-6 text-white shadow-indigo-600/10">
         <div className="flex items-center gap-4">
           {statusIcon[kyc?.status] || statusIcon.PENDING}
           <div>
@@ -257,25 +260,25 @@ export function KycPage() {
       </div>
 
       {kyc?.status === 'VERIFIED' ? (
-        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-xl p-6">
-          <h2 className="font-semibold text-green-700 dark:text-green-400 mb-2">✓ KYC Verified</h2>
-          <p className="text-sm text-green-600 dark:text-green-300">Your KYC has been verified successfully. You can access all banking services.</p>
+        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
+          <h2 className="font-semibold text-green-400 mb-2">✓ KYC Verified</h2>
+          <p className="text-sm text-slate-300">Your KYC has been verified successfully. You can access all banking services.</p>
         </div>
       ) : kyc?.status === 'REJECTED' ? (
-        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-6">
-          <h2 className="font-semibold text-red-700 dark:text-red-400 mb-2">KYC Rejected</h2>
-          <p className="text-sm text-red-600 dark:text-red-300">Your KYC application was rejected. Please submit again with correct documents.</p>
-          <button onClick={() => setSubmitted(false)} className="mt-3 text-red-600 dark:text-red-400 text-sm hover:underline">Resubmit KYC</button>
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6">
+          <h2 className="font-semibold text-red-400 mb-2">KYC Rejected</h2>
+          <p className="text-sm text-slate-300">Your KYC application was rejected. Please submit again with correct documents.</p>
+          <button onClick={() => setSubmitted(false)} className="mt-3 text-red-400 text-sm hover:underline">Resubmit KYC</button>
         </div>
       ) : kyc?.status === 'SUBMITTED' ? (
-        <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6">
-          <h2 className="font-semibold text-yellow-700 dark:text-yellow-400 mb-2">Under Review</h2>
-          <p className="text-sm text-yellow-600 dark:text-yellow-300">Your KYC is under review. This usually takes 1-2 business days.</p>
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-6">
+          <h2 className="font-semibold text-yellow-400 mb-2">Under Review</h2>
+          <p className="text-sm text-slate-300">Your KYC is under review. This usually takes 1-2 business days.</p>
         </div>
       ) : null}
 
       {!submitted && kyc?.status !== 'VERIFIED' && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+        <div className="glass-card">
           <h2 className="font-semibold dark:text-white mb-4 flex items-center gap-2"><FaIdCard /> Submit KYC Documents</h2>
           <form onSubmit={submitKyc} className="space-y-4">
             <div>

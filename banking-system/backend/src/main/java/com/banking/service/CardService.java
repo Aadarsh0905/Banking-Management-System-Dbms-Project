@@ -69,6 +69,37 @@ public class CardService {
         return cardRepo.findByUserId(userId).stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    public List<CardResponse> getPendingCardRequests() {
+        return cardRepo.findByStatus(Card.CardStatus.REQUESTED).stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void issueCard(Long cardId) {
+        Card card = cardRepo.findById(cardId)
+            .orElseThrow(() -> new BankingException("Card not found", 404));
+        if (card.getStatus() != Card.CardStatus.REQUESTED) {
+            throw new BankingException("Card is already " + card.getStatus(), 400);
+        }
+        String actualCardNo = "4" + (100000000000000L + (long)(Math.random() * 900000000000000L));
+        card.setCardNumber(actualCardNo);
+        card.setStatus(Card.CardStatus.ACTIVE);
+        card.setActivatedAt(LocalDateTime.now());
+        cardRepo.save(card);
+    }
+
+    @Transactional
+    public void rejectCard(Long cardId) {
+        Card card = cardRepo.findById(cardId)
+            .orElseThrow(() -> new BankingException("Card not found", 404));
+        if (card.getStatus() != Card.CardStatus.REQUESTED) {
+            throw new BankingException("Card is already " + card.getStatus(), 400);
+        }
+        card.setStatus(Card.CardStatus.CANCELLED);
+        cardRepo.save(card);
+    }
+
     @Transactional
     public void blockCard(Long userId, Long cardId, String reason) {
         Card card = getAndValidate(userId, cardId);

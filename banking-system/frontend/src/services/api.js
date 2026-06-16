@@ -136,6 +136,12 @@ export const adminApi = {
   getBranches:          ()       => API.get('/admin/branches'),
   createBranch:         (d)      => API.post('/admin/branches', d),
   getEmployees:         (p)      => API.get(`/admin/employees?page=${p}`),
+  getPendingCards:      ()       => API.get('/admin/cards/pending'),
+  issueCard:            (id)     => API.patch(`/admin/cards/${id}/issue`),
+  rejectCard:           (id)     => API.patch(`/admin/cards/${id}/reject`),
+  getPendingTerminations:()      => API.get('/admin/accounts/pending-termination'),
+  approveTermination:   (id)     => API.patch(`/admin/accounts/${id}/approve-termination`),
+  rejectTermination:    (id)     => API.patch(`/admin/accounts/${id}/reject-termination`),
 };
 
 export default API;

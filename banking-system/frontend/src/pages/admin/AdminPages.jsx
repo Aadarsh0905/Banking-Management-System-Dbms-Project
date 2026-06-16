@@ -540,3 +540,188 @@ export function AdminTransactions() {
     </div>
   );
 }
+
+export function AdminCards() {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await adminApi.getPendingCards();
+      setRequests(res.data.data || []);
+    } catch {
+      toast.error('Failed to load pending cards');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function issueCard(id) {
+    try {
+      await adminApi.issueCard(id);
+      toast.success('Card issued successfully');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to issue card');
+    }
+  }
+
+  async function rejectCard(id) {
+    if (!confirm('Reject this card request?')) return;
+    try {
+      await adminApi.rejectCard(id);
+      toast.success('Card request rejected');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to reject card');
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <h1 className="text-2xl font-bold dark:text-white">ATM Card Requests</h1>
+
+      <div className="glass-card p-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-white/[0.02]">
+              <tr className="text-slate-400 border-b border-white/5">
+                {['Cardholder Name','Account No','Card Type','Network','Status','Requested At','Actions'].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              {loading ? (
+                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Loading...</td></tr>
+              ) : requests.length === 0 ? (
+                <tr><td colSpan={7} className="text-center py-12 text-gray-400">No pending card requests</td></tr>
+              ) : requests.map(r => (
+                <tr key={r.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <td className="px-4 py-3 font-semibold dark:text-white">{r.cardHolderName}</td>
+                  <td className="px-4 py-3 font-mono text-xs dark:text-gray-300">{r.cardNumber}</td>
+                  <td className="px-4 py-3 dark:text-gray-300">{r.cardType}</td>
+                  <td className="px-4 py-3 dark:text-gray-300">{r.cardNetwork}</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                      {r.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-400">{r.requestedAt ? new Date(r.requestedAt).toLocaleString() : '—'}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <button onClick={() => issueCard(r.id)}
+                        className="flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded text-xs font-semibold transition-all">
+                        <FaCheck /> Issue
+                      </button>
+                      <button onClick={() => rejectCard(r.id)}
+                        className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded text-xs font-semibold transition-all">
+                        <FaTimes /> Reject
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AdminTerminations() {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    setLoading(true);
+    try {
+      const res = await adminApi.getPendingTerminations();
+      setRequests(res.data.data || []);
+    } catch {
+      toast.error('Failed to load termination requests');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function approve(id) {
+    if (!confirm('Approve account termination and CLOSE this account permanently?')) return;
+    try {
+      await adminApi.approveTermination(id);
+      toast.success('Account closed successfully');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to close account');
+    }
+  }
+
+  async function reject(id) {
+    if (!confirm('Reject account termination and restore account to ACTIVE status?')) return;
+    try {
+      await adminApi.rejectTermination(id);
+      toast.success('Termination request rejected');
+      load();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to reject termination request');
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+      <h1 className="text-2xl font-bold dark:text-white">Account Terminations</h1>
+
+      <div className="glass-card p-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-white/[0.02]">
+              <tr className="text-slate-400 border-b border-white/5">
+                {['Account Number','Account Type','Branch Name','Balance','Status','Opened At','Actions'].map(h => (
+                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              {loading ? (
+                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Loading...</td></tr>
+              ) : requests.length === 0 ? (
+                <tr><td colSpan={7} className="text-center py-12 text-gray-400">No pending termination requests</td></tr>
+              ) : requests.map(a => (
+                <tr key={a.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
+                  <td className="px-4 py-3 font-mono text-xs dark:text-gray-300">{a.accountNumber}</td>
+                  <td className="px-4 py-3 dark:text-gray-300">{a.accountType}</td>
+                  <td className="px-4 py-3 dark:text-gray-300">{a.branchName}</td>
+                  <td className="px-4 py-3 font-semibold dark:text-white">₹{a.balance?.toLocaleString('en-IN')}</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                      {a.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-gray-400">{a.openedAt ? new Date(a.openedAt).toLocaleDateString() : '—'}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <button onClick={() => approve(a.id)}
+                        className="flex items-center gap-1 px-2 py-1 bg-green-500/10 text-green-400 hover:bg-green-500/20 rounded text-xs font-semibold transition-all">
+                        <FaCheck /> Approve Close
+                      </button>
+                      <button onClick={() => reject(a.id)}
+                        className="flex items-center gap-1 px-2 py-1 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded text-xs font-semibold transition-all">
+                        <FaTimes /> Keep Active
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

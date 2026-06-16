@@ -23,6 +23,7 @@ import {
   FaUniversity,
   FaUser,
   FaUsers,
+  FaTimesCircle,
 } from 'react-icons/fa';
 import { useAuth, useTheme } from '../context/Contexts';
 import { notifApi } from '../services/api';
@@ -55,6 +56,8 @@ function Sidebar({ open }) {
   const adminNav = [
     { to: '/admin', label: 'Admin Dashboard', icon: <FaChartBar /> },
     { to: '/admin/customers', label: 'Customers', icon: <FaUsers /> },
+    { to: '/admin/cards', label: 'Card Requests', icon: <FaCreditCard /> },
+    { to: '/admin/terminations', label: 'Account Closures', icon: <FaTimesCircle /> },
     { to: '/admin/loans', label: 'Loan Approvals', icon: <FaFileAlt /> },
     { to: '/admin/kyc', label: 'KYC Review', icon: <FaIdCard /> },
     { to: '/admin/transactions', label: 'Monitor Txns', icon: <FaExchangeAlt /> },

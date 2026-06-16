@@ -225,6 +225,21 @@ export function AccountsPage() {
   const [addMoneyAccount, setAddMoneyAccount] = useState(null);
   const [addMoneyAmount, setAddMoneyAmount] = useState('10000');
 
+  async function requestCloseAccount(acc) {
+    if (acc.balance > 0) {
+      toast.error('Please withdraw all funds (balance must be ₹0) before requesting closure.');
+      return;
+    }
+    if (!window.confirm(`Request closure of account ${acc.accountNumber}? This will be reviewed by admin.`)) return;
+    try {
+      await accountApi.close(acc.id);
+      toast.success('Account closure request submitted. Awaiting admin approval.');
+      accountApi.getAll().then(r => setAccounts(r.data.data || []));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit closure request');
+    }
+  }
+
   async function submitAddDemoMoney() {
     if (!addMoneyAmount || isNaN(addMoneyAmount) || +addMoneyAmount <= 0) {
       toast.error("Please enter a valid amount");
@@ -296,7 +311,8 @@ export function AccountsPage() {
     ACTIVE:'bg-green-500/10 text-green-400', 
     PENDING:'bg-yellow-500/10 text-yellow-400', 
     FROZEN:'bg-blue-500/10 text-blue-400', 
-    CLOSED:'bg-red-500/10 text-red-400' 
+    CLOSED:'bg-red-500/10 text-red-400',
+    PENDING_CLOSE:'bg-orange-500/10 text-orange-400'
   };
 
   return (
@@ -372,7 +388,7 @@ export function AccountsPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 border-t border-white/5 pt-4 mt-6">
+            <div className="grid grid-cols-2 gap-2 border-t border-white/5 pt-4 mt-6">
               <button onClick={() => downloadStatement(acc.id)}
                 className="flex items-center justify-center gap-1 border border-white/10 hover:bg-white/5 text-[11px] font-semibold py-2 rounded-xl text-slate-300 transition-colors">
                 <FaDownload /> Statement
@@ -385,6 +401,16 @@ export function AccountsPage() {
                 className="flex items-center justify-center gap-1 border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/25 text-[11px] font-semibold py-2 rounded-xl text-emerald-400 transition-all">
                 <FaPlus /> Add Demo
               </button>
+              {acc.status === 'ACTIVE' ? (
+                <button onClick={() => requestCloseAccount(acc)}
+                  className="flex items-center justify-center gap-1 border border-red-500/20 bg-red-500/10 hover:bg-red-500/25 text-[11px] font-semibold py-2 rounded-xl text-red-400 transition-all">
+                  <FaTimesCircle /> Close Acct
+                </button>
+              ) : acc.status === 'PENDING_CLOSE' ? (
+                <div className="flex items-center justify-center gap-1 border border-orange-500/20 bg-orange-500/10 text-[11px] font-semibold py-2 rounded-xl text-orange-400">
+                  <FaTimesCircle /> Closure Pending
+                </div>
+              ) : null}
             </div>
           </div>
         ))}
