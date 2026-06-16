@@ -22,24 +22,24 @@ import { authApi } from '../services/api';
 // ── Glassmorphic Background Layout ──────────────────────────
 function AuthLayout({ children, title, subtitle, maxWidth = 'max-w-md' }) {
   return (
-    <div className="min-h-screen bg-slate-950 relative flex items-center justify-center p-4 overflow-hidden font-sans select-none page-transition">
+    <div className="min-h-screen bg-[#000B1A] relative flex items-center justify-center p-4 overflow-hidden font-sans select-none page-transition">
       {/* Animated Premium Floating Gradient Orbs */}
-      <div className="absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-tr from-blue-600/25 to-indigo-500/20 blur-[130px] animate-float-1 pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-bl from-purple-600/20 to-pink-500/20 blur-[130px] animate-float-2 pointer-events-none"></div>
+      <div className="absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-tr from-blue-600/20 to-cyan-500/15 blur-[130px] animate-float-1 pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-bl from-cyan-600/15 to-blue-500/15 blur-[130px] animate-float-2 pointer-events-none"></div>
       <div className="absolute top-[30%] left-[25%] w-80 h-80 rounded-full bg-cyan-500/5 blur-[100px] pointer-events-none"></div>
-
+ 
       <div className={`w-full ${maxWidth} z-10`}>
         {/* Frosted Glass Container with super smooth borders and round corners */}
-        <div className="glass-frosted rounded-[2.5rem] shadow-2xl p-6 sm:p-10 border border-white/10 hover:border-white/15 transition-all duration-500 shadow-blue-500/5">
+        <div className="glass-frosted rounded-[2.5rem] shadow-2xl p-6 sm:p-10 border border-cyan-500/20 hover:border-cyan-400/35 transition-all duration-500 shadow-cyan-500/5">
           <div className="text-center mb-8">
             {/* Glowing Bank Portal Logo */}
-            <div className="inline-flex p-4 bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white rounded-3xl shadow-xl shadow-indigo-500/25 mb-4 transform hover:scale-105 hover:rotate-6 transition-all duration-300">
+            <div className="inline-flex p-4 bg-gradient-to-tr from-blue-600 via-sky-500 to-cyan-400 text-white rounded-3xl shadow-xl shadow-cyan-500/25 mb-4 transform hover:scale-105 hover:rotate-6 transition-all duration-300">
               <FaUniversity className="text-3xl" />
             </div>
             <h1 className="text-3xl font-black tracking-tight text-white">
               {title}
             </h1>
-            <p className="text-slate-400 text-xs mt-2 font-medium tracking-wide uppercase">{subtitle}</p>
+            <p className="text-cyan-400 text-xs mt-2 font-bold tracking-wide uppercase">{subtitle}</p>
           </div>
           {children}
         </div>

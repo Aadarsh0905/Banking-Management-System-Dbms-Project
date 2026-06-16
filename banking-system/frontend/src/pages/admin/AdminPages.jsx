@@ -25,15 +25,18 @@ Chart.register(...registerables);
 
 function StatCard({ icon, label, value, color, sub }) {
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 border-l-4 ${color}`}>
-      <div className="flex items-center justify-between">
+    <div className={`glass-card glass-card-hover border-l-4 ${color} relative overflow-hidden group`}>
+      <div className="flex justify-between items-start z-10 relative">
         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider">{label}</p>
-          <p className="text-2xl font-bold dark:text-white mt-1">{value ?? '—'}</p>
-          {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
+          <p className="text-2xl font-black text-white mt-2 tracking-tight">{value ?? '—'}</p>
+          {sub && <p className="text-xs text-cyan-400 font-bold mt-1.5">{sub}</p>}
         </div>
-        <span className="text-3xl opacity-70">{icon}</span>
+        <span className="text-2xl p-3 rounded-2xl bg-white/5 transition-transform duration-300 group-hover:scale-110">
+          {icon}
+        </span>
       </div>
+      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/[0.01] rounded-full pointer-events-none group-hover:scale-150 transition-transform duration-500"></div>
     </div>
   );
 }
@@ -80,7 +83,7 @@ export function AdminDashboard() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-96">
-      <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="spinner" />
     </div>
   );
 
@@ -92,35 +95,35 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={<FaUsers className="text-blue-500"/>}   label="Total Customers"  value={stats?.totalCustomers}        color="border-blue-500" />
-        <StatCard icon={<FaUniversity className="text-green-500"/>} label="Total Accounts" value={stats?.totalAccounts}      color="border-green-500" />
-        <StatCard icon={<FaExchangeAlt className="text-purple-500"/>} label="Txns Today"  value={stats?.totalTransactionsToday} color="border-purple-500" sub={`₹${Number(stats?.totalTransactionValueToday||0).toLocaleString('en-IN')}`} />
-        <StatCard icon={<FaHandHoldingUsd className="text-orange-500"/>} label="Active Loans" value={stats?.activeLoans}    color="border-orange-500" />
-        <StatCard icon={<FaClock className="text-yellow-500"/>}  label="Pending KYC"    value={stats?.pendingKycVerifications} color="border-yellow-500" />
-        <StatCard icon={<FaCheckCircle className="text-teal-500"/>} label="Pending Loans" value={stats?.pendingLoanApplications} color="border-teal-500" />
+        <StatCard icon={<FaUsers className="text-cyan-400"/>}   label="Total Customers"  value={stats?.totalCustomers}        color="border-cyan-400" />
+        <StatCard icon={<FaUniversity className="text-green-400"/>} label="Total Accounts" value={stats?.totalAccounts}      color="border-green-400" />
+        <StatCard icon={<FaExchangeAlt className="text-purple-400"/>} label="Txns Today"  value={stats?.totalTransactionsToday} color="border-purple-400" sub={`₹${Number(stats?.totalTransactionValueToday||0).toLocaleString('en-IN')}`} />
+        <StatCard icon={<FaHandHoldingUsd className="text-orange-400"/>} label="Active Loans" value={stats?.activeLoans}    color="border-orange-400" />
+        <StatCard icon={<FaClock className="text-yellow-400"/>}  label="Pending KYC"    value={stats?.pendingKycVerifications} color="border-yellow-400" />
+        <StatCard icon={<FaCheckCircle className="text-teal-400"/>} label="Pending Loans" value={stats?.pendingLoanApplications} color="border-teal-400" />
         <StatCard icon={<FaCodeBranch className="text-red-400"/>} label="Branches"       value={stats?.totalBranches}         color="border-red-400" />
-        <StatCard icon={<FaIdCard className="text-indigo-500"/>} label="New Customers (7d)" value={report?.newCustomers}       color="border-indigo-500" />
+        <StatCard icon={<FaIdCard className="text-cyan-400"/>} label="New Customers (7d)" value={report?.newCustomers}       color="border-cyan-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <h2 className="font-semibold dark:text-white mb-4">Weekly Transaction Volume</h2>
+        <div className="glass-card">
+          <h2 className="font-extrabold text-white text-base mb-4">Weekly Transaction Volume</h2>
           <Bar data={barData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <h2 className="font-semibold dark:text-white mb-4">Customer Growth</h2>
+        <div className="glass-card">
+          <h2 className="font-extrabold text-white text-base mb-4">Customer Growth</h2>
           <Line data={lineData} options={{ responsive: true, plugins: { legend: { display: false } } }} />
         </div>
       </div>
 
       {report && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <h2 className="font-semibold dark:text-white mb-4">7-Day Summary Report ({weekAgo} → {today})</h2>
+        <div className="glass-card">
+          <h2 className="font-extrabold text-white text-base mb-6">7-Day Summary Report ({weekAgo} → {today})</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
-            <div><p className="text-gray-400 text-xs">Total Transactions</p><p className="text-xl font-bold dark:text-white">{report.totalTransactions}</p></div>
-            <div><p className="text-gray-400 text-xs">Total Amount</p><p className="text-xl font-bold dark:text-white">₹{Number(report.totalAmount||0).toLocaleString('en-IN')}</p></div>
-            <div><p className="text-gray-400 text-xs">New Accounts</p><p className="text-xl font-bold dark:text-white">{report.newAccounts}</p></div>
-            <div><p className="text-gray-400 text-xs">New Customers</p><p className="text-xl font-bold dark:text-white">{report.newCustomers}</p></div>
+            <div><p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Transactions</p><p className="text-2xl font-black text-white mt-1">{report.totalTransactions}</p></div>
+            <div><p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Amount</p><p className="text-2xl font-black text-cyan-400 mt-1">₹{Number(report.totalAmount||0).toLocaleString('en-IN')}</p></div>
+            <div><p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">New Accounts</p><p className="text-2xl font-black text-white mt-1">{report.newAccounts}</p></div>
+            <div><p className="text-slate-400 text-xs font-semibold uppercase tracking-wider">New Customers</p><p className="text-2xl font-black text-white mt-1">{report.newCustomers}</p></div>
           </div>
         </div>
       )}
@@ -161,18 +164,18 @@ export function AdminCustomers() {
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">Customer Management</h1>
 
-      <div className="relative max-w-xs">
-        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+      <div className="relative max-w-xs group">
+        <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-400 transition-colors" />
         <input value={search} onChange={e => { setSearch(e.target.value); setPage(0); }}
           placeholder="Search by name or email..."
-          className="w-full pl-9 pr-4 py-2 border rounded-lg text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder-gray-500" />
+          className="glass-input pl-11" />
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <div className="glass-card p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-700/50">
-              <tr>{['Name','Email','Phone','KYC','Status','Locked','Joined','Actions'].map(h => (
+            <thead className="bg-white/[0.02]">
+              <tr className="text-slate-400 border-b border-white/5">{['Name','Email','Phone','KYC','Status','Locked','Joined','Actions'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
               ))}</tr>
             </thead>
@@ -185,10 +188,10 @@ export function AdminCustomers() {
                 <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold">
+                      <div className="w-8 h-8 rounded-full bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-xs font-bold border border-cyan-500/20">
                         {c.firstName?.[0]}{c.lastName?.[0]}
                       </div>
-                      <span className="font-medium dark:text-white">{c.firstName} {c.lastName}</span>
+                      <span className="font-semibold text-white">{c.firstName} {c.lastName}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{c.email}</td>
@@ -226,10 +229,10 @@ export function AdminCustomers() {
           </table>
         </div>
         {total > 1 && (
-          <div className="flex justify-between items-center px-4 py-3 border-t dark:border-gray-700">
-            <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Previous</button>
-            <span className="text-sm text-gray-500 dark:text-gray-400">Page {page + 1} of {total}</span>
-            <button disabled={page >= total - 1} onClick={() => setPage(p => p + 1)} className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Next</button>
+          <div className="flex justify-between items-center px-6 py-4 border-t border-white/5">
+            <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="btn-secondary py-1.5 px-4 text-xs">Previous</button>
+            <span className="text-xs text-slate-400 font-semibold">Page {page + 1} of {total}</span>
+            <button disabled={page >= total - 1} onClick={() => setPage(p => p + 1)} className="btn-secondary py-1.5 px-4 text-xs">Next</button>
           </div>
         )}
       </div>
@@ -273,11 +276,11 @@ export function AdminLoans() {
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">Loan Approvals</h1>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <div className="glass-card p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-700/50">
-              <tr>{['App No','Customer','Loan Type','Amount','Tenure','EMI Est.','Income','Employment','Submitted','Actions'].map(h => (
+            <thead className="bg-white/[0.02]">
+              <tr className="text-slate-400 border-b border-white/5">{['App No','Customer','Loan Type','Amount','Tenure','EMI Est.','Income','Employment','Submitted','Actions'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
               ))}</tr>
             </thead>
@@ -313,33 +316,33 @@ export function AdminLoans() {
           </table>
         </div>
         {total > 1 && (
-          <div className="flex justify-between items-center px-4 py-3 border-t dark:border-gray-700">
-            <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Previous</button>
-            <span className="text-sm text-gray-500 dark:text-gray-400">Page {page + 1} of {total}</span>
-            <button disabled={page >= total - 1} onClick={() => setPage(p => p + 1)} className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Next</button>
+          <div className="flex justify-between items-center px-6 py-4 border-t border-white/5">
+            <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="btn-secondary py-1.5 px-4 text-xs">Previous</button>
+            <span className="text-xs text-slate-400 font-semibold">Page {page + 1} of {total}</span>
+            <button disabled={page >= total - 1} onClick={() => setPage(p => p + 1)} className="btn-secondary py-1.5 px-4 text-xs">Next</button>
           </div>
         )}
       </div>
 
       {modal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl modal-transition">
-            <h2 className="font-bold text-lg dark:text-white mb-2">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-frosted rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl border border-white/10 modal-transition">
+            <h2 className="font-extrabold text-xl text-white mb-2">
               {modal.decision === 'APPROVED' ? '✅ Approve Loan' : '❌ Reject Loan'}
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <p className="text-xs text-slate-400 mb-6 leading-relaxed">
               Are you sure you want to <strong>{modal.decision.toLowerCase()}</strong> this loan application?
             </p>
-            <label className="block text-sm font-medium dark:text-gray-300 mb-1">Remarks (optional)</label>
+            <label className="label">Remarks (optional)</label>
             <textarea value={remarks} onChange={e => setRemarks(e.target.value)} rows={3}
               placeholder="Add remarks for the customer..."
-              className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-4" />
+              className="glass-input mb-6" />
             <div className="flex gap-3">
               <button onClick={review}
-                className={`flex-1 py-2 rounded-lg text-white font-semibold ${modal.decision === 'APPROVED' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}>
+                className={`flex-1 py-3.5 rounded-2xl text-white font-bold text-sm transition-all active:scale-[0.98] ${modal.decision === 'APPROVED' ? 'bg-green-600 hover:bg-green-700 shadow-lg shadow-green-500/20' : 'bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/20'}`}>
                 Confirm {modal.decision}
               </button>
-              <button onClick={() => setModal(null)} className="flex-1 border rounded-lg py-2 dark:border-gray-600 dark:text-white">Cancel</button>
+              <button onClick={() => setModal(null)} className="flex-1 btn-secondary text-sm">Cancel</button>
             </div>
           </div>
         </div>
@@ -384,11 +387,11 @@ export function AdminKyc() {
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">KYC Verification</h1>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <div className="glass-card p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 dark:bg-gray-700/50">
-              <tr>{['Customer','Email','Aadhaar','PAN','City','State','Submitted','Actions'].map(h => (
+            <thead className="bg-white/[0.02]">
+              <tr className="text-slate-400 border-b border-white/5">{['Customer','Email','Aadhaar','PAN','City','State','Submitted','Actions'].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
               ))}</tr>
             </thead>
@@ -422,36 +425,36 @@ export function AdminKyc() {
           </table>
         </div>
         {total > 1 && (
-          <div className="flex justify-between items-center px-4 py-3 border-t dark:border-gray-700">
-            <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Previous</button>
-            <span className="text-sm text-gray-500 dark:text-gray-400">Page {page + 1} of {total}</span>
-            <button disabled={page >= total - 1} onClick={() => setPage(p => p + 1)} className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Next</button>
+          <div className="flex justify-between items-center px-6 py-4 border-t border-white/5">
+            <button disabled={page === 0} onClick={() => setPage(p => p - 1)} className="btn-secondary py-1.5 px-4 text-xs">Previous</button>
+            <span className="text-xs text-slate-400 font-semibold">Page {page + 1} of {total}</span>
+            <button disabled={page >= total - 1} onClick={() => setPage(p => p + 1)} className="btn-secondary py-1.5 px-4 text-xs">Next</button>
           </div>
         )}
       </div>
 
       {modal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl modal-transition">
-            <h2 className="font-bold text-lg dark:text-white mb-1">Review KYC — {modal.name}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Aadhaar: {modal.aadhaar} | PAN: {modal.pan}</p>
-            <div className="flex gap-2 mb-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-frosted rounded-[2.5rem] p-8 w-full max-w-md shadow-2xl border border-white/10 modal-transition">
+            <h2 className="font-extrabold text-xl text-white mb-1">Review KYC — {modal.name}</h2>
+            <p className="text-xs text-slate-400 mb-6 font-mono">Aadhaar: {modal.aadhaar} | PAN: {modal.pan}</p>
+            <div className="flex gap-3 mb-6">
               <button onClick={() => setDecision('VERIFIED')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium border ${decision==='VERIFIED' ? 'bg-green-600 text-white border-green-600' : 'dark:border-gray-600 dark:text-white'}`}>
+                className={`flex-1 py-3.5 rounded-2xl text-xs font-bold border transition-all active:scale-[0.98] ${decision==='VERIFIED' ? 'bg-green-600 text-white border-green-600 shadow-lg shadow-green-500/10' : 'border-white/10 text-slate-400 hover:bg-white/5'}`}>
                 ✓ Verify
               </button>
               <button onClick={() => setDecision('REJECTED')}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium border ${decision==='REJECTED' ? 'bg-red-600 text-white border-red-600' : 'dark:border-gray-600 dark:text-white'}`}>
+                className={`flex-1 py-3.5 rounded-2xl text-xs font-bold border transition-all active:scale-[0.98] ${decision==='REJECTED' ? 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-500/10' : 'border-white/10 text-slate-400 hover:bg-white/5'}`}>
                 ✕ Reject
               </button>
             </div>
-            <label className="block text-sm font-medium dark:text-gray-300 mb-1">Remarks</label>
+            <label className="label">Remarks</label>
             <textarea value={remarks} onChange={e => setRemarks(e.target.value)} rows={3}
-              className="w-full border rounded-lg px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-4"
+              className="glass-input mb-6"
               placeholder="Add review notes..." />
             <div className="flex gap-3">
-              <button onClick={review} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium">Submit</button>
-              <button onClick={() => setModal(null)} className="flex-1 border rounded-lg py-2 dark:border-gray-600 dark:text-white">Cancel</button>
+              <button onClick={review} className="flex-1 btn-primary text-sm py-2">Submit</button>
+              <button onClick={() => setModal(null)} className="flex-1 btn-secondary text-sm py-2">Cancel</button>
             </div>
           </div>
         </div>
@@ -492,16 +495,16 @@ export function AdminTransactions() {
     <div className="space-y-5">
       <h1 className="text-2xl font-bold dark:text-white">Transaction Monitoring</h1>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <div className="glass-card p-0 overflow-hidden">
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            <div className="spinner" />
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
-                <tr>{['Ref No','Type','Amount','From Account','To Account','Status','Channel','Date'].map(h => (
+              <thead className="bg-white/[0.02]">
+                <tr className="text-slate-400 border-b border-white/5">{['Ref No','Type','Amount','From Account','To Account','Status','Channel','Date'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{h}</th>
                 ))}</tr>
               </thead>

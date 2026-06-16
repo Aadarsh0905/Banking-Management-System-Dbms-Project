@@ -8,6 +8,34 @@ USE banking_db;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+DROP TABLE IF EXISTS refresh_tokens;
+DROP TABLE IF EXISTS login_attempts;
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS notification_templates;
+DROP TABLE IF EXISTS card_transactions;
+DROP TABLE IF EXISTS cards;
+DROP TABLE IF EXISTS emi_schedule;
+DROP TABLE IF EXISTS loans;
+DROP TABLE IF EXISTS loan_applications;
+DROP TABLE IF EXISTS loan_types;
+DROP TABLE IF EXISTS upi_payment_requests;
+DROP TABLE IF EXISTS upi_transactions;
+DROP TABLE IF EXISTS upi_ids;
+DROP TABLE IF EXISTS beneficiaries;
+DROP TABLE IF EXISTS scheduled_transfers;
+DROP TABLE IF EXISTS transactions;
+DROP TABLE IF EXISTS fixed_deposits;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS account_types;
+DROP TABLE IF EXISTS employees;
+DROP TABLE IF EXISTS branches;
+DROP TABLE IF EXISTS kyc_documents;
+DROP TABLE IF EXISTS kyc_details;
+DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS roles;
+
 -- ============================================================
 -- 1. ROLES & USERS
 -- ============================================================

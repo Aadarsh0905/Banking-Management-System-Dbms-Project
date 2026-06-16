@@ -27,7 +27,7 @@ Chart.register(...registerables);
 
 function StatCard({ title, value, icon, color, link }) {
   return (
-    <Link to={link} className="glass-card glass-card-hover border-l-4 border-blue-500 block relative overflow-hidden group">
+    <Link to={link} className="glass-card glass-card-hover border-l-4 border-cyan-400 block relative overflow-hidden group">
       <div className="flex justify-between items-start z-10 relative">
         <div>
           <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{title}</p>
@@ -69,8 +69,8 @@ export function DashboardPage() {
     datasets: [{
       label: 'Spending (₹)',
       data: [12000,19000,8000,22000,15000,18000],
-      borderColor: '#3b82f6',
-      backgroundColor: 'rgba(59,130,246,0.05)',
+      borderColor: '#00BAF2',
+      backgroundColor: 'rgba(0,186,242,0.05)',
       fill: true, tension: 0.4
     }]
   };
@@ -79,7 +79,7 @@ export function DashboardPage() {
     labels: accounts.map(a => a.accountType),
     datasets: [{ 
       data: accounts.map(a => a.balance), 
-      backgroundColor: ['#3b82f6','#10b981','#f59e0b','#ef4444'],
+      backgroundColor: ['#00BAF2','#005CFF','#10b981','#f59e0b'],
       borderWidth: 0
     }]
   };
@@ -127,9 +127,9 @@ export function DashboardPage() {
               <div key={acc.id} className="border border-white/5 rounded-3xl p-5 bg-white/[0.02] hover:bg-white/[0.04] transition-all flex flex-col justify-between group shadow-lg">
                 <div>
                   <div className="flex justify-between items-start">
-                    <p className="font-bold text-sm text-white group-hover:text-blue-400 transition-colors">{acc.accountType}</p>
+                    <p className="font-bold text-sm text-white group-hover:text-cyan-400 transition-colors">{acc.accountType}</p>
                     <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider ${
-                      acc.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'
+                      acc.status === 'ACTIVE' ? 'bg-cyan-500/10 text-cyan-400' : 'bg-yellow-500/10 text-yellow-400'
                     }`}>{acc.status}</span>
                   </div>
                   <p className="text-xs text-slate-400 font-mono mt-1.5">{acc.accountNumber}</p>
@@ -138,9 +138,9 @@ export function DashboardPage() {
                 <div className="mt-6 flex justify-between items-end border-t border-white/5 pt-4">
                   <div>
                     <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Available Balance</p>
-                    <p className="text-lg font-black text-blue-400">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
+                    <p className="text-lg font-black text-cyan-400">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
                   </div>
-                  <Link to="/accounts" className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:underline">Manage →</Link>
+                  <Link to="/accounts" className="text-xs text-cyan-400 hover:text-cyan-300 font-bold hover:underline">Manage →</Link>
                 </div>
               </div>
             ))}
@@ -169,7 +169,7 @@ export function DashboardPage() {
       <div className="glass-card">
         <div className="flex justify-between items-center mb-6">
           <h2 className="font-extrabold text-white text-lg">Recent Transactions</h2>
-          <Link to="/transactions" className="text-blue-400 text-xs font-bold hover:underline">View All</Link>
+          <Link to="/transactions" className="text-cyan-400 text-xs font-bold hover:underline">View All</Link>
         </div>
         {transactions.length === 0
           ? <p className="text-slate-500 text-center py-8 text-sm">No recent transactions</p>
@@ -339,7 +339,7 @@ export function AccountsPage() {
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusColor[acc.status]||'bg-white/5 text-slate-400'}`}>{acc.status}</span>
               </div>
               
-              <div className="bg-gradient-to-r from-blue-600/90 to-indigo-600/90 rounded-2xl p-5 text-white shadow-lg shadow-indigo-600/10">
+              <div className="bg-gradient-to-r from-[#005CFF] to-[#00BAF2] rounded-2xl p-5 text-white shadow-lg shadow-cyan-600/10">
                 <p className="text-[10px] opacity-75 uppercase tracking-wider font-semibold">Available Balance</p>
                 <p className="text-3xl font-black mt-1">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
                 <p className="text-xs font-medium mt-3 opacity-90">{acc.accountType}</p>
@@ -358,7 +358,7 @@ export function AccountsPage() {
                 <FaDownload /> Statement
               </button>
               <button onClick={() => openPassbook(acc)}
-                className="flex-1 flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-xs font-semibold py-2 rounded-xl text-white transition-all">
+                className="flex-1 flex items-center justify-center gap-1.5 bg-gradient-to-r from-[#005CFF] to-[#00BAF2] hover:from-[#004ecc] hover:to-[#00a8d6] text-xs font-semibold py-2 rounded-xl text-white transition-all">
                 <FaFileAlt /> Passbook
               </button>
             </div>
@@ -535,7 +535,7 @@ export function TransferPage() {
         {tabs.map(tab => (
           <button key={tab} onClick={() => { setActiveTab(tab); setResult(null); }}
             className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all duration-300
-              ${activeTab===tab ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
+              ${activeTab===tab ? 'bg-gradient-to-r from-[#005CFF] to-[#00BAF2] text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
             {tab}
           </button>
         ))}

@@ -76,7 +76,7 @@ export function ProfilePage() {
         <div className="relative w-24 h-24 mx-auto mb-4">
           <img src={user?.profilePictureUrl || 'https://via.placeholder.com/100'} alt="Avatar"
             className="w-24 h-24 rounded-full object-cover border-4 border-white/10" />
-          <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
+          <label className="absolute bottom-0 right-0 bg-gradient-to-tr from-blue-600 to-cyan-500 text-white p-2 rounded-full cursor-pointer hover:from-blue-500 hover:to-cyan-400 transition-all shadow-md">
             <FaCamera />
             <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} className="hidden" />
           </label>
@@ -88,8 +88,8 @@ export function ProfilePage() {
       {/* Profile Info */}
       <div className="glass-card">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="font-extrabold text-white flex items-center gap-2 text-base"><FaUser className="text-blue-500" /> Personal Information</h2>
-          <button onClick={() => setEditing(!editing)} className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1">
+          <h2 className="font-extrabold text-white flex items-center gap-2 text-base"><FaUser className="text-cyan-400" /> Personal Information</h2>
+          <button onClick={() => setEditing(!editing)} className="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
             {editing ? 'Cancel' : <><FaEdit /> Edit</>}
           </button>
         </div>
@@ -114,7 +114,7 @@ export function ProfilePage() {
             <div>
               <label className="label">Gender</label>
               <select value={form.gender} onChange={e => setForm(f => ({...f, gender: e.target.value}))}
-                className="w-full bg-slate-900/60 border border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl px-4 py-3 text-white focus:outline-none transition-all duration-300 text-sm cursor-pointer">
+                className="w-full bg-slate-900/60 border border-cyan-500/10 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 rounded-2xl px-4 py-3 text-white focus:outline-none transition-all duration-300 text-sm cursor-pointer">
                 <option value="MALE" className="bg-slate-950">Male</option>
                 <option value="FEMALE" className="bg-slate-950">Female</option>
                 <option value="OTHER" className="bg-slate-950">Other</option>
@@ -162,7 +162,7 @@ export function ProfilePage() {
       {/* Opened Bank Accounts */}
       <div className="glass-card">
         <h2 className="font-extrabold text-white mb-6 flex items-center gap-2 text-base">
-          <FaUniversity className="text-blue-500" /> Opened Bank Accounts
+          <FaUniversity className="text-cyan-400" /> Opened Bank Accounts
         </h2>
         {accounts.length === 0 ? (
           <p className="text-slate-500 text-sm">No opened bank accounts found.</p>
@@ -175,9 +175,9 @@ export function ProfilePage() {
                   <p className="text-xs text-slate-400 font-mono mt-0.5">{acc.accountNumber} — {acc.branchName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-black text-sm text-blue-400">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
+                  <p className="font-black text-sm text-cyan-400">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
                   <span className={`inline-block px-2 py-0.5 text-[9px] font-bold rounded-full uppercase tracking-wider mt-1 ${
-                    acc.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400' :
+                    acc.status === 'ACTIVE' ? 'bg-cyan-500/10 text-cyan-400' :
                     acc.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400' :
                     'bg-white/5 text-slate-400'
                   }`}>{acc.status}</span>
@@ -238,7 +238,7 @@ export function KycPage() {
   const statusIcon = {
     VERIFIED: <FaCheckCircle className="text-green-500 text-2xl" />,
     SUBMITTED: <FaClock className="text-yellow-500 text-2xl" />,
-    PENDING: <FaClock className="text-blue-500 text-2xl" />,
+    PENDING: <FaClock className="text-cyan-400 text-2xl" />,
     REJECTED: <span className="text-red-500 text-2xl">✕</span>,
   };
 
@@ -246,7 +246,7 @@ export function KycPage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold dark:text-white">KYC Verification</h1>
 
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl shadow-lg p-6 text-white">
+      <div className="bg-gradient-to-r from-[#005CFF] to-[#00BAF2] rounded-2xl shadow-lg p-6 text-white">
         <div className="flex items-center gap-4">
           {statusIcon[kyc?.status] || statusIcon.PENDING}
           <div>
@@ -279,46 +279,46 @@ export function KycPage() {
           <h2 className="font-semibold dark:text-white mb-4 flex items-center gap-2"><FaIdCard /> Submit KYC Documents</h2>
           <form onSubmit={submitKyc} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Aadhaar Number</label>
+              <label className="label">Aadhaar Number</label>
               <input required value={form.aadhaarNumber} onChange={e => setForm(f => ({...f, aadhaarNumber: e.target.value}))}
                 placeholder="12-digit Aadhaar number" maxLength={12}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">PAN Card</label>
+              <label className="label">PAN Card</label>
               <input required value={form.panNumber} onChange={e => setForm(f => ({...f, panNumber: e.target.value}))}
                 placeholder="10-character PAN" maxLength={10} style={{ textTransform: 'uppercase' }}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Address Line 1</label>
+              <label className="label">Address Line 1</label>
               <input required value={form.addressLine1} onChange={e => setForm(f => ({...f, addressLine1: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Address Line 2 (optional)</label>
+              <label className="label">Address Line 2 (optional)</label>
               <input value={form.addressLine2} onChange={e => setForm(f => ({...f, addressLine2: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                className="glass-input" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">City</label>
+                <label className="label">City</label>
                 <input required value={form.city} onChange={e => setForm(f => ({...f, city: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                  className="glass-input" />
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">State</label>
+                <label className="label">State</label>
                 <input required value={form.state} onChange={e => setForm(f => ({...f, state: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                  className="glass-input" />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Pincode</label>
+              <label className="label">Pincode</label>
               <input required value={form.pincode} onChange={e => setForm(f => ({...f, pincode: e.target.value}))}
                 maxLength={6}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                className="glass-input" />
             </div>
-            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg">Submit for Verification</button>
+            <button type="submit" className="w-full btn-primary text-sm">Submit for Verification</button>
           </form>
         </div>
       )}
@@ -367,8 +367,8 @@ export function BeneficiariesPage() {
   return (
     <div className="space-y-5">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold dark:text-white">Beneficiaries</h1>
-        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+        <h1 className="text-2xl font-black text-white">Beneficiaries</h1>
+        <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 btn-primary py-2 px-4 text-sm">
           <FaPlus /> Add Beneficiary
         </button>
       </div>
@@ -402,25 +402,25 @@ export function BeneficiariesPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md modal-transition">
             <h2 className="font-bold text-lg dark:text-white mb-4">Add Beneficiary</h2>
-            <form onSubmit={addBeneficiary} className="space-y-3">
+            <form onSubmit={addBeneficiary} className="space-y-4">
               <input required value={form.nickname} onChange={e => setForm(f => ({...f, nickname: e.target.value}))}
                 placeholder="Nickname (e.g., Mom, Brother)"
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" />
+                className="glass-input" />
               <input required value={form.beneficiaryName} onChange={e => setForm(f => ({...f, beneficiaryName: e.target.value}))}
                 placeholder="Full Name"
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" />
+                className="glass-input" />
               <input required value={form.accountNumber} onChange={e => setForm(f => ({...f, accountNumber: e.target.value}))}
                 placeholder="Account Number"
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" />
+                className="glass-input" />
               <input required value={form.ifscCode} onChange={e => setForm(f => ({...f, ifscCode: e.target.value}))}
                 placeholder="IFSC Code"
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" />
+                className="glass-input" />
               <input value={form.bankName} onChange={e => setForm(f => ({...f, bankName: e.target.value}))}
                 placeholder="Bank Name (optional)"
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm" />
-              <div className="flex gap-2">
-                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 text-sm">Add</button>
-                <button type="button" onClick={() => setShowAdd(false)} className="flex-1 border rounded-lg py-2 dark:border-gray-600 dark:text-white text-sm">Cancel</button>
+                className="glass-input" />
+              <div className="flex gap-3 mt-4">
+                <button type="submit" className="flex-1 btn-primary text-sm py-2">Add</button>
+                <button type="button" onClick={() => setShowAdd(false)} className="flex-1 btn-secondary text-sm py-2">Cancel</button>
               </div>
             </form>
           </div>
@@ -465,9 +465,9 @@ export function NotificationsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold dark:text-white">Notifications</h1>
+        <h1 className="text-2xl font-black text-white">Notifications</h1>
         {notifications.some(n => n.status !== 'READ') && (
-          <button onClick={markAllRead} className="text-sm text-blue-600 hover:underline">Mark all as read</button>
+          <button onClick={markAllRead} className="text-sm text-cyan-400 hover:text-cyan-300 font-bold hover:underline">Mark all as read</button>
         )}
       </div>
 
@@ -481,7 +481,7 @@ export function NotificationsPage() {
       ) : (
         <div className="space-y-2">
           {notifications.map(n => (
-            <div key={n.id} className={`rounded-lg p-4 border ${n.status === 'READ' ? 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'}`}>
+            <div key={n.id} className={`rounded-3xl p-5 border ${n.status === 'READ' ? 'bg-white/[0.02] border-white/5' : 'bg-cyan-500/5 border-cyan-500/25'}`}>
               <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3 flex-1">
                   <span className="text-lg">{channelIcon[n.channel] || '📌'}</span>

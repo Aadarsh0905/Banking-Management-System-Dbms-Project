@@ -67,7 +67,7 @@ function Sidebar({ open }) {
         className={({ isActive }) =>
           `flex items-center gap-3 px-4 py-3 text-sm transition-all duration-300 rounded-xl mx-2 my-0.5 ${
             isActive
-              ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border-l-4 border-blue-500 text-white font-semibold shadow-inner'
+              ? 'bg-gradient-to-r from-blue-600/20 to-cyan-500/20 border-l-4 border-cyan-400 text-white font-semibold shadow-inner'
               : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
           }`
         }
@@ -79,17 +79,17 @@ function Sidebar({ open }) {
   }
 
   function SectionLabel({ label }) {
-    return <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</p>;
+    return <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-cyan-400/60 uppercase tracking-widest">{label}</p>;
   }
 
   return (
-    <aside className="w-60 flex-shrink-0 bg-slate-950/60 backdrop-blur-xl border-r border-white/5 text-white flex flex-col shadow-xl overflow-y-auto">
-      <div className="p-4 border-b border-white/5 flex-shrink-0">
+    <aside className="w-60 flex-shrink-0 bg-[#000d2b] border-r border-cyan-500/10 text-white flex flex-col shadow-xl overflow-y-auto">
+      <div className="p-4 border-b border-cyan-500/10 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <FaUniversity className="text-2xl text-blue-500 animate-pulse" />
+          <FaUniversity className="text-2xl text-cyan-400 animate-pulse" />
           <div>
-            <p className="font-extrabold text-base leading-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">BankPortal</p>
-            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Management System</p>
+            <p className="font-extrabold text-base leading-tight bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">BankPortal</p>
+            <p className="text-[10px] text-cyan-400/80 uppercase tracking-widest font-semibold">Management System</p>
           </div>
         </div>
       </div>
@@ -132,17 +132,17 @@ function Navbar({ onToggleSidebar }) {
   }
 
   return (
-    <header className="flex-shrink-0 bg-slate-950/40 backdrop-blur-md border-b border-white/5 px-4 py-3 flex items-center justify-between z-10">
-      <button onClick={onToggleSidebar} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all">
+    <header className="flex-shrink-0 bg-[#000B1A]/60 backdrop-blur-md border-b border-cyan-500/10 px-4 py-3 flex items-center justify-between z-10">
+      <button onClick={onToggleSidebar} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-cyan-500/10 transition-all">
         <FaBars className="text-slate-300" />
       </button>
 
       <div className="flex items-center gap-3">
-        <button onClick={toggleTheme} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all">
+        <button onClick={toggleTheme} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-cyan-500/10 transition-all">
           {theme === 'dark' ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-slate-300" />}
         </button>
 
-        <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all">
+        <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-cyan-500/10 transition-all">
           <FaBell className="text-slate-300" />
           {unread > 0 && (
             <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-black shadow-lg shadow-red-500/30">
@@ -151,8 +151,8 @@ function Navbar({ onToggleSidebar }) {
           )}
         </button>
 
-        <button onClick={() => navigate('/profile')} className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
+        <button onClick={() => navigate('/profile')} className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-cyan-500/10 transition-colors">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white text-xs font-bold">
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
           <span className="text-sm font-semibold text-slate-300">{user?.firstName} {user?.lastName}</span>
@@ -172,11 +172,11 @@ export default function Layout() {
   const location = useLocation();
 
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
+    <div className="flex h-screen bg-[#000B1A] overflow-hidden">
       <Sidebar open={sidebarOpen} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Navbar onToggleSidebar={() => setSidebarOpen((open) => !open)} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-950/20">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-[#000B1A]/20">
           <div key={location.pathname} className="page-transition">
             <Outlet />
           </div>
