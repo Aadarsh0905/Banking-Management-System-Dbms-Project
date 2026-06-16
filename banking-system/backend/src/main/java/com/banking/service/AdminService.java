@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service @RequiredArgsConstructor @Slf4j
+@Transactional(readOnly = true)
 public class AdminService {
     private final UserRepository userRepo;
     private final AccountRepository accountRepo;
@@ -120,6 +121,7 @@ public class AdminService {
                 .build());
     }
 
+    @Transactional
     public void reviewLoan(LoanReviewRequest req, Long reviewerId) {
         loanService.reviewLoan(req, reviewerId);
     }

@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor @Slf4j
+@Transactional(readOnly = true)
 public class CardService {
     private final CardRepository cardRepo;
     private final AccountRepository accountRepo;
@@ -99,6 +100,7 @@ public class CardService {
         cardRepo.save(card);
     }
 
+    @Transactional
     public CardResponse updateSettings(Long userId, Long cardId, Map<String, Boolean> settings) {
         Card card = getAndValidate(userId, cardId);
         if (settings.containsKey("isOnlineEnabled"))         card.setIsOnlineEnabled(settings.get("isOnlineEnabled"));

@@ -353,8 +353,8 @@ export function AccountsPage() {
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                       {passbookTxns.map(t => {
-                        const isCredit = t.transactionType === 'DEPOSIT' || t.toAccount === passbookAccount.accountNumber;
-                        const isDebit = t.transactionType === 'WITHDRAWAL' || t.fromAccount === passbookAccount.accountNumber;
+                        const isCredit = t.transactionType === 'DEPOSIT' || t.transactionType === 'UPI_CREDIT' || t.transactionType === 'INTEREST_CREDIT' || t.toAccount === passbookAccount.accountNumber;
+                        const isDebit = t.transactionType === 'WITHDRAWAL' || t.transactionType === 'UPI_DEBIT' || t.transactionType === 'EMI_DEBIT' || t.transactionType === 'CHARGE' || t.fromAccount === passbookAccount.accountNumber;
                         return (
                           <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                             <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">

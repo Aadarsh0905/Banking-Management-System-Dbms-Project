@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor @Slf4j
+@Transactional(readOnly = true)
 public class AccountService {
     private final AccountRepository accountRepo;
     private final AccountTypeRepository accountTypeRepo;

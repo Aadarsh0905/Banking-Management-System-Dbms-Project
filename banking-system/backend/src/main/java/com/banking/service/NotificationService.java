@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Service @RequiredArgsConstructor @Slf4j
+@Transactional(readOnly = true)
 public class NotificationService {
     private final NotificationRepository notifRepo;
     private final JavaMailSender mailSender;

@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor @Slf4j
+@Transactional(readOnly = true)
 public class TransactionService {
     private final TransactionRepository txnRepo;
     private final AccountRepository accountRepo;

@@ -31,6 +31,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor @Slf4j
+@Transactional(readOnly = true)
 public class UpiService {
     private final UpiRepository upiRepo;
     private final AccountRepository accountRepo;

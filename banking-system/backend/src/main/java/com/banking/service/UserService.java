@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service @RequiredArgsConstructor @Slf4j
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepo;
     private final KycRepository kycRepo;
@@ -55,6 +56,7 @@ public class UserService {
         return authService.mapToUserResponse(userRepo.save(u));
     }
 
+    @Transactional
     public String uploadAvatar(Long userId, MultipartFile file) {
         try {
             Path dir = Paths.get(uploadDir, "avatars");
