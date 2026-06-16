@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 @Component
@@ -27,19 +26,23 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        log.info("Checking if database seeding is required...");
+        log.info("Checking database configuration and seeding state...");
 
-        // 1. Seed Roles
-        if (roleRepo.count() == 0) {
-            log.info("Seeding roles...");
-            roleRepo.saveAll(List.of(
-                Role.builder().name("ROLE_CUSTOMER").description("Regular bank customer").build(),
-                Role.builder().name("ROLE_ADMIN").description("Bank administrator").build(),
-                Role.builder().name("ROLE_EMPLOYEE").description("Bank employee").build()
-            ));
+        // 1. Seed Roles individually
+        if (roleRepo.findByName("ROLE_CUSTOMER").isEmpty()) {
+            log.info("Seeding ROLE_CUSTOMER...");
+            roleRepo.save(Role.builder().name("ROLE_CUSTOMER").description("Regular bank customer").build());
+        }
+        if (roleRepo.findByName("ROLE_ADMIN").isEmpty()) {
+            log.info("Seeding ROLE_ADMIN...");
+            roleRepo.save(Role.builder().name("ROLE_ADMIN").description("Bank administrator").build());
+        }
+        if (roleRepo.findByName("ROLE_EMPLOYEE").isEmpty()) {
+            log.info("Seeding ROLE_EMPLOYEE...");
+            roleRepo.save(Role.builder().name("ROLE_EMPLOYEE").description("Bank employee").build());
         }
 
-        // Fetch roles for later use
+        // Fetch roles for other entities
         Role customerRole = roleRepo.findByName("ROLE_CUSTOMER")
             .orElseThrow(() -> new IllegalStateException("ROLE_CUSTOMER not found"));
         Role adminRole = roleRepo.findByName("ROLE_ADMIN")
@@ -47,125 +50,135 @@ public class DatabaseSeeder implements CommandLineRunner {
         Role employeeRole = roleRepo.findByName("ROLE_EMPLOYEE")
             .orElseThrow(() -> new IllegalStateException("ROLE_EMPLOYEE not found"));
 
-        // 2. Seed Branches
-        if (branchRepo.count() == 0) {
-            log.info("Seeding branches...");
-            branchRepo.saveAll(List.of(
-                Branch.builder()
-                    .branchCode("BR001")
-                    .branchName("Main Branch")
-                    .address("1 MG Road, Connaught Place")
-                    .city("New Delhi")
-                    .state("Delhi")
-                    .pincode("110001")
-                    .phone("011-12345678")
-                    .email("main@bank.com")
-                    .ifscCode("BANK0000001")
-                    .isActive(true)
-                    .build(),
-                Branch.builder()
-                    .branchCode("BR002")
-                    .branchName("South Delhi Branch")
-                    .address("15 Lajpat Nagar")
-                    .city("New Delhi")
-                    .state("Delhi")
-                    .pincode("110024")
-                    .phone("011-23456789")
-                    .email("south@bank.com")
-                    .ifscCode("BANK0000002")
-                    .isActive(true)
-                    .build(),
-                Branch.builder()
-                    .branchCode("BR003")
-                    .branchName("Mumbai Main")
-                    .address("42 Nariman Point")
-                    .city("Mumbai")
-                    .state("Maharashtra")
-                    .pincode("400021")
-                    .phone("022-34567890")
-                    .email("mumbai@bank.com")
-                    .ifscCode("BANK0000003")
-                    .isActive(true)
-                    .build()
-            ));
+        // 2. Seed Branches individually
+        if (branchRepo.findByBranchCode("BR001").isEmpty()) {
+            log.info("Seeding Main Branch (BR001)...");
+            branchRepo.save(Branch.builder()
+                .branchCode("BR001")
+                .branchName("Main Branch")
+                .address("1 MG Road, Connaught Place")
+                .city("New Delhi")
+                .state("Delhi")
+                .pincode("110001")
+                .phone("011-12345678")
+                .email("main@bank.com")
+                .ifscCode("BANK0000001")
+                .isActive(true)
+                .build());
+        }
+        if (branchRepo.findByBranchCode("BR002").isEmpty()) {
+            log.info("Seeding South Delhi Branch (BR002)...");
+            branchRepo.save(Branch.builder()
+                .branchCode("BR002")
+                .branchName("South Delhi Branch")
+                .address("15 Lajpat Nagar")
+                .city("New Delhi")
+                .state("Delhi")
+                .pincode("110024")
+                .phone("011-23456789")
+                .email("south@bank.com")
+                .ifscCode("BANK0000002")
+                .isActive(true)
+                .build());
+        }
+        if (branchRepo.findByBranchCode("BR003").isEmpty()) {
+            log.info("Seeding Mumbai Main Branch (BR003)...");
+            branchRepo.save(Branch.builder()
+                .branchCode("BR003")
+                .branchName("Mumbai Main")
+                .address("42 Nariman Point")
+                .city("Mumbai")
+                .state("Maharashtra")
+                .pincode("400021")
+                .phone("022-34567890")
+                .email("mumbai@bank.com")
+                .ifscCode("BANK0000003")
+                .isActive(true)
+                .build());
         }
 
-        // 3. Seed Account Types
-        if (accountTypeRepo.count() == 0) {
-            log.info("Seeding account types...");
-            accountTypeRepo.saveAll(List.of(
-                AccountType.builder()
-                    .typeCode("SAVINGS")
-                    .typeName("Savings Account")
-                    .interestRate(new BigDecimal("3.50"))
-                    .minBalance(new BigDecimal("1000.00"))
-                    .description("Regular savings account with interest")
-                    .isActive(true)
-                    .build(),
-                AccountType.builder()
-                    .typeCode("CURRENT")
-                    .typeName("Current Account")
-                    .interestRate(BigDecimal.ZERO)
-                    .minBalance(new BigDecimal("5000.00"))
-                    .description("Current account for business transactions")
-                    .isActive(true)
-                    .build(),
-                AccountType.builder()
-                    .typeCode("FIXED_DEPOSIT")
-                    .typeName("Fixed Deposit Account")
-                    .interestRate(new BigDecimal("6.50"))
-                    .minBalance(new BigDecimal("10000.00"))
-                    .description("Fixed deposit with higher interest")
-                    .isActive(true)
-                    .build()
-            ));
+        // 3. Seed Account Types individually
+        if (accountTypeRepo.findByTypeCode("SAVINGS").isEmpty()) {
+            log.info("Seeding Account Type: SAVINGS...");
+            accountTypeRepo.save(AccountType.builder()
+                .typeCode("SAVINGS")
+                .typeName("Savings Account")
+                .interestRate(new BigDecimal("3.50"))
+                .minBalance(new BigDecimal("1000.00"))
+                .description("Regular savings account with interest")
+                .isActive(true)
+                .build());
+        }
+        if (accountTypeRepo.findByTypeCode("CURRENT").isEmpty()) {
+            log.info("Seeding Account Type: CURRENT...");
+            accountTypeRepo.save(AccountType.builder()
+                .typeCode("CURRENT")
+                .typeName("Current Account")
+                .interestRate(BigDecimal.ZERO)
+                .minBalance(new BigDecimal("5000.00"))
+                .description("Current account for business transactions")
+                .isActive(true)
+                .build());
+        }
+        if (accountTypeRepo.findByTypeCode("FIXED_DEPOSIT").isEmpty()) {
+            log.info("Seeding Account Type: FIXED_DEPOSIT...");
+            accountTypeRepo.save(AccountType.builder()
+                .typeCode("FIXED_DEPOSIT")
+                .typeName("Fixed Deposit Account")
+                .interestRate(new BigDecimal("6.50"))
+                .minBalance(new BigDecimal("10000.00"))
+                .description("Fixed deposit with higher interest")
+                .isActive(true)
+                .build());
         }
 
-        // 4. Seed Loan Types
-        if (loanTypeRepo.count() == 0) {
-            log.info("Seeding loan types...");
-            loanTypeRepo.saveAll(List.of(
-                LoanType.builder()
-                    .typeCode("PERSONAL")
-                    .typeName("Personal Loan")
-                    .minAmount(new BigDecimal("10000.00"))
-                    .maxAmount(new BigDecimal("500000.00"))
-                    .minTenureMonths(12)
-                    .maxTenureMonths(60)
-                    .interestRate(new BigDecimal("10.50"))
-                    .processingFeePct(new BigDecimal("1.00"))
-                    .isActive(true)
-                    .build(),
-                LoanType.builder()
-                    .typeCode("HOME")
-                    .typeName("Home Loan")
-                    .minAmount(new BigDecimal("500000.00"))
-                    .maxAmount(new BigDecimal("10000000.00"))
-                    .minTenureMonths(60)
-                    .maxTenureMonths(360)
-                    .interestRate(new BigDecimal("8.50"))
-                    .processingFeePct(new BigDecimal("0.50"))
-                    .isActive(true)
-                    .build(),
-                LoanType.builder()
-                    .typeCode("EDUCATION")
-                    .typeName("Education Loan")
-                    .minAmount(new BigDecimal("5000.00"))
-                    .maxAmount(new BigDecimal("1500000.00"))
-                    .minTenureMonths(12)
-                    .maxTenureMonths(84)
-                    .interestRate(new BigDecimal("9.00"))
-                    .processingFeePct(BigDecimal.ZERO)
-                    .isActive(true)
-                    .build()
-            ));
+        // 4. Seed Loan Types individually
+        if (loanTypeRepo.findByTypeCode("PERSONAL").isEmpty()) {
+            log.info("Seeding Loan Type: PERSONAL...");
+            loanTypeRepo.save(LoanType.builder()
+                .typeCode("PERSONAL")
+                .typeName("Personal Loan")
+                .minAmount(new BigDecimal("10000.00"))
+                .maxAmount(new BigDecimal("500000.00"))
+                .minTenureMonths(12)
+                .maxTenureMonths(60)
+                .interestRate(new BigDecimal("10.50"))
+                .processingFeePct(new BigDecimal("1.00"))
+                .isActive(true)
+                .build());
+        }
+        if (loanTypeRepo.findByTypeCode("HOME").isEmpty()) {
+            log.info("Seeding Loan Type: HOME...");
+            loanTypeRepo.save(LoanType.builder()
+                .typeCode("HOME")
+                .typeName("Home Loan")
+                .minAmount(new BigDecimal("500000.00"))
+                .maxAmount(new BigDecimal("10000000.00"))
+                .minTenureMonths(60)
+                .maxTenureMonths(360)
+                .interestRate(new BigDecimal("8.50"))
+                .processingFeePct(new BigDecimal("0.50"))
+                .isActive(true)
+                .build());
+        }
+        if (loanTypeRepo.findByTypeCode("EDUCATION").isEmpty()) {
+            log.info("Seeding Loan Type: EDUCATION...");
+            loanTypeRepo.save(LoanType.builder()
+                .typeCode("EDUCATION")
+                .typeName("Education Loan")
+                .minAmount(new BigDecimal("5000.00"))
+                .maxAmount(new BigDecimal("1500000.00"))
+                .minTenureMonths(12)
+                .maxTenureMonths(84)
+                .interestRate(new BigDecimal("9.00"))
+                .processingFeePct(BigDecimal.ZERO)
+                .isActive(true)
+                .build());
         }
 
-        // 5. Seed Users
-        if (userRepo.count() == 0) {
-            log.info("Seeding default users...");
-            
-            // Default Admin (Admin@123)
+        // 5. Seed Users individually
+        if (!userRepo.existsByUsername("admin")) {
+            log.info("Seeding Admin User...");
             userRepo.save(User.builder()
                 .username("admin")
                 .email("admin@bank.com")
@@ -178,8 +191,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .emailVerified(true)
                 .roles(Set.of(adminRole))
                 .build());
-
-            // Default Customer: Rahul Sharma (Customer@123)
+        }
+        if (!userRepo.existsByUsername("rahul.sharma")) {
+            log.info("Seeding Customer User: rahul.sharma...");
             userRepo.save(User.builder()
                 .username("rahul.sharma")
                 .email("rahul@email.com")
@@ -194,8 +208,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .emailVerified(true)
                 .roles(Set.of(customerRole))
                 .build());
-
-            // Default Customer: Priya Patel (Customer@123)
+        }
+        if (!userRepo.existsByUsername("priya.patel")) {
+            log.info("Seeding Customer User: priya.patel...");
             userRepo.save(User.builder()
                 .username("priya.patel")
                 .email("priya@email.com")
@@ -210,8 +225,9 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .emailVerified(true)
                 .roles(Set.of(customerRole))
                 .build());
-
-            // Default Employee: Rajesh Kumar (Admin@123)
+        }
+        if (!userRepo.existsByUsername("emp.kumar")) {
+            log.info("Seeding Employee User: emp.kumar...");
             userRepo.save(User.builder()
                 .username("emp.kumar")
                 .email("kumar@bank.com")
@@ -226,6 +242,6 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .build());
         }
 
-        log.info("Database check & seeding completed.");
+        log.info("Database validation and seeding completed successfully.");
     }
 }
