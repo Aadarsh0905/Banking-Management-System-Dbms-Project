@@ -15,6 +15,7 @@ import com.banking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -78,6 +79,10 @@ public class UserService {
     public void submitKyc(Long userId, KycRequest req) {
         User u = userRepo.findById(userId).orElseThrow(() -> new BankingException("User not found", 404));
         KycDetails kyc = kycRepo.findByUserId(userId).orElse(KycDetails.builder().user(u).build());
+        // Don't allow resubmission if already VERIFIED
+        if (kyc.getId() != null && kyc.getKycStatus() == KycDetails.KycStatus.VERIFIED) {
+            throw new BankingException("KYC is already verified. No changes needed.", 400);
+        }
         kyc.setAadhaarNumber(req.aadhaarNumber);
         kyc.setPanNumber(req.panNumber);
         kyc.setAddressLine1(req.addressLine1);
@@ -86,7 +91,11 @@ public class UserService {
         kyc.setState(req.state);
         kyc.setPincode(req.pincode);
         kyc.setKycStatus(KycDetails.KycStatus.SUBMITTED);
-        kycRepo.save(kyc);
+        try {
+            kycRepo.save(kyc);
+        } catch (DataIntegrityViolationException e) {
+            throw new BankingException("Aadhaar or PAN number is already registered with another account.", 409);
+        }
     }
 
     public Map<String, Object> getKycStatus(Long userId) {

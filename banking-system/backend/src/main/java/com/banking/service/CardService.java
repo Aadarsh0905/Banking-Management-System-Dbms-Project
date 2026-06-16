@@ -35,20 +35,29 @@ public class CardService {
 
     @Transactional
     public CardResponse requestCard(Long userId, CardRequest req) {
-        Account acc = accountRepo.findById(req.accountId)
+        Account acc = accountRepo.findByIdWithAssociations(req.accountId)
             .orElseThrow(() -> new BankingException("Account not found", 404));
         if (!acc.getUser().getId().equals(userId))
             throw new BankingException("Unauthorized", 403);
 
         Card.CardType cardType = Card.CardType.valueOf(req.cardType);
-        if (cardRepo.existsByUserIdAndCardTypeAndStatusNot(userId, cardType, Card.CardStatus.CANCELLED))
-            throw new BankingException("You already have an active " + req.cardType + " card request", 409);
+        // Only block if an ACTIVE or REQUESTED card of this type already exists
+        boolean hasActiveOrPending = cardRepo.findByUserId(userId).stream()
+            .filter(c -> c.getCardType() == cardType)
+            .anyMatch(c -> c.getStatus() == Card.CardStatus.ACTIVE || c.getStatus() == Card.CardStatus.REQUESTED);
+        if (hasActiveOrPending)
+            throw new BankingException("You already have an active or pending " + req.cardType + " card", 409);
 
         User u = userRepo.findById(userId).orElseThrow();
-        String maskedNumber = "XXXXXXXXXXXX" + (1000 + (int)(Math.random() * 9000));
+        // Generate unique placeholder: REQ + userId + timestamp last 9 digits = 16 chars max
+        String placeholder;
+        do {
+            placeholder = "REQ" + userId + (System.currentTimeMillis() % 1000000000L);
+            if (placeholder.length() > 20) placeholder = placeholder.substring(0, 20);
+        } while (cardRepo.existsByCardNumber(placeholder));
 
         Card card = Card.builder()
-            .cardNumber(maskedNumber)
+            .cardNumber(placeholder)
             .user(u).account(acc)
             .cardType(cardType)
             .cardNetwork(req.cardNetwork != null ? Card.CardNetwork.valueOf(req.cardNetwork) : Card.CardNetwork.RUPAY)
@@ -166,6 +175,7 @@ public class CardService {
             .status(c.getStatus().name()).isOnlineEnabled(c.getIsOnlineEnabled())
             .isInternationalEnabled(c.getIsInternationalEnabled())
             .isContactlessEnabled(c.getIsContactlessEnabled()).activatedAt(c.getActivatedAt())
+            .requestedAt(c.getRequestedAt())
             .build();
     }
 }

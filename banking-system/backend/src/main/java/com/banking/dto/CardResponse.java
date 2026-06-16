@@ -23,4 +23,5 @@ public class CardResponse {
     public Boolean isInternationalEnabled;
     public Boolean isContactlessEnabled;
     public LocalDateTime activatedAt;
+    public LocalDateTime requestedAt;
 }

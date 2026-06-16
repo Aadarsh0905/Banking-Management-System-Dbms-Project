@@ -25,7 +25,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
     @Query("SELECT a FROM Account a JOIN FETCH a.accountType JOIN FETCH a.branch WHERE a.status = :status")
     List<Account> findByStatus(@Param("status") Account.AccountStatus status);
 
-    @Query("SELECT a FROM Account a JOIN FETCH a.accountType JOIN FETCH a.branch WHERE a.id = :id")
+    @Query("SELECT a FROM Account a JOIN FETCH a.user JOIN FETCH a.accountType JOIN FETCH a.branch WHERE a.id = :id")
     Optional<Account> findByIdWithAssociations(@Param("id") Long id);
 
     @Override

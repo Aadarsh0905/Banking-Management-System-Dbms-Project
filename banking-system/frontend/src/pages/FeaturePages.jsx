@@ -8,6 +8,7 @@ import {
   FaCalculator,
   FaChevronDown,
   FaChevronUp,
+  FaClock,
   FaCreditCard,
   FaDownload,
   FaFileAlt,
@@ -554,7 +555,7 @@ export function CardsPage() {
 
             {/* Actions */}
             <div className="glass-card border border-white/5 p-4 flex flex-col justify-between">
-              {card.cardType === 'CREDIT' && (
+              {card.cardType === 'CREDIT' && card.status !== 'REQUESTED' && (
                 <div className="mb-4 pt-1 pb-2 border-b border-white/5">
                   <div className="flex justify-between text-xs mb-1.5 font-semibold">
                     <span className="text-slate-400">Credit Limit Utilization</span>
@@ -566,17 +567,23 @@ export function CardsPage() {
                   </div>
                 </div>
               )}
-              <div className="flex gap-3">
-                <button onClick={() => toggleBlock(card)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors
-                    ${card.status === 'BLOCKED' ? 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20'}`}>
-                  {card.status === 'BLOCKED' ? <><FaUnlock /> Unblock</> : <><FaLock /> Block</>}
-                </button>
-                <button onClick={() => setShowPin(card.id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-white/10 bg-white/5 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-colors">
-                  <FaKey /> Set PIN
-                </button>
-              </div>
+              {card.status === 'REQUESTED' ? (
+                <div className="flex items-center justify-center gap-2 py-3 text-yellow-400 text-xs font-bold border border-yellow-500/20 bg-yellow-500/10 rounded-xl">
+                  <FaClock /> Awaiting Admin Approval
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <button onClick={() => toggleBlock(card)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors
+                      ${card.status === 'BLOCKED' ? 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20'}`}>
+                    {card.status === 'BLOCKED' ? <><FaUnlock /> Unblock</> : <><FaLock /> Block</>}
+                  </button>
+                  <button onClick={() => setShowPin(card.id)}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-white/10 bg-white/5 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-colors">
+                    <FaKey /> Set PIN
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
