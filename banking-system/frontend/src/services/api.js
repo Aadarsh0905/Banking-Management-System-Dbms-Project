@@ -63,6 +63,7 @@ export const accountApi = {
   getTypes:       ()    => API.get('/accounts/types'),
   getBranches:    ()    => API.get('/accounts/branches'),
   getStatement:   (d)   => API.post('/accounts/statement', d, { responseType: 'blob' }),
+  getOther:       ()    => API.get('/accounts/other'),
 };
 
 // ── Transactions ────────────────────────────────────────────
@@ -110,6 +111,13 @@ export const upiApi = {
   requestMoney:  (d)    => API.post('/upi/request', d),
   getHistory:    (p=0)  => API.get(`/upi/history?page=${p}`),
   delete:        (id)   => API.delete(`/upi/${id}`),
+  getOther:      ()     => API.get('/upi/other'),
+};
+
+// ── AI ───────────────────────────────────────────────────────
+export const aiApi = {
+  chat:     (messages) => API.post('/ai/chat', { messages }),
+  insights: ()         => API.post('/ai/insights'),
 };
 
 // ── Notifications ───────────────────────────────────────────

@@ -120,4 +120,18 @@ public class UpiService {
             .linkedAccountNumber(u.getAccount().getAccountNumber())
             .build();
     }
+
+    public List<java.util.Map<String, Object>> getOtherUsersUpiIds(Long userId) {
+        return upiRepo.findAll().stream()
+            .filter(u -> Boolean.TRUE.equals(u.getIsActive()) && !u.getUser().getId().equals(userId))
+            .map(u -> {
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("id", u.getId());
+                map.put("upiId", u.getUpiId());
+                map.put("ownerName", u.getUser().getFirstName() + " " + u.getUser().getLastName());
+                return map;
+            })
+            .collect(Collectors.toList());
+    }
 }
+

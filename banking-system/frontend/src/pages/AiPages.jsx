@@ -14,7 +14,7 @@ import {
   FaSpinner,
 } from 'react-icons/fa';
 import { toast } from 'react-toastify';
-import { accountApi, txnApi } from '../services/api';
+import { accountApi, txnApi, aiApi } from '../services/api';
 
 
 Chart.register(...registerables);
@@ -85,32 +85,9 @@ export function SpendingInsightsPage() {
   // ── AI Insights ──────────────────────────────────────────
   async function getAiInsights() {
     setAiLoading(true);
-    const summary = `
-Total transactions: ${transactions.length}
-Total spent: ₹${totalSpent.toLocaleString('en-IN')}
-Total earned: ₹${totalEarned.toLocaleString('en-IN')}
-Spending breakdown: ${JSON.stringify(spendByType)}
-Number of accounts: ${accounts.length}
-Total balance: ₹${accounts.reduce((s,a) => s+(a.balance||0), 0).toLocaleString('en-IN')}
-    `.trim();
-
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: `You are a financial advisor AI. Analyze this customer's banking data and provide 3-5 actionable spending insights and recommendations. Be specific, concise, and helpful.\n\nCustomer data:\n${summary}\n\nProvide insights as a JSON array with objects having "title" and "description" fields. Return ONLY valid JSON, no markdown.`
-          }]
-        })
-      });
-      const data = await res.json();
-      const text = data.content?.[0]?.text || '[]';
-      const cleaned = text.replace(/```json|```/g, '').trim();
-      setInsights(JSON.parse(cleaned));
+      const res = await aiApi.insights();
+      setInsights(res.data.data);
     } catch (err) {
       toast.error('AI insights unavailable');
       setInsights([

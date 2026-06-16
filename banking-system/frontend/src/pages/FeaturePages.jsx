@@ -669,6 +669,7 @@ export function CardsPage() {
 // ── UPI Page ──────────────────────────────────────────────────
 export function UpiPage() {
   const [upiIds, setUpiIds]   = useState([]);
+  const [otherUpiIds, setOtherUpiIds] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [tab, setTab]         = useState('ids');
   const [qrUrl, setQrUrl]     = useState(null);
@@ -679,6 +680,7 @@ export function UpiPage() {
   useEffect(() => {
     upiApi.getAll().then(r => setUpiIds(r.data.data || [])).catch(()=>{});
     accountApi.getAll().then(r => setAccounts((r.data.data||[]).filter(a=>a.status==='ACTIVE'))).catch(()=>{});
+    upiApi.getOther().then(r => setOtherUpiIds(r.data.data || [])).catch(()=>{});
   }, []);
 
   async function createUpi(e) {
@@ -771,11 +773,27 @@ export function UpiPage() {
                 {upiIds.map(u => <option key={u.id} value={u.upiId} className="bg-slate-950">{u.upiId}</option>)}
               </select>
             </div>
-            <div>
-              <label className="label">Recipient UPI ID</label>
-              <input required value={sendForm.toUpiId} onChange={e => setSendForm(f => ({...f, toUpiId: e.target.value}))}
-                placeholder="recipient@paytm"
-                className="glass-input" />
+            <div className="space-y-4">
+              <div>
+                <label className="label">Recipient UPI ID</label>
+                <input required value={sendForm.toUpiId} onChange={e => setSendForm(f => ({...f, toUpiId: e.target.value}))}
+                  placeholder="recipient@paytm"
+                  className="glass-input" />
+              </div>
+              {otherUpiIds.length > 0 && (
+                <div>
+                  <label className="label text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Quick Select Other UPI IDs</label>
+                  <select onChange={e => setSendForm(f => ({ ...f, toUpiId: e.target.value }))}
+                    className="glass-input cursor-pointer text-xs" value={sendForm.toUpiId}>
+                    <option value="" className="bg-slate-950">-- Select a UPI ID to auto-fill --</option>
+                    {otherUpiIds.map(ou => (
+                      <option key={ou.id} value={ou.upiId} className="bg-slate-950">
+                        {ou.ownerName} — {ou.upiId}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
             <div>
               <label className="label">Amount (₹)</label>

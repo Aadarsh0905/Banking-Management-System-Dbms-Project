@@ -4,6 +4,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/Contexts';
 import { FaRobot, FaPaperPlane, FaSpinner, FaTrash } from 'react-icons/fa';
+import { aiApi } from '../services/api';
 
 const SYSTEM_PROMPT = `You are an intelligent banking assistant for a Banking Management System.
 You help customers with:
@@ -52,26 +53,12 @@ export default function AiChatbotPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: updatedMessages
-            .filter(m => m.role === 'user' || m.role === 'assistant')
-            .map(m => ({ role: m.role, content: m.content }))
-        })
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error?.message || 'API error');
-      }
-
-      const data = await response.json();
-      const reply = data.content?.[0]?.text || 'Sorry, I could not generate a response.';
+      const res = await aiApi.chat(
+        updatedMessages
+          .filter(m => m.role === 'user' || m.role === 'assistant')
+          .map(m => ({ role: m.role, content: m.content }))
+      );
+      const reply = res.data.data?.reply || 'Sorry, I could not generate a response.';
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (err) {
       setError('Could not reach AI service. Please try again.');

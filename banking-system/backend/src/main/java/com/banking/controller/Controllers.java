@@ -168,6 +168,12 @@ class AccountController {
         return ResponseEntity.ok(ApiResponse.success(accountService.getUserAccounts(ud.getId())));
     }
 
+    @GetMapping("/other")
+    @Operation(summary = "Get active accounts of other users")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getOtherUsersAccounts(@AuthenticationPrincipal BankUserDetails ud) {
+        return ResponseEntity.ok(ApiResponse.success(accountService.getOtherUsersActiveAccounts(ud.getId())));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get account by ID")
     public ResponseEntity<ApiResponse<AccountResponse>> getAccount(
@@ -467,6 +473,12 @@ class UpiController {
         return ResponseEntity.ok(ApiResponse.success(upiService.getUserUpiIds(ud.getId())));
     }
 
+    @GetMapping("/other")
+    @Operation(summary = "Get active UPI IDs of other users")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> getOtherUsersUpiIds(@AuthenticationPrincipal BankUserDetails ud) {
+        return ResponseEntity.ok(ApiResponse.success(upiService.getOtherUsersUpiIds(ud.getId())));
+    }
+
     @PostMapping
     @Operation(summary = "Create UPI ID")
     public ResponseEntity<ApiResponse<UpiResponse>> createUpi(
@@ -733,5 +745,224 @@ class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(ApiResponse.success(adminService.getEmployees(page, size)));
+    }
+}
+
+// ============================================================
+// AI Controller
+// ============================================================
+@RestController
+@RequestMapping("/ai")
+@RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "AI", description = "AI Assistant and Spending Insights")
+class AiController {
+    private final UserRepository userRepo;
+    private final AccountRepository accountRepo;
+    private final CardRepository cardRepo;
+    private final LoanRepository loanRepo;
+    private final TransactionRepository txnRepo;
+    private final KycRepository kycRepo;
+
+    @PostMapping("/chat")
+    public ResponseEntity<ApiResponse<Map<String, String>>> chat(
+            @AuthenticationPrincipal BankUserDetails ud,
+            @RequestBody Map<String, Object> body) {
+        
+        List<Map<String, String>> messages = (List<Map<String, String>>) body.get("messages");
+        String userMessage = "";
+        if (messages != null && !messages.isEmpty()) {
+            userMessage = messages.get(messages.size() - 1).get("content");
+        } else {
+            userMessage = (String) body.get("message");
+        }
+        if (userMessage == null) userMessage = "";
+
+        Long userId = ud.getId();
+        User user = userRepo.findById(userId).orElse(null);
+        String reply = generateResponse(userId, user, userMessage.trim().toLowerCase());
+
+        return ResponseEntity.ok(ApiResponse.success(Map.of("reply", reply)));
+    }
+
+    @PostMapping("/insights")
+    public ResponseEntity<ApiResponse<List<Map<String, String>>>> insights(
+            @AuthenticationPrincipal BankUserDetails ud) {
+        
+        Long userId = ud.getId();
+        List<Map<String, String>> insightsList = generateInsights(userId);
+        return ResponseEntity.ok(ApiResponse.success(insightsList));
+    }
+
+    private String generateResponse(Long userId, User user, String msg) {
+        String name = user != null ? user.getFirstName() : "there";
+        
+        if (msg.contains("balance") || msg.contains("how much money")) {
+            List<Account> accounts = accountRepo.findByUserId(userId);
+            if (accounts.isEmpty()) {
+                return "You don't have any open accounts yet. You can open an account via the **Accounts** page.";
+            }
+            StringBuilder sb = new StringBuilder("Here is your current balance information:\n\n");
+            for (Account a : accounts) {
+                if (a.getStatus() != Account.AccountStatus.CLOSED) {
+                    sb.append("- **").append(a.getAccountType().getTypeName()).append("** (").append(a.getAccountNumber()).append("): ")
+                      .append("₹").append(String.format("%,.2f", a.getAvailableBalance())).append(" (Status: ").append(a.getStatus()).append(")\n");
+                }
+            }
+            return sb.toString();
+        }
+        
+        if (msg.contains("transaction") || msg.contains("history") || msg.contains("statement")) {
+            List<Account> accounts = accountRepo.findByUserId(userId);
+            if (accounts.isEmpty()) {
+                return "You don't have any accounts to view transactions for.";
+            }
+            org.springframework.data.domain.Page<Transaction> page = txnRepo.findByUserId(userId, org.springframework.data.domain.PageRequest.of(0, 10));
+            List<Transaction> txns = page.getContent();
+            if (txns.isEmpty()) {
+                return "No recent transactions found on your accounts.";
+            }
+            StringBuilder sb = new StringBuilder("Here are your recent transactions:\n\n");
+            int count = 0;
+            for (Transaction t : txns) {
+                if (count >= 5) break;
+                String type = t.getTransactionType().name().replace("_", " ");
+                sb.append("- **").append(type).append("** of **₹").append(String.format("%,.2f", t.getAmount())).append("** on ")
+                  .append(t.getInitiatedAt().toLocalDate()).append(" (Ref: ").append(t.getTransactionRef()).append(" - ").append(t.getStatus()).append(")\n");
+                count++;
+            }
+            return sb.toString();
+        }
+
+        if (msg.contains("loan") || msg.contains("apply loan") || msg.contains("emi")) {
+            List<Loan> loans = loanRepo.findByUserId(userId);
+            StringBuilder sb = new StringBuilder();
+            if (!loans.isEmpty()) {
+                sb.append("You have **").append(loans.size()).append("** active loan(s):\n\n");
+                for (Loan l : loans) {
+                    sb.append("- **").append(l.getLoanType().getTypeName()).append("** (").append(l.getLoanAccountNumber()).append("): Outstanding ")
+                      .append("₹").append(String.format("%,.2f", l.getOutstandingBalance())).append(" with EMI ₹").append(String.format("%,.2f", l.getEmiAmount())).append(" (Status: ").append(l.getStatus()).append(")\n");
+                }
+                sb.append("\n");
+            }
+            sb.append("To apply for a new loan:\n");
+            sb.append("1. Go to the **Loans** portal in the sidebar.\n");
+            sb.append("2. Select the **Apply** tab.\n");
+            sb.append("3. Select loan type, payout account, amount, and submit.\n\n");
+            sb.append("You can also use the **Calculator** tab to estimate your monthly EMI payments.");
+            return sb.toString();
+        }
+
+        if (msg.contains("card") || msg.contains("pin") || msg.contains("block")) {
+            List<Card> cards = cardRepo.findByUserId(userId);
+            StringBuilder sb = new StringBuilder();
+            if (!cards.isEmpty()) {
+                sb.append("Here are your current cards:\n\n");
+                for (Card c : cards) {
+                    sb.append("- **").append(c.getCardType()).append(" (").append(c.getCardNetwork()).append(")**: ")
+                      .append(c.getCardNumber()).append(" (Status: ").append(c.getStatus()).append(")\n");
+                }
+                sb.append("\n");
+            }
+            sb.append("To manage your cards (set PIN, block/unblock, or change online transaction settings):\n");
+            sb.append("1. Navigate to the **Cards** section.\n");
+            sb.append("2. Click **Set PIN** to set a new PIN.\n");
+            sb.append("3. Click **Block** to block a card instantly if lost or stolen.");
+            return sb.toString();
+        }
+
+        if (msg.contains("kyc") || msg.contains("verify") || msg.contains("document")) {
+            Optional<KycDetails> kycOpt = kycRepo.findByUserId(userId);
+            StringBuilder sb = new StringBuilder();
+            if (kycOpt.isPresent()) {
+                KycDetails kyc = kycOpt.get();
+                sb.append("Your KYC verification status is: **").append(kyc.getKycStatus().name()).append("**.\n\n");
+                if (kyc.getKycStatus() == KycDetails.KycStatus.VERIFIED) {
+                    sb.append("Your account is fully verified. You have access to all banking features!");
+                } else if (kyc.getKycStatus() == KycDetails.KycStatus.SUBMITTED || kyc.getKycStatus() == KycDetails.KycStatus.PENDING) {
+                    sb.append("Your KYC document is under review by our administration team. This usually takes 24-48 hours.");
+                } else if (kyc.getKycStatus() == KycDetails.KycStatus.REJECTED) {
+                    sb.append("Your previous KYC submission was rejected. Remarks: *").append(kyc.getRemarks()).append("*.\n\n")
+                      .append("Please go to the **KYC** page in the sidebar and resubmit your valid documents.");
+                }
+            } else {
+                sb.append("You have not submitted your KYC details yet. To unlock full transfer limits and prevent account locking:\n")
+                  .append("1. Click on **KYC** in the sidebar.\n")
+                  .append("2. Fill in your Document Type, ID Number, and upload a proof image.\n")
+                  .append("3. Submit for admin verification.");
+            }
+            return sb.toString();
+        }
+
+        if (msg.contains("transfer") || msg.contains("send money") || msg.contains("upi") || msg.contains("pay")) {
+            return "To transfer money or make easy payments:\n\n" +
+                   "- **Bank Transfer**: Go to the **Transfer** page. Select source account, destination account, enter amount and description. We've also added a list of other user accounts so you can select and fetch them easily!\n" +
+                   "- **Self Transfer**: Use the **Self Transfer** tab on the Transfer page to transfer between your own accounts.\n" +
+                   "- **UPI Payment**: Go to the **UPI** page, and use the **Send Money** tab. You can select other users' UPI IDs from the quick selection list to instantly fill the recipient's ID.";
+        }
+
+        if (msg.contains("hello") || msg.contains("hi") || msg.contains("hey")) {
+            return "Hello " + name + "! 👋 How can I assist you with your banking needs today?\n\nYou can ask me about:\n" +
+                   "- Your **account balance**\n" +
+                   "- **Recent transactions**\n" +
+                   "- Your **KYC status**\n" +
+                   "- Managing your **cards**\n" +
+                   "- Applying for **loans** or paying EMIs\n" +
+                   "- Making **fund transfers**";
+        }
+
+        return "I am here to help you with your banking needs, **" + name + "**. " +
+               "You can check your **account balances**, view **recent transactions**, ask about **loans**, check your **KYC status**, or manage **cards**.\n\n" +
+               "Please let me know how I can assist you!";
+    }
+
+    private List<Map<String, String>> generateInsights(Long userId) {
+        List<Account> accounts = accountRepo.findByUserId(userId);
+        org.springframework.data.domain.Page<Transaction> page = txnRepo.findByUserId(userId, org.springframework.data.domain.PageRequest.of(0, 100));
+        List<Transaction> txns = page.getContent();
+
+        double totalSpent = 0;
+        double totalEarned = 0;
+        for (Transaction t : txns) {
+            if (t.getStatus() != Transaction.TransactionStatus.SUCCESS) continue;
+            double amt = t.getAmount().doubleValue();
+            if (t.getTransactionType() == Transaction.TransactionType.WITHDRAWAL ||
+                t.getTransactionType() == Transaction.TransactionType.TRANSFER ||
+                t.getTransactionType() == Transaction.TransactionType.UPI_DEBIT ||
+                t.getTransactionType() == Transaction.TransactionType.EMI_DEBIT) {
+                totalSpent += amt;
+            } else if (t.getTransactionType() == Transaction.TransactionType.DEPOSIT ||
+                       t.getTransactionType() == Transaction.TransactionType.UPI_CREDIT) {
+                totalEarned += amt;
+            }
+        }
+
+        List<Map<String, String>> list = new ArrayList<>();
+        
+        Map<String, String> in1 = new HashMap<>();
+        in1.put("title", "Cash Flow Balance");
+        if (totalEarned >= totalSpent) {
+            in1.put("description", "Excellent! Your earnings (₹" + String.format("%,.0f", totalEarned) + ") exceed your spending (₹" + String.format("%,.0f", totalSpent) + ") recently. Keep maintaining this positive savings rate.");
+        } else {
+            in1.put("description", "Alert: Your spending (₹" + String.format("%,.0f", totalSpent) + ") has exceeded your credits (₹" + String.format("%,.0f", totalEarned) + ") recently. We recommend reviewing non-essential withdrawals.");
+        }
+        list.add(in1);
+
+        Map<String, String> in2 = new HashMap<>();
+        in2.put("title", "Savings Optimization");
+        double totalBal = accounts.stream().mapToDouble(a -> a.getAvailableBalance().doubleValue()).sum();
+        if (totalBal > 25000) {
+            in2.put("description", "You have ₹" + String.format("%,.0f", totalBal) + " available in your accounts. Consider allocating a portion of this to a Fixed Deposit to earn higher interest rates.");
+        } else {
+            in2.put("description", "To maximize your interest, set up a recurring deposit (RD) of even ₹1,000 monthly. This builds consistent savings over time.");
+        }
+        list.add(in2);
+
+        Map<String, String> in3 = new HashMap<>();
+        in3.put("title", "Card Safety & Alerts");
+        in3.put("description", "Ensure you've set custom transaction limits on your debit/credit cards under the Card Settings page to secure your funds against unauthorized transactions.");
+        list.add(in3);
+
+        return list;
     }
 }

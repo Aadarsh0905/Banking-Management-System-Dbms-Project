@@ -138,4 +138,20 @@ public class AccountService {
             .nomineeName(a.getNomineeName())
             .build();
     }
+
+    public List<java.util.Map<String, Object>> getOtherUsersActiveAccounts(Long userId) {
+        List<Account> accounts = accountRepo.findAll();
+        return accounts.stream()
+            .filter(a -> a.getStatus() == Account.AccountStatus.ACTIVE && !a.getUser().getId().equals(userId))
+            .map(a -> {
+                java.util.Map<String, Object> map = new java.util.HashMap<>();
+                map.put("id", a.getId());
+                map.put("accountNumber", a.getAccountNumber());
+                map.put("accountType", a.getAccountType().getTypeName());
+                map.put("ownerName", a.getUser().getFirstName() + " " + a.getUser().getLastName());
+                return map;
+            })
+            .collect(Collectors.toList());
+    }
 }
+

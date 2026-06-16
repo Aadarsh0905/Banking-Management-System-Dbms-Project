@@ -561,6 +561,7 @@ export function AccountsPage() {
 
 export function TransferPage() {
   const [accounts, setAccounts] = useState([]);
+  const [otherAccounts, setOtherAccounts] = useState([]);
   const [form, setForm] = useState({ fromAccountId: '', toAccountNumber: '', amount: '', description: '' });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
@@ -572,6 +573,10 @@ export function TransferPage() {
       .catch((err) => {
         toast.error(err.response?.data?.message || 'Error fetching active accounts');
       }); 
+    
+    accountApi.getOther()
+      .then(r => setOtherAccounts(r.data.data || []))
+      .catch(() => {});
   }, []);
 
   async function handleTransfer(e) {
@@ -643,11 +648,27 @@ export function TransferPage() {
           </div>
 
           {activeTab === 'transfer' && (
-            <div>
-              <label className="label">Destination Account Number</label>
-              <input required value={form.toAccountNumber} onChange={e => setForm(f => ({...f, toAccountNumber: e.target.value}))}
-                placeholder="Enter recipient account number"
-                className="glass-input" />
+            <div className="space-y-4">
+              <div>
+                <label className="label">Destination Account Number</label>
+                <input required value={form.toAccountNumber} onChange={e => setForm(f => ({...f, toAccountNumber: e.target.value}))}
+                  placeholder="Enter recipient account number"
+                  className="glass-input" />
+              </div>
+              {otherAccounts.length > 0 && (
+                <div>
+                  <label className="label text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Quick Select Other Bank Accounts</label>
+                  <select onChange={e => setForm(f => ({ ...f, toAccountNumber: e.target.value }))}
+                    className="glass-input cursor-pointer text-xs" value={form.toAccountNumber}>
+                    <option value="" className="bg-slate-950">-- Select an account to auto-fill --</option>
+                    {otherAccounts.map(oa => (
+                      <option key={oa.id} value={oa.accountNumber} className="bg-slate-950">
+                        {oa.ownerName} ({oa.accountType}) — {oa.accountNumber}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           )}
 
