@@ -44,6 +44,7 @@ public class AdminService {
     private final BranchRepository branchRepo;
     private final LoanService loanService;
     private final AuthService authService;
+    private final AccountService accountService;
 
     public DashboardStats getDashboardStats() {
         return DashboardStats.builder()
@@ -148,9 +149,8 @@ public class AdminService {
     }
 
     public Page<AccountResponse> getAllAccounts(int page, int size) {
-        AccountService accSvc = getAccountService();
         return accountRepo.findAll(PageRequest.of(page, size, Sort.by("createdAt").descending()))
-            .map(accSvc::mapToResponse);
+            .map(accountService::mapToResponse);
     }
 
     @Transactional
@@ -168,6 +168,4 @@ public class AdminService {
     public Page<UserResponse> getEmployees(int page, int size) {
         return userRepo.findEmployees(PageRequest.of(page, size)).map(authService::mapToUserResponse);
     }
-
-    private AccountService getAccountService() { return new AccountService(accountRepo, null, branchRepo, userRepo); }
 }

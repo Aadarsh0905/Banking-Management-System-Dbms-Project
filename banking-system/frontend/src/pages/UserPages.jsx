@@ -33,7 +33,11 @@ export function ProfilePage() {
   }, [user]);
 
   useEffect(() => {
-    accountApi.getAll().then(r => setAccounts(r.data.data || [])).catch(() => {});
+    accountApi.getAll()
+      .then(r => setAccounts(r.data.data || []))
+      .catch((err) => {
+        toast.error(err.response?.data?.message || 'Failed to load accounts in profile');
+      });
   }, []);
 
   async function updateProfile(e) {
@@ -62,118 +66,120 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold dark:text-white">My Profile</h1>
+      <div>
+        <h1 className="text-2xl font-black text-white">My Profile</h1>
+        <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Manage your personal settings and KYC state</p>
+      </div>
 
       {/* Avatar */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+      <div className="glass-card text-center relative overflow-hidden">
         <div className="relative w-24 h-24 mx-auto mb-4">
           <img src={user?.profilePictureUrl || 'https://via.placeholder.com/100'} alt="Avatar"
-            className="w-24 h-24 rounded-full object-cover border-4 border-blue-200 dark:border-blue-900" />
-          <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700">
+            className="w-24 h-24 rounded-full object-cover border-4 border-white/10" />
+          <label className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors">
             <FaCamera />
             <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} className="hidden" />
           </label>
         </div>
-        <h2 className="text-xl font-semibold dark:text-white">{user?.firstName} {user?.lastName}</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-sm">{user?.email}</p>
+        <h2 className="text-xl font-bold text-white">{user?.firstName} {user?.lastName}</h2>
+        <p className="text-slate-400 text-sm mt-1">{user?.email}</p>
       </div>
 
       {/* Profile Info */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold dark:text-white flex items-center gap-2"><FaUser /> Personal Information</h2>
-          <button onClick={() => setEditing(!editing)} className="text-sm text-blue-600 hover:underline">
-            {editing ? 'Cancel' : <FaEdit className="inline mr-1" />}
-            {editing ? 'Cancel' : 'Edit'}
+      <div className="glass-card">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="font-extrabold text-white flex items-center gap-2 text-base"><FaUser className="text-blue-500" /> Personal Information</h2>
+          <button onClick={() => setEditing(!editing)} className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1">
+            {editing ? 'Cancel' : <><FaEdit /> Edit</>}
           </button>
         </div>
 
         {editing ? (
-          <form onSubmit={updateProfile} className="grid grid-cols-2 gap-4">
+          <form onSubmit={updateProfile} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">First Name</label>
+              <label className="label">First Name</label>
               <input value={form.firstName} onChange={e => setForm(f => ({...f, firstName: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Last Name</label>
+              <label className="label">Last Name</label>
               <input value={form.lastName} onChange={e => setForm(f => ({...f, lastName: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Phone</label>
+              <label className="label">Phone</label>
               <input value={form.phone} onChange={e => setForm(f => ({...f, phone: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Gender</label>
+              <label className="label">Gender</label>
               <select value={form.gender} onChange={e => setForm(f => ({...f, gender: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                <option value="MALE">Male</option>
-                <option value="FEMALE">Female</option>
-                <option value="OTHER">Other</option>
+                className="w-full bg-slate-900/60 border border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl px-4 py-3 text-white focus:outline-none transition-all duration-300 text-sm cursor-pointer">
+                <option value="MALE" className="bg-slate-950">Male</option>
+                <option value="FEMALE" className="bg-slate-950">Female</option>
+                <option value="OTHER" className="bg-slate-950">Other</option>
               </select>
             </div>
-            <div className="col-span-2">
-              <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Save Changes</button>
+            <div className="md:col-span-2 mt-2">
+              <button type="submit" className="w-full btn-primary text-sm">Save Changes</button>
             </div>
           </form>
         ) : (
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><p className="text-gray-500 dark:text-gray-400">First Name</p><p className="font-medium dark:text-white">{user?.firstName}</p></div>
-            <div><p className="text-gray-500 dark:text-gray-400">Last Name</p><p className="font-medium dark:text-white">{user?.lastName}</p></div>
-            <div><p className="text-gray-500 dark:text-gray-400">Email</p><p className="font-medium dark:text-white">{user?.email}</p></div>
-            <div><p className="text-gray-500 dark:text-gray-400">Phone</p><p className="font-medium dark:text-white">{user?.phone}</p></div>
-            <div><p className="text-gray-500 dark:text-gray-400">Gender</p><p className="font-medium dark:text-white">{user?.gender}</p></div>
-            <div><p className="text-gray-500 dark:text-gray-400">Member Since</p><p className="font-medium dark:text-white">{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</p></div>
+          <div className="grid grid-cols-2 gap-6 text-sm">
+            <div><p className="text-slate-500 font-medium">First Name</p><p className="font-semibold text-slate-200 mt-1">{user?.firstName}</p></div>
+            <div><p className="text-slate-500 font-medium">Last Name</p><p className="font-semibold text-slate-200 mt-1">{user?.lastName}</p></div>
+            <div><p className="text-slate-500 font-medium">Email</p><p className="font-semibold text-slate-200 mt-1">{user?.email}</p></div>
+            <div><p className="text-slate-500 font-medium">Phone</p><p className="font-semibold text-slate-200 mt-1">{user?.phone}</p></div>
+            <div><p className="text-slate-500 font-medium">Gender</p><p className="font-semibold text-slate-200 mt-1 uppercase">{user?.gender}</p></div>
+            <div><p className="text-slate-500 font-medium">Member Since</p><p className="font-semibold text-slate-200 mt-1">{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</p></div>
           </div>
         )}
       </div>
 
       {/* Account Status */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 className="font-semibold dark:text-white mb-4">Account Status</h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <span className="dark:text-gray-300">{user?.isActive ? 'Account Active' : 'Account Inactive'}</span>
+      <div className="glass-card">
+        <h2 className="font-extrabold text-white text-base mb-4">Security & Status</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+          <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div className={`w-2.5 h-2.5 rounded-full ${user?.isActive ? 'bg-green-400' : 'bg-red-400'}`}></div>
+            <span className="text-slate-300">{user?.isActive ? 'Account Active' : 'Account Inactive'}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${user?.isLocked ? 'bg-red-500' : 'bg-green-500'}`}></div>
-            <span className="dark:text-gray-300">{user?.isLocked ? 'Account Locked' : 'Account Unlocked'}</span>
+          <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div className={`w-2.5 h-2.5 rounded-full ${user?.isLocked ? 'bg-red-400' : 'bg-green-400'}`}></div>
+            <span className="text-slate-300">{user?.isLocked ? 'Account Locked' : 'Account Unlocked'}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${user?.emailVerified ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-            <span className="dark:text-gray-300">{user?.emailVerified ? 'Email Verified' : 'Email Pending'}</span>
+          <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div className={`w-2.5 h-2.5 rounded-full ${user?.emailVerified ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`}></div>
+            <span className="text-slate-300">{user?.emailVerified ? 'Email Verified' : 'Email Verification Pending'}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${user?.kycStatus === 'VERIFIED' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-            <span className="dark:text-gray-300">KYC: {user?.kycStatus || 'PENDING'}</span>
+          <div className="flex items-center gap-2.5 p-3 rounded-2xl bg-white/[0.02] border border-white/5">
+            <div className={`w-2.5 h-2.5 rounded-full ${user?.kycStatus === 'VERIFIED' ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`}></div>
+            <span className="text-slate-300">KYC Status: {user?.kycStatus || 'NOT SUBMITTED'}</span>
           </div>
         </div>
       </div>
 
       {/* Opened Bank Accounts */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-        <h2 className="font-semibold dark:text-white mb-4 flex items-center gap-2">
+      <div className="glass-card">
+        <h2 className="font-extrabold text-white mb-6 flex items-center gap-2 text-base">
           <FaUniversity className="text-blue-500" /> Opened Bank Accounts
         </h2>
         {accounts.length === 0 ? (
-          <p className="text-gray-500 dark:text-gray-400 text-sm">No opened bank accounts found.</p>
+          <p className="text-slate-500 text-sm">No opened bank accounts found.</p>
         ) : (
           <div className="space-y-3">
             {accounts.map(acc => (
-              <div key={acc.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+              <div key={acc.id} className="flex justify-between items-center p-4 bg-white/[0.02] border border-white/5 hover:border-white/10 rounded-2xl transition-all">
                 <div>
-                  <p className="font-medium text-sm dark:text-white">{acc.accountType}</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 font-mono">{acc.accountNumber} — {acc.branchName}</p>
+                  <p className="font-bold text-sm text-white">{acc.accountType}</p>
+                  <p className="text-xs text-slate-400 font-mono mt-0.5">{acc.accountNumber} — {acc.branchName}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-semibold text-sm dark:text-white">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
-                  <span className={`inline-block px-2 py-0.5 text-[10px] font-medium rounded-full ${
-                    acc.status === 'ACTIVE' ? 'bg-green-100 text-green-700' :
-                    acc.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-gray-100 text-gray-700'
+                  <p className="font-black text-sm text-blue-400">₹{acc.availableBalance?.toLocaleString('en-IN')}</p>
+                  <span className={`inline-block px-2 py-0.5 text-[9px] font-bold rounded-full uppercase tracking-wider mt-1 ${
+                    acc.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400' :
+                    acc.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400' :
+                    'bg-white/5 text-slate-400'
                   }`}>{acc.status}</span>
                 </div>
               </div>
@@ -394,7 +400,7 @@ export function BeneficiariesPage() {
 
       {showAdd && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md modal-transition">
             <h2 className="font-bold text-lg dark:text-white mb-4">Add Beneficiary</h2>
             <form onSubmit={addBeneficiary} className="space-y-3">
               <input required value={form.nickname} onChange={e => setForm(f => ({...f, nickname: e.target.value}))}

@@ -323,7 +323,7 @@ export function AdminLoans() {
 
       {modal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl modal-transition">
             <h2 className="font-bold text-lg dark:text-white mb-2">
               {modal.decision === 'APPROVED' ? '✅ Approve Loan' : '❌ Reject Loan'}
             </h2>
@@ -432,7 +432,7 @@ export function AdminKyc() {
 
       {modal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl">
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl modal-transition">
             <h2 className="font-bold text-lg dark:text-white mb-1">Review KYC — {modal.name}</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Aadhaar: {modal.aadhaar} | PAN: {modal.pan}</p>
             <div className="flex gap-2 mb-4">

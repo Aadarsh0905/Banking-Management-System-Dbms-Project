@@ -1,8 +1,8 @@
 // ============================================================
-// src/components/Layout.jsx
+// src/components/Layout.jsx — Glassmorphic Edition
 // ============================================================
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   FaBars,
   FaBell,
@@ -65,10 +65,10 @@ function Sidebar({ open }) {
       <NavLink
         to={to}
         className={({ isActive }) =>
-          `flex items-center gap-3 px-4 py-2.5 text-sm transition-all ${
+          `flex items-center gap-3 px-4 py-3 text-sm transition-all duration-300 rounded-xl mx-2 my-0.5 ${
             isActive
-              ? 'bg-blue-700 dark:bg-blue-600 border-r-4 border-yellow-400 text-white font-medium'
-              : 'text-blue-100 dark:text-gray-300 hover:bg-blue-800/70 dark:hover:bg-gray-700 hover:text-white'
+              ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border-l-4 border-blue-500 text-white font-semibold shadow-inner'
+              : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
           }`
         }
       >
@@ -79,17 +79,17 @@ function Sidebar({ open }) {
   }
 
   function SectionLabel({ label }) {
-    return <p className="px-4 pt-4 pb-1 text-xs font-bold text-blue-300 dark:text-gray-500 uppercase tracking-widest">{label}</p>;
+    return <p className="px-4 pt-4 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-widest">{label}</p>;
   }
 
   return (
-    <aside className="w-60 flex-shrink-0 bg-blue-900 dark:bg-gray-800 text-white flex flex-col shadow-xl overflow-y-auto">
-      <div className="p-4 border-b border-blue-800 dark:border-gray-700 flex-shrink-0">
+    <aside className="w-60 flex-shrink-0 bg-slate-950/60 backdrop-blur-xl border-r border-white/5 text-white flex flex-col shadow-xl overflow-y-auto">
+      <div className="p-4 border-b border-white/5 flex-shrink-0">
         <div className="flex items-center gap-2">
-          <FaUniversity className="text-2xl text-yellow-400" />
+          <FaUniversity className="text-2xl text-blue-500 animate-pulse" />
           <div>
-            <p className="font-bold text-base leading-tight">BankPortal</p>
-            <p className="text-xs text-blue-300 dark:text-gray-400">Management System</p>
+            <p className="font-extrabold text-base leading-tight bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">BankPortal</p>
+            <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Management System</p>
           </div>
         </div>
       </div>
@@ -132,33 +132,33 @@ function Navbar({ onToggleSidebar }) {
   }
 
   return (
-    <header className="flex-shrink-0 bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 px-4 py-3 flex items-center justify-between">
-      <button onClick={onToggleSidebar} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-        <FaBars className="text-gray-600 dark:text-gray-300" />
+    <header className="flex-shrink-0 bg-slate-950/40 backdrop-blur-md border-b border-white/5 px-4 py-3 flex items-center justify-between z-10">
+      <button onClick={onToggleSidebar} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all">
+        <FaBars className="text-slate-300" />
       </button>
 
-      <div className="flex items-center gap-2">
-        <button onClick={toggleTheme} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-          {theme === 'dark' ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-gray-600" />}
+      <div className="flex items-center gap-3">
+        <button onClick={toggleTheme} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all">
+          {theme === 'dark' ? <FaSun className="text-yellow-400" /> : <FaMoon className="text-slate-300" />}
         </button>
 
-        <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-          <FaBell className="text-gray-600 dark:text-gray-300" />
+        <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-all">
+          <FaBell className="text-slate-300" />
           {unread > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 font-bold">
+            <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] rounded-full w-5 h-5 flex items-center justify-center font-black shadow-lg shadow-red-500/30">
               {unread > 9 ? '9+' : unread}
             </span>
           )}
         </button>
 
-        <button onClick={() => navigate('/profile')} className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-          <div className="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+        <button onClick={() => navigate('/profile')} className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold">
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
-          <span className="text-sm font-medium dark:text-white">{user?.firstName} {user?.lastName}</span>
+          <span className="text-sm font-semibold text-slate-300">{user?.firstName} {user?.lastName}</span>
         </button>
 
-        <button onClick={handleLogout} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors">
+        <button onClick={handleLogout} className="flex items-center gap-1.5 px-4.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold transition-colors shadow-lg shadow-red-600/20 active:scale-95">
           <FaSignOutAlt />
           <span className="hidden sm:inline">Logout</span>
         </button>
@@ -169,14 +169,17 @@ function Navbar({ onToggleSidebar }) {
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const location = useLocation();
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+    <div className="flex h-screen bg-slate-950 overflow-hidden">
       <Sidebar open={sidebarOpen} />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Navbar onToggleSidebar={() => setSidebarOpen((open) => !open)} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-950/20">
+          <div key={location.pathname} className="page-transition">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
