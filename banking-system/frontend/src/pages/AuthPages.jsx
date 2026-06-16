@@ -20,27 +20,56 @@ import { useAuth } from '../context/Contexts';
 import { authApi } from '../services/api';
 
 // ── Glassmorphic Background Layout ──────────────────────────
-function AuthLayout({ children, title, subtitle, maxWidth = 'max-w-md' }) {
+function AuthLayout({ children, title, subtitle, activeTab, maxWidth = 'max-w-md' }) {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#000B1A] relative flex items-center justify-center p-4 overflow-hidden font-sans select-none page-transition">
       {/* Animated Premium Floating Gradient Orbs */}
-      <div className="absolute top-[-20%] left-[-20%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-tr from-blue-600/20 to-cyan-500/15 blur-[130px] animate-float-1 pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] right-[-20%] w-[60vw] h-[60vw] max-w-[700px] max-h-[700px] rounded-full bg-gradient-to-bl from-cyan-600/15 to-blue-500/15 blur-[130px] animate-float-2 pointer-events-none"></div>
-      <div className="absolute top-[30%] left-[25%] w-80 h-80 rounded-full bg-cyan-500/5 blur-[100px] pointer-events-none"></div>
+      <div className="absolute top-[-25%] left-[-25%] w-[70vw] h-[70vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-tr from-blue-600/15 to-cyan-500/10 blur-[140px] animate-float-1 pointer-events-none"></div>
+      <div className="absolute bottom-[-25%] right-[-25%] w-[70vw] h-[70vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-bl from-cyan-600/10 to-blue-500/10 blur-[140px] animate-float-2 pointer-events-none"></div>
+      <div className="absolute top-[35%] left-[20%] w-96 h-96 rounded-full bg-cyan-500/3 blur-[120px] pointer-events-none"></div>
  
-      <div className={`w-full ${maxWidth} z-10`}>
+      <div className={`w-full ${maxWidth} z-10 my-8`}>
         {/* Frosted Glass Container with super smooth borders and round corners */}
-        <div className="glass-frosted rounded-[2.5rem] shadow-2xl p-6 sm:p-10 border border-cyan-500/20 hover:border-cyan-400/35 transition-all duration-500 shadow-cyan-500/5">
+        <div className="glass-frosted rounded-[2.5rem] shadow-2xl p-6 sm:p-10 border border-cyan-500/15 hover:border-cyan-400/30 transition-all duration-500 shadow-cyan-500/5">
           <div className="text-center mb-8">
             {/* Glowing Bank Portal Logo */}
-            <div className="inline-flex p-4 bg-gradient-to-tr from-blue-600 via-sky-500 to-cyan-400 text-white rounded-3xl shadow-xl shadow-cyan-500/25 mb-4 transform hover:scale-105 hover:rotate-6 transition-all duration-300">
+            <div className="inline-flex p-4 bg-gradient-to-tr from-blue-600 via-sky-500 to-cyan-400 text-white rounded-[1.75rem] shadow-xl shadow-cyan-500/20 mb-4 transform hover:scale-105 hover:rotate-6 transition-all duration-300">
               <FaUniversity className="text-3xl" />
             </div>
             <h1 className="text-3xl font-black tracking-tight text-white">
               {title}
             </h1>
-            <p className="text-cyan-400 text-xs mt-2 font-bold tracking-wide uppercase">{subtitle}</p>
+            <p className="text-cyan-400 text-xs mt-2 font-bold tracking-widest uppercase">{subtitle}</p>
           </div>
+
+          {/* Tab Navigation for Seamless Switching */}
+          {activeTab && (
+            <div className="flex rounded-2xl bg-[#000d21]/80 border border-white/5 p-1 mb-8 relative">
+              <button 
+                type="button"
+                onClick={() => navigate('/login')}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 relative
+                  ${activeTab === 'login' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Sign In
+              </button>
+              <button 
+                type="button"
+                onClick={() => navigate('/register')}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-300 z-10 relative
+                  ${activeTab === 'register' ? 'text-white font-extrabold' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Register
+              </button>
+              {/* Sliding background highlight */}
+              <div 
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl transition-all duration-500 ease-out shadow-lg shadow-cyan-500/20
+                  ${activeTab === 'login' ? 'left-1' : 'left-[50%]'}`}
+              />
+            </div>
+          )}
+
           {children}
         </div>
       </div>
@@ -76,12 +105,12 @@ export function LoginPage() {
   }
 
   return (
-    <AuthLayout title="BankPortal" subtitle="Secure Digital Gateway" maxWidth="max-w-md">
+    <AuthLayout title="BankPortal" subtitle="Secure Digital Gateway" activeTab="login" maxWidth="max-w-md">
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
+        <div className="focus-glow">
           <label className="label">Username or Email</label>
           <div className="relative group">
-            <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-400 transition-colors" />
+            <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
             <input
               type="text"
               required
@@ -93,15 +122,15 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div>
+        <div className="focus-glow">
           <div className="flex justify-between items-center mb-2">
             <label className="label mb-0">Password</label>
-            <Link to="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold hover:underline">
+            <Link to="/forgot-password" className="text-xs text-cyan-400 hover:text-cyan-300 font-bold hover:underline tracking-wider uppercase">
               Forgot?
             </Link>
           </div>
           <div className="relative group">
-            <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-400 transition-colors" />
+            <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
             <input
               type={showPwd ? 'text' : 'password'}
               required
@@ -133,16 +162,9 @@ export function LoginPage() {
         </button>
       </form>
 
-      <p className="text-center text-sm text-slate-400 mt-6 font-medium">
-        Don't have an account?{' '}
-        <Link to="/register" className="text-blue-400 font-bold hover:text-blue-300 hover:underline">
-          Register
-        </Link>
-      </p>
-
       {/* Demo Accounts Panel */}
       <div className="mt-8 pt-6 border-t border-white/5">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 text-center">
+        <p className="text-[10px] font-bold text-cyan-400/80 uppercase tracking-widest mb-4 text-center">
           Quick Access Demo Portals
         </p>
         <div className="space-y-2.5">
@@ -214,7 +236,7 @@ export function RegisterPage() {
   }
 
   const renderField = (label, key, type = 'text', placeholder = '', helpText = '') => (
-    <div key={key} className="space-y-1.5">
+    <div key={key} className="space-y-1.5 focus-glow">
       <label className="label">{label}</label>
       <input
         type={type}
@@ -231,7 +253,7 @@ export function RegisterPage() {
   );
 
   return (
-    <AuthLayout title="Register" subtitle="Open a New Digital Account" maxWidth="max-w-xl">
+    <AuthLayout title="Register" subtitle="Open a New Digital Account" activeTab="register" maxWidth="max-w-xl">
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {renderField('First Name', 'firstName', 'text', 'Rahul')}
         {renderField('Last Name', 'lastName', 'text', 'Sharma')}
@@ -240,16 +262,16 @@ export function RegisterPage() {
         {renderField('Phone', 'phone', 'tel', '9876543210', '10-digit number')}
         {renderField('Password', 'password', 'password', 'Min 8 characters', 'Alphanumeric + symbol')}
 
-        <div className="md:col-span-2 space-y-1.5">
+        <div className="md:col-span-2 space-y-1.5 focus-glow">
           <label className="label">Gender</label>
           <select
             value={form.gender}
             onChange={set('gender')}
             className="w-full bg-slate-900/60 border border-white/10 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-2xl px-4 py-3 text-white focus:outline-none transition-all duration-300 text-sm cursor-pointer"
           >
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
-            <option value="OTHER">Other</option>
+            <option value="MALE" className="bg-slate-950">Male</option>
+            <option value="FEMALE" className="bg-slate-950">Female</option>
+            <option value="OTHER" className="bg-slate-950">Other</option>
           </select>
         </div>
 
@@ -265,13 +287,6 @@ export function RegisterPage() {
           )}
         </button>
       </form>
-
-      <p className="text-center text-sm text-slate-400 mt-6 font-medium">
-        Already have an account?{' '}
-        <Link to="/login" className="text-blue-400 font-bold hover:text-blue-300 hover:underline">
-          Login
-        </Link>
-      </p>
     </AuthLayout>
   );
 }
@@ -310,10 +325,10 @@ export function ForgotPasswordPage() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
+          <div className="focus-glow">
             <label className="label">Registered Email Address</label>
             <div className="relative group">
-              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-blue-400 transition-colors" />
+              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
               <input
                 type="email"
                 required
@@ -340,11 +355,10 @@ export function ForgotPasswordPage() {
       )}
 
       <p className="text-center mt-6 text-sm font-medium">
-        <Link to="/login" className="text-blue-400 hover:text-blue-300 hover:underline">
+        <Link to="/login" className="text-cyan-400 hover:text-cyan-300 hover:underline tracking-wider uppercase text-xs font-bold">
           Back to Login
         </Link>
       </p>
     </AuthLayout>
   );
 }
-

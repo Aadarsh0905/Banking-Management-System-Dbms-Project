@@ -59,7 +59,9 @@ public class AccountService {
     }
 
     public List<AccountResponse> getUserAccounts(Long userId) {
-        return accountRepo.findByUserId(userId).stream()
+        List<Account> accounts = accountRepo.findByUserId(userId);
+        log.info("Fetching accounts for userId: {}, found: {}", userId, accounts.size());
+        return accounts.stream()
             .map(this::mapToResponse).collect(Collectors.toList());
     }
 

@@ -1,5 +1,5 @@
 // ============================================================
-// src/pages/TransactionsPage.jsx
+// src/pages/FeaturePages.jsx — Premium Paytm Glassmorphic Edition
 // ============================================================
 
 import { useState, useEffect } from 'react';
@@ -20,10 +20,12 @@ import {
   FaQrcode,
   FaSearch,
   FaUnlock,
+  FaExchangeAlt,
+  FaInfoCircle
 } from 'react-icons/fa';
 import { accountApi, cardApi, loanApi, txnApi, upiApi } from '../services/api';
 
-
+// ── Transactions Page ────────────────────────────────────────
 export function TransactionsPage() {
   const [txns, setTxns]         = useState([]);
   const [page, setPage]         = useState(0);
@@ -54,99 +56,102 @@ export function TransactionsPage() {
   }
 
   const statusColor = {
-    SUCCESS: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-    FAILED:  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    PENDING: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-    REVERSED:'bg-gray-100 text-gray-600',
+    SUCCESS: 'bg-green-500/10 text-green-400 border border-green-500/20',
+    FAILED:  'bg-red-500/10 text-red-400 border border-red-500/20',
+    PENDING: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
+    REVERSED:'bg-white/5 text-slate-400 border border-white/5',
   };
 
   const typeColor = {
-    DEPOSIT: 'text-green-600', WITHDRAWAL: 'text-red-600',
-    TRANSFER: 'text-blue-600', UPI_CREDIT: 'text-green-600', UPI_DEBIT: 'text-red-600',
+    DEPOSIT: 'text-green-400', WITHDRAWAL: 'text-red-400',
+    TRANSFER: 'text-cyan-400', UPI_CREDIT: 'text-green-400', UPI_DEBIT: 'text-red-400',
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 page-transition">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold dark:text-white">Transaction History</h1>
+        <div>
+          <h1 className="text-2xl font-black text-white">Transaction History</h1>
+          <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Monitor all deposits, withdrawals, and transfers</p>
+        </div>
         <button onClick={() => setShowFilters(s => !s)}
-          className="flex items-center gap-2 border px-4 py-2 rounded-lg text-sm hover:bg-gray-50 dark:border-gray-600 dark:text-white dark:hover:bg-gray-700">
+          className="btn-secondary flex items-center gap-2 text-sm py-2 px-4 rounded-xl">
           <FaFilter /> Filters
         </button>
       </div>
 
       {showFilters && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="glass-card grid grid-cols-2 md:grid-cols-4 gap-4 p-5 animate-fade-in">
           <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Type</label>
+            <label className="label">Type</label>
             <select value={filters.type} onChange={e => setFilters(f => ({...f, type: e.target.value}))}
-              className="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-              <option value="">All</option>
+              className="glass-input cursor-pointer">
+              <option value="" className="bg-slate-950">All Types</option>
               {['DEPOSIT','WITHDRAWAL','TRANSFER','UPI_CREDIT','UPI_DEBIT','EMI_DEBIT'].map(t =>
-                <option key={t} value={t}>{t}</option>)}
+                <option key={t} value={t} className="bg-slate-950">{t.replace('_', ' ')}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Status</label>
+            <label className="label">Status</label>
             <select value={filters.status} onChange={e => setFilters(f => ({...f, status: e.target.value}))}
-              className="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-              <option value="">All</option>
-              {['SUCCESS','FAILED','PENDING','REVERSED'].map(s => <option key={s} value={s}>{s}</option>)}
+              className="glass-input cursor-pointer">
+              <option value="" className="bg-slate-950">All Statuses</option>
+              {['SUCCESS','FAILED','PENDING','REVERSED'].map(s => <option key={s} value={s} className="bg-slate-950">{s}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">From Date</label>
+            <label className="label">From Date</label>
             <input type="date" value={filters.from} onChange={e => setFilters(f => ({...f, from: e.target.value}))}
-              className="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              className="glass-input" />
           </div>
           <div>
-            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">To Date</label>
+            <label className="label">To Date</label>
             <input type="date" value={filters.to} onChange={e => setFilters(f => ({...f, to: e.target.value}))}
-              className="w-full border rounded-lg px-3 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+              className="glass-input" />
           </div>
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+      <div className="glass-card overflow-hidden p-0 border border-white/5 shadow-2xl">
         {loading ? (
-          <div className="flex justify-center items-center h-40">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="flex justify-center items-center h-48">
+            <div className="spinner" />
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 dark:bg-gray-700/50">
-                <tr className="text-gray-500 dark:text-gray-400">
+              <thead>
+                <tr className="bg-white/[0.02] text-slate-400 border-b border-white/5 text-xs font-bold uppercase tracking-wider">
                   {['Ref No','Type','From','To','Amount','Balance After','Status','Date','Receipt'].map(h => (
-                    <th key={h} className="px-4 py-3 text-left font-medium text-xs uppercase tracking-wider">{h}</th>
+                    <th key={h} className="px-5 py-4 text-left font-bold">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              <tbody className="divide-y divide-white/5">
                 {txns.length === 0 ? (
-                  <tr><td colSpan={9} className="text-center py-12 text-gray-400">No transactions found</td></tr>
+                  <tr><td colSpan={9} className="text-center py-16 text-slate-500 font-bold">No transactions found</td></tr>
                 ) : txns.map(t => (
-                  <tr key={t.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs dark:text-gray-300">{t.transactionRef}</td>
-                    <td className={`px-4 py-3 font-medium ${typeColor[t.transactionType] || 'text-gray-600 dark:text-gray-300'}`}>
+                  <tr key={t.id} className="hover:bg-white/[0.01] transition-colors border-b border-white/5 last:border-0">
+                    <td className="px-5 py-4 font-mono text-xs text-slate-300">{t.transactionRef}</td>
+                    <td className={`px-5 py-4 font-bold text-xs uppercase tracking-wider ${typeColor[t.transactionType] || 'text-slate-300'}`}>
                       {t.transactionType?.replace('_',' ')}
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{t.fromAccount || '—'}</td>
-                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">{t.toAccount || '—'}</td>
-                    <td className="px-4 py-3 font-semibold dark:text-white">₹{t.amount?.toLocaleString('en-IN')}</td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
+                    <td className="px-5 py-4 text-xs text-slate-400 font-mono">{t.fromAccount || '—'}</td>
+                    <td className="px-5 py-4 text-xs text-slate-400 font-mono">{t.toAccount || '—'}</td>
+                    <td className="px-5 py-4 font-black text-white">₹{t.amount?.toLocaleString('en-IN')}</td>
+                    <td className="px-5 py-4 text-slate-400 font-mono">
                       {t.balanceAfter != null ? `₹${t.balanceAfter?.toLocaleString('en-IN')}` : '—'}
                     </td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor[t.status] || ''}`}>{t.status}</span>
+                    <td className="px-5 py-4">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusColor[t.status] || ''}`}>{t.status}</span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                    <td className="px-5 py-4 text-xs text-slate-400">
                       {t.initiatedAt ? new Date(t.initiatedAt).toLocaleString('en-IN', {dateStyle:'short',timeStyle:'short'}) : '—'}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-4">
                       {t.status === 'SUCCESS' && (
                         <button onClick={() => downloadReceipt(t.transactionRef)}
-                          className="text-blue-500 hover:text-blue-700 p-1" title="Download receipt">
+                          className="text-cyan-400 hover:text-cyan-300 p-1.5 rounded-lg bg-white/5 border border-white/5 hover:border-cyan-500/30 transition-all" title="Download receipt">
                           <FaDownload />
                         </button>
                       )}
@@ -159,12 +164,12 @@ export function TransactionsPage() {
         )}
 
         {totalPages > 1 && (
-          <div className="flex justify-between items-center px-4 py-3 border-t dark:border-gray-700">
+          <div className="flex justify-between items-center px-5 py-4 border-t border-white/5 bg-white/[0.01]">
             <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
-              className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Previous</button>
-            <span className="text-sm text-gray-500 dark:text-gray-400">Page {page + 1} of {totalPages}</span>
+              className="btn-secondary py-1.5 px-4 text-xs rounded-xl disabled:opacity-40">Previous</button>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Page {page + 1} of {totalPages}</span>
             <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}
-              className="px-4 py-1.5 border rounded-lg text-sm disabled:opacity-40 dark:border-gray-600 dark:text-white">Next</button>
+              className="btn-secondary py-1.5 px-4 text-xs rounded-xl disabled:opacity-40">Next</button>
           </div>
         )}
       </div>
@@ -172,10 +177,7 @@ export function TransactionsPage() {
   );
 }
 
-// ============================================================
-// src/pages/LoansPage.jsx
-// ============================================================
-
+// ── Loans Page ────────────────────────────────────────────────
 export function LoansPage() {
   const [tab, setTab]               = useState('my');
   const [loans, setLoans]           = useState([]);
@@ -222,15 +224,28 @@ export function LoansPage() {
     } catch { toast.error('Failed to load EMI schedule'); }
   }
 
-  const statusColor = { ACTIVE:'bg-green-100 text-green-700', SUBMITTED:'bg-blue-100 text-blue-700', APPROVED:'bg-emerald-100 text-emerald-700', REJECTED:'bg-red-100 text-red-700', DISBURSED:'bg-purple-100 text-purple-700', CLOSED:'bg-gray-100 text-gray-600', DRAFT:'bg-yellow-100 text-yellow-700' };
+  const statusColor = { 
+    ACTIVE:'bg-green-500/10 text-green-400 border border-green-500/20', 
+    SUBMITTED:'bg-blue-500/10 text-blue-400 border border-blue-500/20', 
+    APPROVED:'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20', 
+    REJECTED:'bg-red-500/10 text-red-400 border border-red-500/20', 
+    DISBURSED:'bg-purple-500/10 text-purple-400 border border-purple-500/20', 
+    CLOSED:'bg-white/5 text-slate-400 border border-white/5', 
+    DRAFT:'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' 
+  };
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold dark:text-white">Loans</h1>
-      <div className="flex gap-2 border-b dark:border-gray-700">
+    <div className="space-y-6 page-transition">
+      <div>
+        <h1 className="text-2xl font-black text-white">Loans Portal</h1>
+        <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Apply for personal/home loans and view EMI schedules</p>
+      </div>
+
+      <div className="flex rounded-2xl bg-white/5 border border-white/5 p-1">
         {[['my','My Loans'],['apps','Applications'],['apply','Apply'],['calc','Calculator']].map(([key,label]) => (
           <button key={key} onClick={() => setTab(key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab===key ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}>
+            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all duration-300
+              ${tab===key ? 'bg-gradient-to-r from-[#005CFF] to-[#00BAF2] text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
             {label}
           </button>
         ))}
@@ -238,128 +253,147 @@ export function LoansPage() {
 
       {/* My Loans */}
       {tab === 'my' && (
-        <div className="space-y-4">
-          {loans.length === 0 ? <p className="text-center text-gray-400 py-12">No active loans</p> :
-          loans.map(loan => (
-            <div key={loan.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <p className="text-xs text-gray-400">Loan Account</p>
-                  <p className="font-mono font-semibold dark:text-white">{loan.loanAccountNumber}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{loan.loanType}</p>
-                </div>
-                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusColor[loan.status]||''}`}>{loan.status}</span>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                <div><p className="text-gray-400 text-xs">Principal</p><p className="font-semibold dark:text-white">₹{loan.principalAmount?.toLocaleString('en-IN')}</p></div>
-                <div><p className="text-gray-400 text-xs">EMI Amount</p><p className="font-semibold dark:text-white">₹{loan.emiAmount?.toLocaleString('en-IN')}</p></div>
-                <div><p className="text-gray-400 text-xs">Outstanding</p><p className="font-semibold text-orange-600">₹{loan.outstandingBalance?.toLocaleString('en-IN')}</p></div>
-                <div><p className="text-gray-400 text-xs">Rate</p><p className="font-semibold dark:text-white">{loan.interestRate}% p.a.</p></div>
-                <div><p className="text-gray-400 text-xs">Tenure</p><p className="font-semibold dark:text-white">{loan.tenureMonths} months</p></div>
-                <div><p className="text-gray-400 text-xs">Paid EMIs</p><p className="font-semibold dark:text-white">{loan.paidEmis}/{loan.totalEmis}</p></div>
-                <div><p className="text-gray-400 text-xs">Overdue EMIs</p><p className={`font-semibold ${loan.overdueEmis>0?'text-red-600':'dark:text-white'}`}>{loan.overdueEmis}</p></div>
-                <div><p className="text-gray-400 text-xs">Last EMI Date</p><p className="font-semibold dark:text-white">{loan.lastEmiDate}</p></div>
-              </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-3">
-                <div className="bg-blue-500 h-2 rounded-full transition-all"
-                  style={{ width: `${(loan.paidEmis / loan.totalEmis) * 100}%` }} />
-              </div>
-              <button onClick={() => loadEmi(loan.id)}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
-                {emiOpen === loan.id ? <FaChevronUp /> : <FaChevronDown />} View EMI Schedule
-              </button>
-              {emiOpen === loan.id && emiSchedule.length > 0 && (
-                <div className="mt-3 overflow-x-auto">
-                  <table className="w-full text-xs">
-                    <thead className="bg-gray-50 dark:bg-gray-700/50">
-                      <tr>{['#','Due Date','EMI','Principal','Interest','Outstanding','Status'].map(h => (
-                        <th key={h} className="px-3 py-2 text-left text-gray-500 dark:text-gray-400 font-medium">{h}</th>))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {emiSchedule.map(e => (
-                        <tr key={e.emiNumber} className="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                          <td className="px-3 py-2 dark:text-gray-300">{e.emiNumber}</td>
-                          <td className="px-3 py-2 dark:text-gray-300">{e.dueDate}</td>
-                          <td className="px-3 py-2 dark:text-gray-300">₹{e.emiAmount?.toLocaleString('en-IN')}</td>
-                          <td className="px-3 py-2 dark:text-gray-300">₹{e.principalComponent?.toLocaleString('en-IN')}</td>
-                          <td className="px-3 py-2 dark:text-gray-300">₹{e.interestComponent?.toLocaleString('en-IN')}</td>
-                          <td className="px-3 py-2 dark:text-gray-300">₹{e.outstandingAfter?.toLocaleString('en-IN')}</td>
-                          <td className="px-3 py-2">
-                            <span className={`px-1.5 py-0.5 rounded text-xs ${statusColor[e.status]||'bg-gray-100'}`}>{e.status}</span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+        <div className="space-y-5">
+          {loans.length === 0 ? (
+            <div className="glass-card text-center py-16 text-slate-500 font-bold">
+              No active loans found
             </div>
-          ))}
+          ) : (
+            loans.map(loan => (
+              <div key={loan.id} className="glass-card glass-card-hover p-6 border border-white/5">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Loan Account Number</p>
+                    <p className="font-mono font-bold text-slate-200">{loan.loanAccountNumber}</p>
+                    <p className="text-xs text-cyan-400 mt-0.5 font-bold uppercase tracking-wider">{loan.loanType}</p>
+                  </div>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusColor[loan.status]||''}`}>{loan.status}</span>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs mb-6 pt-4 border-t border-white/5">
+                  <div><p className="text-slate-500 uppercase tracking-wider font-semibold">Principal</p><p className="font-black text-sm text-slate-200 mt-0.5">₹{loan.principalAmount?.toLocaleString('en-IN')}</p></div>
+                  <div><p className="text-slate-500 uppercase tracking-wider font-semibold">EMI Amount</p><p className="font-black text-sm text-slate-200 mt-0.5">₹{loan.emiAmount?.toLocaleString('en-IN')}</p></div>
+                  <div><p className="text-slate-500 uppercase tracking-wider font-semibold">Outstanding</p><p className="font-black text-sm text-orange-400 mt-0.5">₹{loan.outstandingBalance?.toLocaleString('en-IN')}</p></div>
+                  <div><p className="text-slate-500 uppercase tracking-wider font-semibold">Interest Rate</p><p className="font-black text-sm text-slate-200 mt-0.5">{loan.interestRate}% p.a.</p></div>
+                  <div><p className="text-slate-500 uppercase tracking-wider font-semibold">Tenure</p><p className="font-bold text-slate-200 mt-0.5">{loan.tenureMonths} months</p></div>
+                  <div><p className="text-slate-500 uppercase tracking-wider font-semibold">Paid EMIs</p><p className="font-bold text-slate-200 mt-0.5">{loan.paidEmis}/{loan.totalEmis}</p></div>
+                  <div><p className="text-slate-500 uppercase tracking-wider font-semibold">Overdue EMIs</p><p className={`font-bold mt-0.5 ${loan.overdueEmis>0?'text-red-400':'text-slate-200'}`}>{loan.overdueEmis}</p></div>
+                  <div><p className="text-slate-500 uppercase tracking-wider font-semibold">Last EMI Date</p><p className="font-bold text-slate-200 mt-0.5">{loan.lastEmiDate}</p></div>
+                </div>
+
+                <div className="w-full bg-white/5 border border-white/5 rounded-full h-2.5 mb-4 overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-600 to-cyan-400 h-full rounded-full transition-all"
+                    style={{ width: `${(loan.paidEmis / loan.totalEmis) * 100}%` }} />
+                </div>
+
+                <button onClick={() => loadEmi(loan.id)}
+                  className="flex items-center gap-2 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors uppercase tracking-wider">
+                  {emiOpen === loan.id ? <FaChevronUp /> : <FaChevronDown />} View EMI Schedule
+                </button>
+
+                {emiOpen === loan.id && emiSchedule.length > 0 && (
+                  <div className="mt-4 overflow-x-auto border border-white/5 rounded-2xl animate-fade-in shadow-inner">
+                    <table className="w-full text-xs">
+                      <thead className="bg-white/[0.02] border-b border-white/5 text-slate-400 font-bold uppercase tracking-wider">
+                        <tr>{['#','Due Date','EMI','Principal','Interest','Outstanding','Status'].map(h => (
+                          <th key={h} className="px-4 py-3 text-left font-bold">{h}</th>))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {emiSchedule.map(e => (
+                          <tr key={e.emiNumber} className="hover:bg-white/[0.01]">
+                            <td className="px-4 py-3.5 dark:text-gray-300 font-bold">{e.emiNumber}</td>
+                            <td className="px-4 py-3.5 dark:text-gray-300">{e.dueDate}</td>
+                            <td className="px-4 py-3.5 font-bold text-white">₹{e.emiAmount?.toLocaleString('en-IN')}</td>
+                            <td className="px-4 py-3.5 dark:text-gray-300">₹{e.principalComponent?.toLocaleString('en-IN')}</td>
+                            <td className="px-4 py-3.5 dark:text-gray-300">₹{e.interestComponent?.toLocaleString('en-IN')}</td>
+                            <td className="px-4 py-3.5 dark:text-gray-300 font-mono">₹{e.outstandingAfter?.toLocaleString('en-IN')}</td>
+                            <td className="px-4 py-3.5">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${statusColor[e.status]||'bg-white/5 text-slate-400'}`}>{e.status}</span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
       )}
 
       {/* Applications */}
       {tab === 'apps' && (
-        <div className="space-y-3">
-          {apps.length === 0 ? <p className="text-center text-gray-400 py-12">No loan applications</p> :
-          apps.map(app => (
-            <div key={app.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex justify-between items-center">
-              <div>
-                <p className="font-mono text-sm font-semibold dark:text-white">{app.applicationNo}</p>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">{app.loanType} · ₹{app.amountRequested?.toLocaleString('en-IN')} · {app.tenureMonths} months</p>
-                <p className="text-xs text-gray-400 mt-1">EMI: ₹{app.emiEstimate?.toLocaleString('en-IN')} · Applied: {app.submittedAt ? new Date(app.submittedAt).toLocaleDateString() : '—'}</p>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColor[app.status]||''}`}>{app.status}</span>
+        <div className="space-y-4">
+          {apps.length === 0 ? (
+            <div className="glass-card text-center py-16 text-slate-500 font-bold">
+              No loan applications found
             </div>
-          ))}
+          ) : (
+            apps.map(app => (
+              <div key={app.id} className="glass-card glass-card-hover p-6 border border-white/5 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                  <p className="font-mono text-sm font-bold text-white">{app.applicationNo}</p>
+                  <p className="text-slate-400 text-xs mt-1">
+                    <span className="text-cyan-400 font-bold uppercase tracking-wider">{app.loanType}</span> · Requested: <span className="font-black text-white">₹{app.amountRequested?.toLocaleString('en-IN')}</span> · {app.tenureMonths} months
+                  </p>
+                  <p className="text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">
+                    EMI Estimate: ₹{app.emiEstimate?.toLocaleString('en-IN')} · Applied: {app.submittedAt ? new Date(app.submittedAt).toLocaleDateString() : '—'}
+                  </p>
+                </div>
+                <span className={`self-start sm:self-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${statusColor[app.status]||''}`}>{app.status}</span>
+              </div>
+            ))
+          )}
         </div>
       )}
 
       {/* Apply */}
       {tab === 'apply' && (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 max-w-2xl">
-          <h2 className="font-semibold dark:text-white mb-4 flex items-center gap-2"><FaFileAlt /> Apply for Loan</h2>
-          <form onSubmit={applyLoan} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="glass-card p-6 max-w-2xl mx-auto border border-white/5">
+          <h2 className="font-extrabold text-white text-lg mb-6 flex items-center gap-2 border-b border-white/5 pb-4"><FaFileAlt className="text-blue-500" /> Apply for Loan</h2>
+          <form onSubmit={applyLoan} className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {[
               ['Loan Type','loanTypeId','select-type'],['Disbursal Account','accountId','select-account'],
               ['Amount Requested (₹)','amountRequested','number'],['Tenure (months)','tenureMonths','number'],
               ['Annual Income (₹)','annualIncome','number'],['Employer Name','employerName','text'],
             ].map(([label, key, type]) => (
               <div key={key}>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">{label}</label>
+                <label className="label">{label}</label>
                 {type === 'select-type' ? (
                   <select required value={form[key]} onChange={e => setForm(f => ({...f, [key]: e.target.value}))}
-                    className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <option value="">Select loan type</option>
-                    {types.map(t => <option key={t.id} value={t.id}>{t.typeName} — {t.interestRate}% p.a.</option>)}
+                    className="glass-input cursor-pointer">
+                    <option value="" className="bg-slate-950">Select loan type</option>
+                    {types.map(t => <option key={t.id} value={t.id} className="bg-slate-950">{t.typeName} — {t.interestRate}% p.a.</option>)}
                   </select>
                 ) : type === 'select-account' ? (
                   <select required value={form[key]} onChange={e => setForm(f => ({...f, [key]: e.target.value}))}
-                    className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <option value="">Select account</option>
-                    {accounts.map(a => <option key={a.id} value={a.id}>{a.accountNumber}</option>)}
+                    className="glass-input cursor-pointer">
+                    <option value="" className="bg-slate-950">Select payout account</option>
+                    {accounts.map(a => <option key={a.id} value={a.id} className="bg-slate-950">{a.accountNumber}</option>)}
                   </select>
                 ) : (
                   <input type={type} value={form[key]} onChange={e => setForm(f => ({...f, [key]: e.target.value}))}
-                    className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                    className="glass-input" />
                 )}
               </div>
             ))}
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Employment Type</label>
+              <label className="label">Employment Type</label>
               <select value={form.employmentType} onChange={e => setForm(f => ({...f, employmentType: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                {['SALARIED','SELF_EMPLOYED','BUSINESS','OTHER'].map(t => <option key={t} value={t}>{t}</option>)}
+                className="glass-input cursor-pointer">
+                {['SALARIED','SELF_EMPLOYED','BUSINESS','OTHER'].map(t => <option key={t} value={t} className="bg-slate-950">{t}</option>)}
               </select>
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Purpose</label>
+              <label className="label">Purpose / Comments</label>
               <textarea rows={2} value={form.purpose} onChange={e => setForm(f => ({...f, purpose: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                placeholder="Briefly state the reason for this loan request..."
+                className="glass-input" />
             </div>
-            <div className="md:col-span-2">
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg">Submit Application</button>
+            <div className="md:col-span-2 mt-2">
+              <button type="submit" className="w-full btn-primary">Submit Application</button>
             </div>
           </form>
         </div>
@@ -367,46 +401,57 @@ export function LoansPage() {
 
       {/* Calculator */}
       {tab === 'calc' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-            <h2 className="font-semibold dark:text-white mb-4 flex items-center gap-2"><FaCalculator /> EMI Calculator</h2>
-            <form onSubmit={calculate} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="glass-card border border-white/5 p-6">
+            <h2 className="font-extrabold text-white text-lg mb-6 flex items-center gap-2 border-b border-white/5 pb-4"><FaCalculator className="text-cyan-400" /> EMI Calculator</h2>
+            <form onSubmit={calculate} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Loan Type</label>
+                <label className="label">Loan Type</label>
                 <select required value={calcForm.loanTypeId} onChange={e => setCalcForm(f => ({...f, loanTypeId: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <option value="">Select</option>
-                  {types.map(t => <option key={t.id} value={t.id}>{t.typeName}</option>)}
+                  className="glass-input cursor-pointer">
+                  <option value="" className="bg-slate-950">Select</option>
+                  {types.map(t => <option key={t.id} value={t.id} className="bg-slate-950">{t.typeName}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Loan Amount (₹)</label>
+                <label className="label">Loan Amount (₹)</label>
                 <input type="number" required min="1000" value={calcForm.amount} onChange={e => setCalcForm(f => ({...f, amount: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                  className="glass-input" />
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Tenure (months)</label>
+                <label className="label">Tenure (months)</label>
                 <input type="number" required min="3" value={calcForm.tenureMonths} onChange={e => setCalcForm(f => ({...f, tenureMonths: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                  className="glass-input" />
               </div>
-              <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg">Calculate EMI</button>
+              <button type="submit" className="w-full btn-primary mt-2">Calculate EMI</button>
             </form>
           </div>
-          {calcResult && (
-            <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-sm p-6 text-white">
-              <h2 className="font-semibold mb-4">Calculation Result</h2>
-              <div className="text-center mb-6">
-                <p className="text-xs opacity-80">Monthly EMI</p>
-                <p className="text-4xl font-bold">₹{calcResult.emi?.toLocaleString('en-IN')}</p>
+          
+          {calcResult ? (
+            <div className="bg-gradient-to-br from-blue-700 via-sky-600 to-cyan-500 rounded-[2rem] shadow-2xl p-6 text-white flex flex-col justify-between animate-fade-in relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full pointer-events-none -mr-8 -mt-8" />
+              <div>
+                <h2 className="font-extrabold text-lg mb-4 uppercase tracking-wider">Calculation Result</h2>
+                <div className="text-center my-6">
+                  <p className="text-[10px] opacity-75 uppercase tracking-wider font-semibold">Monthly EMI Installment</p>
+                  <p className="text-4xl font-black">₹{calcResult.emi?.toLocaleString('en-IN')}</p>
+                </div>
+                <div className="space-y-2.5 text-xs border-t border-white/20 pt-4 font-mono">
+                  <div className="flex justify-between"><span className="opacity-80">Principal</span><span className="font-bold">₹{calcResult.principal?.toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between"><span className="opacity-80">Interest Rate</span><span className="font-bold">{calcResult.interestRate}% p.a.</span></div>
+                  <div className="flex justify-between"><span className="opacity-80">Tenure</span><span className="font-bold">{calcResult.tenureMonths} months</span></div>
+                  <div className="flex justify-between"><span className="opacity-80">Total Interest</span><span className="font-bold">₹{calcResult.totalInterest?.toLocaleString('en-IN')}</span></div>
+                  <div className="flex justify-between"><span className="opacity-80">Processing Fee</span><span className="font-bold">₹{calcResult.processingFee?.toLocaleString('en-IN')}</span></div>
+                </div>
               </div>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="opacity-80">Principal</span><span className="font-medium">₹{calcResult.principal?.toLocaleString('en-IN')}</span></div>
-                <div className="flex justify-between"><span className="opacity-80">Interest Rate</span><span className="font-medium">{calcResult.interestRate}% p.a.</span></div>
-                <div className="flex justify-between"><span className="opacity-80">Tenure</span><span className="font-medium">{calcResult.tenureMonths} months</span></div>
-                <div className="flex justify-between border-t border-white/20 pt-2"><span className="opacity-80">Total Interest</span><span className="font-medium">₹{calcResult.totalInterest?.toLocaleString('en-IN')}</span></div>
-                <div className="flex justify-between"><span className="opacity-80">Processing Fee</span><span className="font-medium">₹{calcResult.processingFee?.toLocaleString('en-IN')}</span></div>
-                <div className="flex justify-between border-t border-white/20 pt-2 font-bold"><span>Total Payable</span><span>₹{calcResult.totalAmount?.toLocaleString('en-IN')}</span></div>
+              <div className="flex justify-between border-t border-white/20 pt-4 mt-6 font-bold text-sm">
+                <span className="uppercase tracking-wider">Total Payable</span>
+                <span className="text-lg font-black">₹{calcResult.totalAmount?.toLocaleString('en-IN')}</span>
               </div>
+            </div>
+          ) : (
+            <div className="glass-card border border-white/5 p-6 flex items-center justify-center text-slate-500 italic text-sm">
+              Enter details and calculate to view EMI estimations.
             </div>
           )}
         </div>
@@ -415,10 +460,7 @@ export function LoansPage() {
   );
 }
 
-// ============================================================
-// src/pages/CardsPage.jsx
-// ============================================================
-
+// ── Cards Page ────────────────────────────────────────────────
 export function CardsPage() {
   const [cards, setCards]     = useState([]);
   const [accounts, setAccounts] = useState([]);
@@ -469,61 +511,69 @@ export function CardsPage() {
   const cardBg = { DEBIT:'from-blue-600 to-blue-800', CREDIT:'from-purple-600 to-purple-900' };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6 page-transition">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold dark:text-white">Cards</h1>
-        <button onClick={() => setShowRequest(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+        <div>
+          <h1 className="text-2xl font-black text-white">My Cards</h1>
+          <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Manage debit/credit limits, blocking, and card PINs</p>
+        </div>
+        <button onClick={() => setShowRequest(true)} className="btn-primary flex items-center gap-2 text-sm">
           <FaPlus /> Request Card
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {cards.map(card => (
-          <div key={card.id} className="space-y-3">
+          <div key={card.id} className="space-y-4">
             {/* Card visual */}
-            <div className={`bg-gradient-to-br ${cardBg[card.cardType]||'from-gray-600 to-gray-800'} rounded-2xl p-5 text-white relative overflow-hidden shadow-lg`}>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-8 -mt-8" />
-              <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full -ml-5 -mb-5" />
-              <div className="flex justify-between items-start mb-6">
-                <span className="text-sm font-medium opacity-80">{card.cardType} CARD</span>
-                <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${networkColor[card.cardNetwork]||'bg-gray-500'}`}>{card.cardNetwork}</span>
+            <div className={`bg-gradient-to-br ${cardBg[card.cardType]||'from-gray-600 to-gray-800'} rounded-3xl p-6 text-white relative overflow-hidden shadow-2xl h-52 flex flex-col justify-between group`}>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full pointer-events-none -mr-8 -mt-8 group-hover:scale-110 transition-transform duration-500" />
+              <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full pointer-events-none -ml-5 -mb-5" />
+              
+              <div className="flex justify-between items-start">
+                <span className="text-[10px] font-bold uppercase tracking-widest opacity-85">{card.cardType} CARD</span>
+                <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${networkColor[card.cardNetwork]||'bg-gray-500'}`}>{card.cardNetwork}</span>
               </div>
-              <div className="mb-4">
-                <FaCreditCard className="text-2xl opacity-60 mb-2" />
-                <p className="font-mono text-lg tracking-widest">{card.cardNumber}</p>
+              
+              <div className="my-auto">
+                <FaCreditCard className="text-3xl opacity-50 mb-3" />
+                <p className="font-mono text-xl tracking-widest font-semibold text-slate-100">{card.cardNumber}</p>
               </div>
-              <div className="flex justify-between text-sm">
-                <div><p className="opacity-60 text-xs">CARD HOLDER</p><p className="font-medium">{card.cardHolderName}</p></div>
-                <div><p className="opacity-60 text-xs">EXPIRES</p><p className="font-medium">{String(card.expiryMonth).padStart(2,'0')}/{card.expiryYear}</p></div>
+              
+              <div className="flex justify-between text-xs">
+                <div><p className="opacity-60 text-[9px] uppercase tracking-wider font-semibold">Card Holder</p><p className="font-bold">{card.cardHolderName}</p></div>
+                <div><p className="opacity-60 text-[9px] uppercase tracking-wider font-semibold">Expires</p><p className="font-bold">{String(card.expiryMonth).padStart(2,'0')}/{card.expiryYear}</p></div>
               </div>
+
               {card.status !== 'ACTIVE' && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-2xl">
-                  <span className="bg-white text-red-600 font-bold px-4 py-1 rounded-full text-sm">{card.status}</span>
+                <div className="absolute inset-0 bg-black/75 flex items-center justify-center rounded-3xl backdrop-blur-[2px]">
+                  <span className="bg-red-500/10 border border-red-500/30 text-red-400 font-bold px-4 py-1.5 rounded-full text-xs uppercase tracking-widest">{card.status}</span>
                 </div>
               )}
             </div>
+
             {/* Actions */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4">
+            <div className="glass-card border border-white/5 p-4 flex flex-col justify-between">
               {card.cardType === 'CREDIT' && (
-                <div className="mb-3">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-500 dark:text-gray-400">Credit Used</span>
-                    <span className="dark:text-white">₹{card.outstandingBalance?.toLocaleString('en-IN')} / ₹{card.creditLimit?.toLocaleString('en-IN')}</span>
+                <div className="mb-4 pt-1 pb-2 border-b border-white/5">
+                  <div className="flex justify-between text-xs mb-1.5 font-semibold">
+                    <span className="text-slate-400">Credit Limit Utilization</span>
+                    <span className="text-white">₹{card.outstandingBalance?.toLocaleString('en-IN')} / ₹{card.creditLimit?.toLocaleString('en-IN')}</span>
                   </div>
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className="bg-purple-500 h-2 rounded-full"
+                  <div className="w-full bg-white/5 border border-white/5 rounded-full h-2 overflow-hidden">
+                    <div className="bg-gradient-to-r from-purple-500 to-indigo-400 h-full"
                       style={{ width: card.creditLimit ? `${(card.outstandingBalance/card.creditLimit)*100}%` : '0%' }} />
                   </div>
                 </div>
               )}
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-3">
                 <button onClick={() => toggleBlock(card)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                    ${card.status === 'BLOCKED' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}>
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors
+                    ${card.status === 'BLOCKED' ? 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20'}`}>
                   {card.status === 'BLOCKED' ? <><FaUnlock /> Unblock</> : <><FaLock /> Block</>}
                 </button>
                 <button onClick={() => setShowPin(card.id)}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 border border-white/10 bg-white/5 text-slate-300 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-white/10 transition-colors">
                   <FaKey /> Set PIN
                 </button>
               </div>
@@ -531,47 +581,48 @@ export function CardsPage() {
           </div>
         ))}
         {cards.length === 0 && (
-          <div className="col-span-3 text-center py-16 text-gray-400">
-            <FaCreditCard className="text-5xl mx-auto mb-3 opacity-30" />
-            <p>No cards yet. Request your first card!</p>
+          <div className="col-span-3 glass-card text-center py-20 border border-white/5">
+            <FaCreditCard className="text-5xl mx-auto mb-4 text-slate-700 animate-pulse" />
+            <p className="text-slate-400 font-bold">No active cards found</p>
+            <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">Apply for Visa, MasterCard, or RuPay debit/credit cards linked to your accounts.</p>
           </div>
         )}
       </div>
 
       {/* Request Card Modal */}
       {showRequest && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-sm">
-            <h2 className="font-bold text-lg dark:text-white mb-4">Request Card</h2>
-            <form onSubmit={requestCard} className="space-y-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-frosted rounded-[2.5rem] p-8 w-full max-w-md modal-transition border border-white/10 shadow-2xl">
+            <h2 className="font-extrabold text-xl text-white mb-6">Request New Card</h2>
+            <form onSubmit={requestCard} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Linked Account</label>
+                <label className="label">Linked Account</label>
                 <select required value={form.accountId} onChange={e => setForm(f => ({...f, accountId: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <option value="">Select account</option>
-                  {accounts.map(a => <option key={a.id} value={a.id}>{a.accountNumber}</option>)}
+                  className="glass-input cursor-pointer">
+                  <option value="" className="bg-slate-950">Select account</option>
+                  {accounts.map(a => <option key={a.id} value={a.id} className="bg-slate-950">{a.accountNumber}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Card Type</label>
+                <label className="label">Card Type</label>
                 <select value={form.cardType} onChange={e => setForm(f => ({...f, cardType: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <option value="DEBIT">Debit Card</option>
-                  <option value="CREDIT">Credit Card</option>
+                  className="glass-input cursor-pointer">
+                  <option value="DEBIT" className="bg-slate-950">Debit Card</option>
+                  <option value="CREDIT" className="bg-slate-950">Credit Card</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Network</label>
+                <label className="label">Card Network</label>
                 <select value={form.cardNetwork} onChange={e => setForm(f => ({...f, cardNetwork: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <option value="RUPAY">RuPay</option>
-                  <option value="VISA">Visa</option>
-                  <option value="MASTERCARD">Mastercard</option>
+                  className="glass-input cursor-pointer">
+                  <option value="RUPAY" className="bg-slate-950">RuPay</option>
+                  <option value="VISA" className="bg-slate-950">Visa</option>
+                  <option value="MASTERCARD" className="bg-slate-950">Mastercard</option>
                 </select>
               </div>
-              <div className="flex gap-3">
-                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Request</button>
-                <button type="button" onClick={() => setShowRequest(false)} className="flex-1 border rounded-lg py-2 dark:border-gray-600 dark:text-white">Cancel</button>
+              <div className="flex gap-3 mt-6">
+                <button type="submit" className="flex-1 btn-primary text-sm">Request</button>
+                <button type="button" onClick={() => setShowRequest(false)} className="flex-1 btn-secondary text-sm">Cancel</button>
               </div>
             </form>
           </div>
@@ -580,25 +631,25 @@ export function CardsPage() {
 
       {/* Set PIN Modal */}
       {showPin && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-sm">
-            <h2 className="font-bold text-lg dark:text-white mb-4 flex items-center gap-2"><FaKey /> Set Card PIN</h2>
-            <form onSubmit={setPin} className="space-y-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-frosted rounded-[2.5rem] p-8 w-full max-w-sm modal-transition border border-white/10 shadow-2xl">
+            <h2 className="font-extrabold text-xl text-white mb-6 flex items-center gap-2"><FaKey className="text-cyan-400" /> Set Card PIN</h2>
+            <form onSubmit={setPin} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">CVV</label>
+                <label className="label">CVV (3 digits)</label>
                 <input type="password" maxLength={3} required value={pinForm.cvv} onChange={e => setPinForm(f => ({...f, cvv: e.target.value}))}
-                  placeholder="3-digit CVV"
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                  placeholder="•••"
+                  className="glass-input text-center tracking-widest text-lg font-bold" />
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">New PIN</label>
+                <label className="label">New PIN (4 digits)</label>
                 <input type="password" maxLength={4} required value={pinForm.pin} onChange={e => setPinForm(f => ({...f, pin: e.target.value}))}
-                  placeholder="4-digit PIN"
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                  placeholder="••••"
+                  className="glass-input text-center tracking-widest text-lg font-bold" />
               </div>
-              <div className="flex gap-3">
-                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Set PIN</button>
-                <button type="button" onClick={() => setShowPin(null)} className="flex-1 border rounded-lg py-2 dark:border-gray-600 dark:text-white">Cancel</button>
+              <div className="flex gap-3 mt-6">
+                <button type="submit" className="flex-1 btn-primary text-sm">Set PIN</button>
+                <button type="button" onClick={() => setShowPin(null)} className="flex-1 btn-secondary text-sm">Cancel</button>
               </div>
             </form>
           </div>
@@ -608,10 +659,7 @@ export function CardsPage() {
   );
 }
 
-// ============================================================
-// src/pages/UpiPage.jsx
-// ============================================================
-
+// ── UPI Page ──────────────────────────────────────────────────
 export function UpiPage() {
   const [upiIds, setUpiIds]   = useState([]);
   const [accounts, setAccounts] = useState([]);
@@ -653,12 +701,17 @@ export function UpiPage() {
   }
 
   return (
-    <div className="space-y-5">
-      <h1 className="text-2xl font-bold dark:text-white">UPI</h1>
-      <div className="flex gap-2 border-b dark:border-gray-700">
+    <div className="space-y-6 page-transition">
+      <div>
+        <h1 className="text-2xl font-black text-white">Unified Payments Interface</h1>
+        <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-semibold">Make instant transfers and generate personal scan codes</p>
+      </div>
+
+      <div className="flex rounded-2xl bg-white/5 border border-white/5 p-1">
         {[['ids','My UPI IDs'],['send','Send Money'],['qr','QR Code']].map(([key,label]) => (
           <button key={key} onClick={() => setTab(key)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab===key ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400'}`}>
+            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold capitalize transition-all duration-300
+              ${tab===key ? 'bg-gradient-to-r from-[#005CFF] to-[#00BAF2] text-white shadow-lg' : 'text-slate-400 hover:text-slate-200'}`}>
             {label}
           </button>
         ))}
@@ -666,107 +719,122 @@ export function UpiPage() {
 
       {tab === 'ids' && (
         <div className="space-y-4">
-          <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+          <button onClick={() => setShowCreate(true)} className="btn-primary flex items-center gap-2 text-sm py-2 px-5">
             <FaPlus /> Create UPI ID
           </button>
-          {upiIds.map(u => (
-            <div key={u.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 flex justify-between items-center">
-              <div>
-                <div className="flex items-center gap-2">
-                  <FaMobileAlt className="text-blue-500" />
-                  <p className="font-semibold dark:text-white">{u.upiId}</p>
-                  {u.isDefault && <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">Default</span>}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            {upiIds.map(u => (
+              <div key={u.id} className="glass-card glass-card-hover p-6 border border-white/5 flex justify-between items-center">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-cyan-400 p-2.5 rounded-xl bg-white/5"><FaMobileAlt /></span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-white text-base">{u.upiId}</p>
+                        {u.isDefault && <span className="px-2 py-0.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] rounded-full uppercase tracking-wider font-bold">Default</span>}
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5 uppercase tracking-wider font-semibold">Linked: {u.linkedAccountNumber}</p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Linked to: {u.linkedAccountNumber}</p>
+                <button onClick={() => { getQr(u.upiId); setTab('qr'); }} className="flex items-center gap-1.5 text-xs font-bold text-cyan-400 hover:text-cyan-300 uppercase tracking-wider">
+                  <FaQrcode /> QR Code
+                </button>
               </div>
-              <button onClick={() => getQr(u.upiId)} className="flex items-center gap-1 text-sm text-blue-600 hover:underline">
-                <FaQrcode /> View QR
-              </button>
+            ))}
+          </div>
+          {upiIds.length === 0 && (
+            <div className="glass-card text-center py-16 text-slate-500 font-bold border border-white/5">
+              No active UPI IDs found.
             </div>
-          ))}
-          {upiIds.length === 0 && <p className="text-center text-gray-400 py-12">No UPI IDs yet</p>}
+          )}
         </div>
       )}
 
       {tab === 'send' && (
-        <div className="max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <h2 className="font-semibold dark:text-white mb-4 flex items-center gap-2"><FaPaperPlane /> Send Money via UPI</h2>
-          <form onSubmit={sendMoney} className="space-y-4">
+        <div className="max-w-md mx-auto glass-card border border-white/5 p-6">
+          <h2 className="font-extrabold text-white text-lg mb-6 flex items-center gap-2 border-b border-white/5 pb-4"><FaPaperPlane className="text-cyan-400" /> Send Money via UPI</h2>
+          <form onSubmit={sendMoney} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">From UPI ID</label>
+              <label className="label">From UPI ID</label>
               <select required value={sendForm.fromUpiId} onChange={e => setSendForm(f => ({...f, fromUpiId: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                <option value="">Select your UPI ID</option>
-                {upiIds.map(u => <option key={u.id} value={u.upiId}>{u.upiId}</option>)}
+                className="glass-input cursor-pointer">
+                <option value="" className="bg-slate-950">Select your UPI ID</option>
+                {upiIds.map(u => <option key={u.id} value={u.upiId} className="bg-slate-950">{u.upiId}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">To UPI ID</label>
+              <label className="label">Recipient UPI ID</label>
               <input required value={sendForm.toUpiId} onChange={e => setSendForm(f => ({...f, toUpiId: e.target.value}))}
-                placeholder="recipient@bank"
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                placeholder="recipient@paytm"
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Amount (₹)</label>
+              <label className="label">Amount (₹)</label>
               <input type="number" required min="1" value={sendForm.amount} onChange={e => setSendForm(f => ({...f, amount: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                placeholder="Enter amount"
+                className="glass-input" />
             </div>
             <div>
-              <label className="block text-sm font-medium dark:text-gray-300 mb-1">Note (optional)</label>
+              <label className="label">Add a Note (Optional)</label>
               <input value={sendForm.description} onChange={e => setSendForm(f => ({...f, description: e.target.value}))}
-                className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                placeholder="Rent, dinner split, etc..."
+                className="glass-input" />
             </div>
-            <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg">Send Money</button>
+            <button type="submit" className="w-full btn-primary mt-2">Send Money</button>
           </form>
         </div>
       )}
 
       {tab === 'qr' && (
-        <div className="max-w-sm bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 text-center">
-          <h2 className="font-semibold dark:text-white mb-4">Your QR Code</h2>
-          <div className="mb-4">
+        <div className="max-w-sm mx-auto glass-card border border-white/5 p-6 text-center">
+          <h2 className="font-extrabold text-white text-lg mb-6 flex items-center justify-center gap-2 border-b border-white/5 pb-4"><FaQrcode className="text-cyan-400" /> Receive UPI QR</h2>
+          <div className="mb-6">
             <select onChange={e => e.target.value && getQr(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-              <option value="">Select UPI ID</option>
-              {upiIds.map(u => <option key={u.id} value={u.upiId}>{u.upiId}</option>)}
+              className="glass-input cursor-pointer">
+              <option value="" className="bg-slate-950">Select UPI ID</option>
+              {upiIds.map(u => <option key={u.id} value={u.upiId} className="bg-slate-950">{u.upiId}</option>)}
             </select>
           </div>
           {qrUrl ? (
-            <div>
-              <img src={qrUrl} alt="QR Code" className="mx-auto w-48 h-48 border rounded-lg" />
-              <a href={qrUrl} download="upi-qr.png" className="mt-3 inline-block text-blue-600 text-sm hover:underline">Download QR</a>
+            <div className="space-y-4 animate-fade-in">
+              <div className="bg-white p-4 rounded-[2rem] inline-block shadow-inner">
+                <img src={qrUrl} alt="QR Code" className="w-48 h-48 mx-auto" />
+              </div>
+              <a href={qrUrl} download="upi-qr.png" className="block text-cyan-400 hover:text-cyan-300 font-bold uppercase tracking-wider text-xs">Download QR Code</a>
             </div>
           ) : (
-            <div className="py-12 text-gray-400">
-              <FaQrcode className="text-5xl mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Select a UPI ID to generate QR</p>
+            <div className="py-12 text-slate-500">
+              <FaQrcode className="text-6xl mx-auto mb-4 opacity-20" />
+              <p className="text-sm font-semibold">Select a UPI ID above to render your scanner QR code.</p>
             </div>
           )}
         </div>
       )}
 
       {showCreate && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-sm">
-            <h2 className="font-bold text-lg dark:text-white mb-4">Create UPI ID</h2>
-            <form onSubmit={createUpi} className="space-y-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="glass-frosted rounded-[2.5rem] p-8 w-full max-w-sm modal-transition border border-white/10 shadow-2xl">
+            <h2 className="font-extrabold text-xl text-white mb-6">Create UPI ID</h2>
+            <form onSubmit={createUpi} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">Link to Account</label>
+                <label className="label">Link to Account</label>
                 <select required value={form.accountId} onChange={e => setForm(f => ({...f, accountId: e.target.value}))}
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                  <option value="">Select account</option>
-                  {accounts.map(a => <option key={a.id} value={a.id}>{a.accountNumber}</option>)}
+                  className="glass-input cursor-pointer">
+                  <option value="" className="bg-slate-950">Select account</option>
+                  {accounts.map(a => <option key={a.id} value={a.id} className="bg-slate-950">{a.accountNumber}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium dark:text-gray-300 mb-1">UPI ID</label>
+                <label className="label">UPI ID string</label>
                 <input required value={form.upiId} onChange={e => setForm(f => ({...f, upiId: e.target.value}))}
-                  placeholder="yourname@bank"
-                  className="w-full border rounded-lg px-3 py-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" />
+                  placeholder="e.g. name@paytm"
+                  className="glass-input" />
               </div>
-              <div className="flex gap-3">
-                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Create</button>
-                <button type="button" onClick={() => setShowCreate(false)} className="flex-1 border rounded-lg py-2 dark:border-gray-600 dark:text-white">Cancel</button>
+              <div className="flex gap-3 mt-6">
+                <button type="submit" className="flex-1 btn-primary text-sm">Create</button>
+                <button type="button" onClick={() => setShowCreate(false)} className="flex-1 btn-secondary text-sm">Cancel</button>
               </div>
             </form>
           </div>
