@@ -227,21 +227,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .roles(Set.of(customerRole))
                 .build());
         }
-        if (!userRepo.existsByUsername("emp.kumar")) {
-            log.info("Seeding Employee User: emp.kumar...");
-            userRepo.save(User.builder()
-                .username("emp.kumar")
-                .email("kumar@bank.com")
-                .passwordHash(passwordEncoder.encode("Admin@123"))
-                .firstName("Rajesh")
-                .lastName("Kumar")
-                .phone("9000000001")
-                .isActive(true)
-                .isLocked(false)
-                .emailVerified(true)
-                .roles(Set.of(employeeRole))
-                .build());
-        }
+
 
         // Fetch users for seeding accounts
         User rahul = userRepo.findByUsername("rahul.sharma").orElse(null);
