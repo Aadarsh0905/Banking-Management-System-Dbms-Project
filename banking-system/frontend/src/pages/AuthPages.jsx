@@ -84,13 +84,6 @@ export function LoginPage() {
                 admin / Admin@123
               </button>
             </div>
-            <div className="flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg text-xs">
-              <span className="font-semibold text-gray-700 dark:text-gray-300">Employee:</span>
-              <button type="button" onClick={() => handleQuickLogin('emp.kumar', 'Admin@123')}
-                className="bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 px-2 py-1 rounded hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors font-mono">
-                emp.kumar / Admin@123
-              </button>
-            </div>
             <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg text-xs">
               <span className="font-semibold text-gray-700 dark:text-gray-300 block mb-1">Customers:</span>
               <div className="flex flex-wrap gap-1.5 mt-1">

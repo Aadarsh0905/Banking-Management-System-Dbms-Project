@@ -10,9 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-    List<Account> findByUserId(Long userId);
+    @Query("SELECT a FROM Account a WHERE a.user.id = :userId")
+    List<Account> findByUserId(@Param("userId") Long userId);
+
     Optional<Account> findByAccountNumber(String accountNumber);
-    List<Account> findByUserIdAndStatus(Long userId, Account.AccountStatus status);
+
+    @Query("SELECT a FROM Account a WHERE a.user.id = :userId AND a.status = :status")
+    List<Account> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status") Account.AccountStatus status);
+
     long countByStatus(Account.AccountStatus status);
 
     @Query("SELECT a FROM Account a WHERE a.user.id = :userId AND a.status = 'ACTIVE'")

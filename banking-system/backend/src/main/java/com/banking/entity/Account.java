@@ -42,7 +42,8 @@ public class Account {
     private String currency = "INR";
 
     @Enumerated(EnumType.STRING)
-    private AccountStatus status = AccountStatus.PENDING;
+    @Builder.Default
+    private AccountStatus status = AccountStatus.ACTIVE;
 
     @Column(name = "opened_at", nullable = false)
     private LocalDate openedAt;

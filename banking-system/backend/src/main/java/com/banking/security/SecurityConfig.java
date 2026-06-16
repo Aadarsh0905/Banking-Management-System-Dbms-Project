@@ -42,7 +42,7 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/employees/**").hasAnyRole("ADMIN","EMPLOYEE")
+                .requestMatchers("/employees/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .userDetailsService(userDetailsService)
