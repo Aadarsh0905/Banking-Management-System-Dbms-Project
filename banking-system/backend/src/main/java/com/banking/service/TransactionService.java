@@ -172,6 +172,21 @@ public class TransactionService {
             .map(this::mapToResponse);
     }
 
+    public List<TransactionResponse> getTransactionsByAccount(Long accountId, Long userId) {
+        Account acc = accountRepo.findById(accountId)
+            .orElseThrow(() -> new BankingException("Account not found", 404));
+        if (!acc.getUser().getId().equals(userId))
+            throw new BankingException("Unauthorized", 403);
+        return txnRepo.findByAccountAndDateRange(
+                accountId, 
+                LocalDateTime.now().minusYears(10), 
+                LocalDateTime.now().plusYears(1), 
+                PageRequest.of(0, 100, Sort.by("initiatedAt").descending()))
+            .getContent().stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
     public TransactionResponse getByRef(String ref) {
         return txnRepo.findByTransactionRef(ref)
             .map(this::mapToResponse)

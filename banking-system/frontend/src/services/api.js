@@ -70,6 +70,7 @@ export const txnApi = {
   withdraw:         (d)      => API.post('/transactions/withdraw', d),
   transfer:         (d)      => API.post('/transactions/transfer', d),
   getHistory:       (p=0,s=20) => API.get(`/transactions?page=${p}&size=${s}`),
+  getByAccount:     (accountId) => API.get(`/transactions/account/${accountId}`),
   getByRef:         (ref)    => API.get(`/transactions/${ref}`),
   search:           (params) => API.get('/transactions/search', { params }),
   getReceipt:       (ref)    => API.get(`/transactions/${ref}/receipt`, { responseType: 'blob' }),

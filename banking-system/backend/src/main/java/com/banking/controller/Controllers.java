@@ -252,6 +252,14 @@ class TransactionController {
         return ResponseEntity.ok(ApiResponse.success(txnService.getTransactions(ud.getId(), page, size)));
     }
 
+    @GetMapping("/account/{accountId}")
+    @Operation(summary = "Get transaction history for a specific account")
+    public ResponseEntity<ApiResponse<List<TransactionResponse>>> getAccountTransactions(
+            @AuthenticationPrincipal BankUserDetails ud,
+            @PathVariable Long accountId) {
+        return ResponseEntity.ok(ApiResponse.success(txnService.getTransactionsByAccount(accountId, ud.getId())));
+    }
+
     @GetMapping("/{ref}")
     @Operation(summary = "Get transaction by reference")
     public ResponseEntity<ApiResponse<TransactionResponse>> getByRef(@PathVariable String ref) {
