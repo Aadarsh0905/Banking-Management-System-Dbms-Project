@@ -609,8 +609,8 @@ export function TransferPage() {
     finally { setLoading(false); }
   }
 
-  const tabs = ['transfer','deposit','withdraw'];
-  const handlers = { transfer: handleTransfer, deposit: handleDeposit, withdraw: handleWithdraw };
+  const tabs = ['transfer', 'self', 'deposit', 'withdraw'];
+  const handlers = { transfer: handleTransfer, self: handleTransfer, deposit: handleDeposit, withdraw: handleWithdraw };
 
   return (
     <div className="max-w-lg mx-auto space-y-6">
@@ -621,10 +621,10 @@ export function TransferPage() {
 
       <div className="flex rounded-2xl bg-white/5 border border-white/5 p-1">
         {tabs.map(tab => (
-          <button key={tab} onClick={() => { setActiveTab(tab); setResult(null); }}
+          <button key={tab} onClick={() => { setActiveTab(tab); setResult(null); setForm({ fromAccountId: '', toAccountNumber: '', amount: '', description: '' }); }}
             className={`flex-1 py-2 rounded-xl text-sm font-semibold capitalize transition-all duration-150
               ${activeTab===tab ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>
-            {tab}
+            {tab === 'self' ? 'Self Transfer' : tab}
           </button>
         ))}
       </div>
@@ -633,7 +633,7 @@ export function TransferPage() {
         <form onSubmit={handlers[activeTab]} className="space-y-5">
           <div>
             <label className="label">
-              {activeTab === 'transfer' ? 'Source Account' : 'Account'}
+              {activeTab === 'transfer' || activeTab === 'self' ? 'Source Account' : 'Account'}
             </label>
             <select required value={form.fromAccountId} onChange={e => setForm(f => ({...f, fromAccountId: e.target.value}))}
               className="glass-input cursor-pointer">
@@ -648,6 +648,19 @@ export function TransferPage() {
               <input required value={form.toAccountNumber} onChange={e => setForm(f => ({...f, toAccountNumber: e.target.value}))}
                 placeholder="Enter recipient account number"
                 className="glass-input" />
+            </div>
+          )}
+
+          {activeTab === 'self' && (
+            <div>
+              <label className="label">Destination Account</label>
+              <select required value={form.toAccountNumber} onChange={e => setForm(f => ({...f, toAccountNumber: e.target.value}))}
+                className="glass-input cursor-pointer">
+                <option value="" className="bg-slate-950">Select destination account</option>
+                {accounts
+                  .filter(a => String(a.id) !== String(form.fromAccountId))
+                  .map(a => <option key={a.id} value={a.accountNumber} className="bg-slate-950">{a.accountNumber} ({a.accountType}) — Balance: ₹{a.balance?.toLocaleString('en-IN')}</option>)}
+              </select>
             </div>
           )}
 

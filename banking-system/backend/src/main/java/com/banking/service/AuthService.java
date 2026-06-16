@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import com.banking.exception.BankingException;
 import com.banking.repository.RoleRepository;
 import com.banking.repository.UserRepository;
+import com.banking.repository.KycRepository;
 import com.banking.security.BankUserDetails;
 import com.banking.security.BankUserDetailsService;
 import com.banking.security.JwtUtil;
@@ -48,6 +49,7 @@ public class AuthService {
     private final AccountRepository accountRepo;
     private final BranchRepository branchRepo;
     private final AccountTypeRepository accountTypeRepo;
+    private final KycRepository kycRepo;
 
     @Transactional
     public UserResponse register(AuthDTOs.RegisterRequest req) {
@@ -188,6 +190,10 @@ public class AuthService {
     }
 
     public UserResponse mapToUserResponse(User u) {
+        String kycStatus = kycRepo.findByUserId(u.getId())
+            .map(k -> k.getKycStatus().name())
+            .orElse("NOT_SUBMITTED");
+
         return UserResponse.builder()
             .id(u.getId())
             .username(u.getUsername())
@@ -202,6 +208,7 @@ public class AuthService {
             .isLocked(u.getIsLocked())
             .emailVerified(u.getEmailVerified())
             .roles(u.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+            .kycStatus(kycStatus)
             .lastLoginAt(u.getLastLoginAt())
             .createdAt(u.getCreatedAt())
             .build();

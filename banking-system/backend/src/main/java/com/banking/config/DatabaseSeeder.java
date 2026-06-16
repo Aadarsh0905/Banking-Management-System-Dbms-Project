@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -24,10 +26,20 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final UserRepository userRepo;
     private final AccountRepository accountRepo;
     private final PasswordEncoder passwordEncoder;
+    private final EntityManager entityManager;
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         log.info("Checking database configuration and seeding state...");
+
+        try {
+            entityManager.createNativeQuery("ALTER TABLE accounts MODIFY COLUMN status VARCHAR(30) DEFAULT 'PENDING'")
+                .executeUpdate();
+            log.info("Successfully altered accounts table status column to VARCHAR(30).");
+        } catch (Exception e) {
+            log.warn("Could not alter accounts table status column: {}", e.getMessage());
+        }
 
         // 1. Seed Roles individually
         if (roleRepo.findByName("ROLE_CUSTOMER").isEmpty()) {

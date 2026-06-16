@@ -199,6 +199,7 @@ export function ProfilePage() {
 // ============================================================
 
 export function KycPage() {
+  const { fetchProfile } = useAuth();
   const [kyc, setKyc] = useState(null);
   const [form, setForm] = useState({ aadhaarNumber: '', panNumber: '', addressLine1: '', addressLine2: '', city: '', state: '', pincode: '' });
   const [submitted, setSubmitted] = useState(false);
@@ -231,6 +232,7 @@ export function KycPage() {
       await userApi.submitKyc(form);
       toast.success('KYC submitted for verification!');
       setSubmitted(true);
+      if (fetchProfile) await fetchProfile();
       await loadKyc();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Submission failed');

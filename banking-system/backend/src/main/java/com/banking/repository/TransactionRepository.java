@@ -29,7 +29,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("""
         SELECT t FROM Transaction t
-        WHERE (t.fromAccount.user.id = :userId OR t.toAccount.user.id = :userId)
+        LEFT JOIN t.fromAccount fa
+        LEFT JOIN t.toAccount ta
+        WHERE (fa.user.id = :userId OR ta.user.id = :userId)
         ORDER BY t.initiatedAt DESC
     """)
     Page<Transaction> findByUserId(@Param("userId") Long userId, Pageable pageable);
@@ -42,7 +44,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("""
         SELECT t FROM Transaction t
-        WHERE (t.fromAccount.user.id = :userId OR t.toAccount.user.id = :userId)
+        LEFT JOIN t.fromAccount fa
+        LEFT JOIN t.toAccount ta
+        WHERE (fa.user.id = :userId OR ta.user.id = :userId)
           AND (:type IS NULL OR t.transactionType = :type)
           AND (:status IS NULL OR t.status = :status)
           AND (:from IS NULL OR t.initiatedAt >= :from)
@@ -68,7 +72,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     long countByCardId(@Param("cardId") Long cardId);
 
     @Query("SELECT t FROM Transaction t " +
-           "WHERE (t.fromAccount.user.id = :userId OR t.toAccount.user.id = :userId) " +
+           "LEFT JOIN t.fromAccount fa " +
+           "LEFT JOIN t.toAccount ta " +
+           "WHERE (fa.user.id = :userId OR ta.user.id = :userId) " +
            "AND t.transactionType IN ('UPI_CREDIT', 'UPI_DEBIT') " +
            "ORDER BY t.initiatedAt DESC")
     Page<Transaction> findUpiByUserId(@Param("userId") Long userId, Pageable pageable);
