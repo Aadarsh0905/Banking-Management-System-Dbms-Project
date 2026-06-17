@@ -63,7 +63,7 @@ public class BankingManagementSystemApplication {
                 System.err.println("Could not load .env file: " + e.getMessage());
             }
         } else {
-            System.out.println("No .env file found at standard paths. Relying on system environment.");
+            System.out.println("System environment configuration active (no local .env file).");
         }
     }
 }
