@@ -80,6 +80,11 @@ public class NotificationService {
     @Async
     public void sendPasswordResetEmail(User user, String token) {
         String link = "http://localhost:3000/reset-password?token=" + token;
+        log.info("========================================= [FORGOT PASSWORD] =========================================");
+        log.info("User '{}' requested a password reset.", user.getEmail());
+        log.info("Reset Token: {}", token);
+        log.info("Reset Link: {}", link);
+        log.info("======================================================================================================");
         sendEmail(user.getEmail(), "Password Reset Request",
             "<p>Click <a href='" + link + "'>here</a> to reset your password. Link expires in 1 hour.</p>");
     }
