@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, ThemeProvider, useAuth } from './context/Contexts';
 import Layout from './components/Layout';
+import { toast } from 'react-toastify';
+import { sounds } from './services/sounds';
 
 // Auth
 import { LoginPage, RegisterPage, ForgotPasswordPage } from './pages/AuthPages';
@@ -59,6 +62,53 @@ function IndexRedirect() {
 }
 
 export default function App() {
+  useEffect(() => {
+    // 1. Global Click / Touch sound trigger
+    const handleGlobalClick = (e) => {
+      const isInteractive = e.target.closest(
+        'button, a, input[type="button"], input[type="submit"], [role="button"], select, option, label, textarea'
+      );
+      if (isInteractive) {
+        sounds.playClick();
+      }
+    };
+    window.addEventListener('click', handleGlobalClick, { capture: true });
+
+    // 2. Global Notification toast sound trigger (intercepts all messages)
+    const unsubscribe = toast.onChange((payload) => {
+      if (payload.status === 'added') {
+        if (payload.type === 'success') {
+          const contentStr = String(payload.content || '').toLowerCase();
+          // If transaction-related, play the coin drop / transfer success sound
+          if (
+            contentStr.includes('transfer') ||
+            contentStr.includes('sent') ||
+            contentStr.includes('received') ||
+            contentStr.includes('deposit') ||
+            contentStr.includes('withdraw') ||
+            contentStr.includes('success') ||
+            contentStr.includes('paid') ||
+            contentStr.includes('opened') ||
+            contentStr.includes('activated')
+          ) {
+            sounds.playSuccess();
+          } else {
+            sounds.playNotification();
+          }
+        } else if (payload.type === 'error') {
+          sounds.playError();
+        } else {
+          sounds.playNotification();
+        }
+      }
+    });
+
+    return () => {
+      window.removeEventListener('click', handleGlobalClick, { capture: true });
+      unsubscribe();
+    };
+  }, []);
+
   return (
     <ThemeProvider>
       <AuthProvider>
