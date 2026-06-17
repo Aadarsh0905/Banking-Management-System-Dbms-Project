@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fa';
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 import { adminApi } from '../../services/api';
 import { DashboardSkeleton, TableSkeleton } from '../../components/Skeletons';
@@ -24,9 +25,9 @@ import { FaCheck, FaTimes } from 'react-icons/fa';
 
 Chart.register(...registerables);
 
-function StatCard({ icon, label, value, color, sub }) {
-  return (
-    <div className={`glass-card glass-card-hover border-l-4 ${color} relative overflow-hidden group`}>
+function StatCard({ icon, label, value, color, sub, link }) {
+  const CardContent = () => (
+    <>
       <div className="flex justify-between items-start z-10 relative">
         <div>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</p>
@@ -38,6 +39,20 @@ function StatCard({ icon, label, value, color, sub }) {
         </span>
       </div>
       <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-white/[0.01] rounded-full pointer-events-none group-hover:scale-150 transition-transform duration-500"></div>
+    </>
+  );
+
+  if (link) {
+    return (
+      <Link to={link} className={`glass-card glass-card-hover border-l-4 ${color} relative overflow-hidden group block cursor-pointer`}>
+        <CardContent />
+      </Link>
+    );
+  }
+
+  return (
+    <div className={`glass-card glass-card-hover border-l-4 ${color} relative overflow-hidden group`}>
+      <CardContent />
     </div>
   );
 }
@@ -92,14 +107,14 @@ export function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={<FaUsers className="text-cyan-400"/>}   label="Total Customers"  value={stats?.totalCustomers}        color="border-cyan-400" />
-        <StatCard icon={<FaUniversity className="text-green-400"/>} label="Total Accounts" value={stats?.totalAccounts}      color="border-green-400" />
-        <StatCard icon={<FaExchangeAlt className="text-purple-400"/>} label="Txns Today"  value={stats?.totalTransactionsToday} color="border-purple-400" sub={`₹${Number(stats?.totalTransactionValueToday||0).toLocaleString('en-IN')}`} />
-        <StatCard icon={<FaHandHoldingUsd className="text-orange-400"/>} label="Active Loans" value={stats?.activeLoans}    color="border-orange-400" />
-        <StatCard icon={<FaClock className="text-yellow-400"/>}  label="Pending KYC"    value={stats?.pendingKycVerifications} color="border-yellow-400" />
-        <StatCard icon={<FaCheckCircle className="text-teal-400"/>} label="Pending Loans" value={stats?.pendingLoanApplications} color="border-teal-400" />
+        <StatCard icon={<FaUsers className="text-cyan-400"/>}   label="Total Customers"  value={stats?.totalCustomers}        color="border-cyan-400" link="/admin/customers" />
+        <StatCard icon={<FaUniversity className="text-green-400"/>} label="Total Accounts" value={stats?.totalAccounts}      color="border-green-400" link="/admin/accounts" />
+        <StatCard icon={<FaExchangeAlt className="text-purple-400"/>} label="Txns Today"  value={stats?.totalTransactionsToday} color="border-purple-400" sub={`₹${Number(stats?.totalTransactionValueToday||0).toLocaleString('en-IN')}`} link="/admin/transactions" />
+        <StatCard icon={<FaHandHoldingUsd className="text-orange-400"/>} label="Active Loans" value={stats?.activeLoans}    color="border-orange-400" link="/admin/loans" />
+        <StatCard icon={<FaClock className="text-yellow-400"/>}  label="Pending KYC"    value={stats?.pendingKycVerifications} color="border-yellow-400" link="/admin/kyc" />
+        <StatCard icon={<FaCheckCircle className="text-teal-400"/>} label="Pending Loans" value={stats?.pendingLoanApplications} color="border-teal-400" link="/admin/loans" />
         <StatCard icon={<FaCodeBranch className="text-red-400"/>} label="Branches"       value={stats?.totalBranches}         color="border-red-400" />
-        <StatCard icon={<FaIdCard className="text-cyan-400"/>} label="New Customers (7d)" value={report?.newCustomers}       color="border-cyan-500" />
+        <StatCard icon={<FaIdCard className="text-cyan-400"/>} label="New Customers (7d)" value={report?.newCustomers}       color="border-cyan-500" link="/admin/customers" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
