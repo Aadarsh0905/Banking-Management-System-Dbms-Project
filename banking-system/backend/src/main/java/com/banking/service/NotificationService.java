@@ -27,6 +27,12 @@ public class NotificationService {
     private final JavaMailSender mailSender;
     private final UserRepository userRepo;
 
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
+    private String mailFrom;
+
+    @org.springframework.beans.factory.annotation.Value("${banking.mail.from-name:Banking Management System}")
+    private String mailFromName;
+
     @Async
     public void sendWelcomeEmail(User user) {
         sendEmail(user.getEmail(),
@@ -80,6 +86,11 @@ public class NotificationService {
     @Async
     public void sendPasswordResetEmail(User user, String token) {
         String link = "http://localhost:3000/reset-password?token=" + token;
+        System.out.println("========================================= [FORGOT PASSWORD] =========================================");
+        System.out.println("User '" + user.getEmail() + "' requested a password reset.");
+        System.out.println("Reset Token: " + token);
+        System.out.println("Reset Link: " + link);
+        System.out.println("======================================================================================================");
         log.info("========================================= [FORGOT PASSWORD] =========================================");
         log.info("User '{}' requested a password reset.", user.getEmail());
         log.info("Reset Token: {}", token);
@@ -103,13 +114,20 @@ public class NotificationService {
     private void sendEmail(String to, String subject, String htmlBody) {
         try {
             MimeMessage msg = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+            MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
+            if (mailFrom != null && !mailFrom.isBlank()) {
+                if (mailFrom.contains("@")) {
+                    helper.setFrom(mailFrom, mailFromName);
+                } else {
+                    helper.setFrom("noreply@banking.com", mailFromName);
+                }
+            }
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
             mailSender.send(msg);
         } catch (Exception e) {
-            log.error("Failed to send email to {}: {}", to, e.getMessage());
+            log.error("Failed to send email to {}: {}", to, e.getMessage(), e);
         }
     }
 
