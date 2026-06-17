@@ -27,6 +27,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth, useTheme } from '../context/Contexts';
 import { notifApi } from '../services/api';
+import { toast } from 'react-toastify';
 
 function Sidebar({ open }) {
   const { isAdmin } = useAuth();
@@ -125,10 +126,49 @@ function Navbar({ onToggleSidebar }) {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [unread, setUnread] = useState(0);
+  const [lastNotificationId, setLastNotificationId] = useState(null);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
 
   useEffect(() => {
-    notifApi.getUnreadCount().then((r) => setUnread(r.data.data || 0)).catch(() => {});
-  }, []);
+    if (!user) return;
+
+    const checkNewNotifications = async () => {
+      try {
+        const res = await notifApi.getAll(0);
+        const list = res.data?.data?.content || [];
+        
+        if (list.length > 0) {
+          const latest = list[0];
+          
+          if (!isFirstLoad && lastNotificationId && latest.id > lastNotificationId) {
+            // Filter all notifications that are newer than the last tracked ID
+            const newNotifs = list.filter(n => n.id > lastNotificationId).reverse();
+            newNotifs.forEach(n => {
+              if (n.title.toLowerCase().includes('error') || n.title.toLowerCase().includes('failed') || n.title.toLowerCase().includes('insufficient')) {
+                toast.error(`${n.title}: ${n.message}`);
+              } else if (n.title.toLowerCase().includes('welcome') || n.title.toLowerCase().includes('success') || n.title.toLowerCase().includes('received') || n.title.toLowerCase().includes('opened')) {
+                toast.success(`${n.title}: ${n.message}`);
+              } else {
+                toast.info(`${n.title}: ${n.message}`);
+              }
+            });
+          }
+          
+          setLastNotificationId(latest.id);
+          setIsFirstLoad(false);
+        }
+        
+        const countRes = await notifApi.getUnreadCount();
+        setUnread(countRes.data.data || 0);
+      } catch (err) {
+        console.warn("Failed to retrieve new notifications:", err);
+      }
+    };
+
+    checkNewNotifications();
+    const interval = setInterval(checkNewNotifications, 4000);
+    return () => clearInterval(interval);
+  }, [user, lastNotificationId, isFirstLoad]);
 
   function handleLogout() {
     logout();

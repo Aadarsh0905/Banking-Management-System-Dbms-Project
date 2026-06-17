@@ -56,10 +56,25 @@ public class NotificationService {
 
     @Async
     public void sendTransactionAlert(User user, Transaction txn) {
-        String msg = String.format("Transaction of ₹%.2f [%s] on your account. Ref: %s",
-            txn.getAmount(), txn.getTransactionType(), txn.getTransactionRef());
-        sendEmail(user.getEmail(), "Transaction Alert", "<p>" + msg + "</p>");
-        saveInApp(user, "Transaction Alert", msg);
+        boolean isReceiver = txn.getToAccount() != null && txn.getToAccount().getUser().getId().equals(user.getId());
+        String title;
+        String msg;
+        
+        if (isReceiver) {
+            title = "💸 Money Received";
+            String senderName = txn.getFromAccount() != null 
+                ? txn.getFromAccount().getUser().getFirstName() + " " + txn.getFromAccount().getUser().getLastName()
+                : "External Source";
+            msg = String.format("You received ₹%,.2f from %s. Ref: %s",
+                txn.getAmount(), senderName, txn.getTransactionRef());
+        } else {
+            title = "✅ Transaction Successful";
+            msg = String.format("Your transaction of ₹%,.2f [%s] was successful. Ref: %s",
+                txn.getAmount(), txn.getTransactionType().name(), txn.getTransactionRef());
+        }
+        
+        sendEmail(user.getEmail(), title, "<p>" + msg + "</p>");
+        saveInApp(user, title, msg);
     }
 
     @Async

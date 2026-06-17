@@ -120,8 +120,11 @@ public class TransactionService {
             throw new BankingException("Unauthorized", 403);
         if (acc.getStatus() != Account.AccountStatus.ACTIVE)
             throw new BankingException("Account is not active", 400);
-        if (acc.getAvailableBalance().compareTo(req.amount) < 0)
+        if (acc.getAvailableBalance().compareTo(req.amount) < 0) {
+            notificationService.sendActivityNotification(acc.getUser(), "❌ Insufficient Balance", 
+                String.format("Withdrawal of ₹%,.2f failed due to insufficient balance in account %s.", req.amount, acc.getAccountNumber()));
             throw new BankingException("Insufficient balance", 400);
+        }
 
         BigDecimal before = acc.getBalance();
         acc.setBalance(before.subtract(req.amount));
@@ -161,8 +164,11 @@ public class TransactionService {
             throw new BankingException("Source account is not active", 400);
         if (to.getStatus() != Account.AccountStatus.ACTIVE)
             throw new BankingException("Destination account is not active", 400);
-        if (from.getAvailableBalance().compareTo(req.amount) < 0)
+        if (from.getAvailableBalance().compareTo(req.amount) < 0) {
+            notificationService.sendActivityNotification(from.getUser(), "❌ Insufficient Balance", 
+                String.format("Transfer of ₹%,.2f to account %s failed due to insufficient balance.", req.amount, to.getAccountNumber()));
             throw new BankingException("Insufficient balance", 400);
+        }
         if (from.getId().equals(to.getId()))
             throw new BankingException("Cannot transfer to same account", 400);
 

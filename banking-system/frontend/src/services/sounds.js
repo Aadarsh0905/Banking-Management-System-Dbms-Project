@@ -62,30 +62,42 @@ class SoundEffects {
     }
   }
 
-  // Play a rising coin success/money transfer sound (like a cash register)
+  // Play a premium metallic coin spill / cash register sound effect
   playSuccess() {
     try {
       this.init();
       const now = this.ctx.currentTime;
       
-      const playCoin = (time, freq) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, time);
-        gain.gain.setValueAtTime(0.12, time);
-        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
-        osc.start(time);
-        osc.stop(time + 0.2);
+      // A single coin clink is composed of high-frequency inharmonic sine wave components
+      const playCoinClink = (startTime) => {
+        const frequencies = [850, 1075, 2200, 3300, 4400];
+        frequencies.forEach((freq, index) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+          
+          // Higher frequencies decay much faster to simulate natural metal resonance
+          const decay = 0.16 - (index * 0.02);
+          const volume = 0.045 / (index + 1); // high frequencies are quieter
+          
+          gain.gain.setValueAtTime(volume, startTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, startTime + decay);
+          
+          osc.start(startTime);
+          osc.stop(startTime + decay);
+        });
       };
 
-      // Play 3 rising metallic coin notes
-      playCoin(now, 880.00);       // A5
-      playCoin(now + 0.08, 1174.66); // D6
-      playCoin(now + 0.16, 1396.91); // F6
-      playCoin(now + 0.24, 1760.00); // A6
+      // Play 4 coin drops in quick, irregular succession to sound natural (like dropping a small pile of coins)
+      playCoinClink(now);
+      playCoinClink(now + 0.05);
+      playCoinClink(now + 0.11);
+      playCoinClink(now + 0.18);
     } catch (e) {
       console.warn("Success sound failed:", e);
     }

@@ -135,6 +135,10 @@ public class AuthService {
         ud.user().setLastLoginAt(LocalDateTime.now());
         userRepo.save(ud.user());
 
+        notificationService.sendActivityNotification(ud.user(), "🔔 New Login Detected", 
+            String.format("A new login was detected on your account at %s.", 
+                LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm:ss"))));
+
         return AuthDTOs.AuthResponse.builder()
             .accessToken(accessToken)
             .refreshToken(refreshToken)
