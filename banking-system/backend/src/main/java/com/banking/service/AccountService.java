@@ -28,6 +28,7 @@ public class AccountService {
     private final AccountTypeRepository accountTypeRepo;
     private final BranchRepository branchRepo;
     private final UserRepository userRepo;
+    private final NotificationService notificationService;
 
     @Transactional
     public AccountResponse openAccount(Long userId, OpenAccountRequest req) {
@@ -55,6 +56,9 @@ public class AccountService {
 
         account = accountRepo.save(account);
         log.info("Account {} opened for user {}", accNumber, userId);
+        notificationService.sendActivityNotification(user, "Bank Account Opened", 
+            String.format("Your new %s account (%s) has been successfully opened at %s branch.", 
+                type.getTypeName(), accNumber, branch.getBranchName()));
         return mapToResponse(account);
     }
 
@@ -84,6 +88,10 @@ public class AccountService {
             throw new BankingException("Please withdraw all funds before closing", 400);
         a.setStatus(Account.AccountStatus.PENDING_CLOSE);
         accountRepo.save(a);
+
+        notificationService.sendActivityNotification(a.getUser(), "Account Closure Request Submitted", 
+            String.format("Your request to close bank account %s has been submitted and is pending approval.", 
+                a.getAccountNumber()));
     }
 
     public List<AccountResponse> getPendingTerminations() {
@@ -102,6 +110,9 @@ public class AccountService {
         a.setStatus(Account.AccountStatus.CLOSED);
         a.setClosedAt(LocalDate.now());
         accountRepo.save(a);
+
+        notificationService.sendActivityNotification(a.getUser(), "Account Closed", 
+            String.format("Your bank account %s has been successfully closed.", a.getAccountNumber()));
     }
 
     @Transactional
@@ -113,6 +124,10 @@ public class AccountService {
         }
         a.setStatus(Account.AccountStatus.ACTIVE);
         accountRepo.save(a);
+
+        notificationService.sendActivityNotification(a.getUser(), "Account Closure Cancelled", 
+            String.format("Your request to close bank account %s has been rejected. The account status has been restored to ACTIVE.", 
+                a.getAccountNumber()));
     }
 
     private String generateAccountNumber() {

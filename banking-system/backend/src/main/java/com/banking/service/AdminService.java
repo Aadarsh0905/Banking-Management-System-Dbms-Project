@@ -47,6 +47,7 @@ public class AdminService {
     private final AuthService authService;
     private final AccountService accountService;
     private final jakarta.persistence.EntityManager entityManager;
+    private final NotificationService notificationService;
 
     @Transactional
     public void deleteAccount(Long accountId) {
@@ -119,6 +120,9 @@ public class AdminService {
         User u = userRepo.findById(id).orElseThrow(() -> new BankingException("User not found", 404));
         u.setIsActive(active);
         userRepo.save(u);
+
+        notificationService.sendActivityNotification(u, "Profile Status Update", 
+            String.format("Your bank profile status has been updated to %s by the administrator.", active ? "ACTIVE" : "INACTIVE"));
     }
 
     @Transactional
@@ -127,6 +131,9 @@ public class AdminService {
         u.setIsLocked(false);
         u.setFailedLoginCount(0);
         userRepo.save(u);
+
+        notificationService.sendActivityNotification(u, "Account Security Update", 
+            "Your locked account has been unlocked. You may now log in to the system.");
     }
 
     public Page<Map<String,Object>> getPendingKyc(int page, int size) {
@@ -152,6 +159,10 @@ public class AdminService {
         kyc.setRemarks(remarks);
         if ("VERIFIED".equals(status)) kyc.setVerifiedAt(LocalDateTime.now());
         kycRepo.save(kyc);
+
+        notificationService.sendActivityNotification(kyc.getUser(), "KYC Verification Update", 
+            String.format("Your KYC status has been updated to %s by the bank administration. Remarks: %s", 
+                status, remarks != null ? remarks : "None"));
     }
 
     public Page<LoanApplicationResponse> getPendingLoans(int page, int size) {
@@ -214,6 +225,9 @@ public class AdminService {
         Account acc = accountRepo.findById(id).orElseThrow(() -> new BankingException("Account not found", 404));
         acc.setStatus(Account.AccountStatus.valueOf(status));
         accountRepo.save(acc);
+
+        notificationService.sendActivityNotification(acc.getUser(), "Bank Account Update", 
+            String.format("The status of your bank account %s has been updated to %s.", acc.getAccountNumber(), status));
     }
 
     public List<Branch> getAllBranches() { return branchRepo.findAll(); }

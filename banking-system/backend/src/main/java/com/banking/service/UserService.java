@@ -36,6 +36,7 @@ public class UserService {
     private final KycRepository kycRepo;
     private final BeneficiaryRepository benefRepo;
     private final AuthService authService;
+    private final NotificationService notificationService;
 
     @Value("${banking.upload.dir:./uploads}")
     private String uploadDir;
@@ -54,7 +55,10 @@ public class UserService {
         if (req.lastName  != null) u.setLastName(req.lastName);
         if (req.phone     != null) u.setPhone(req.phone);
         if (req.gender    != null) u.setGender(User.Gender.valueOf(req.gender));
-        return authService.mapToUserResponse(userRepo.save(u));
+        User saved = userRepo.save(u);
+        notificationService.sendActivityNotification(saved, "Profile Updated", 
+            "Your profile details (name, phone, gender) have been updated successfully.");
+        return authService.mapToUserResponse(saved);
     }
 
     @Transactional
@@ -93,6 +97,8 @@ public class UserService {
         kyc.setKycStatus(KycDetails.KycStatus.SUBMITTED);
         try {
             kycRepo.save(kyc);
+            notificationService.sendActivityNotification(u, "KYC Submitted", 
+                "Your KYC document verification request has been submitted successfully and is currently under review.");
         } catch (DataIntegrityViolationException e) {
             throw new BankingException("Aadhaar or PAN number is already registered with another account.", 409);
         }
@@ -129,6 +135,9 @@ public class UserService {
             .ifscCode(req.ifscCode).bankName(req.bankName).beneficiaryName(req.beneficiaryName)
             .isActive(true).build();
         b = benefRepo.save(b);
+        notificationService.sendActivityNotification(u, "Beneficiary Added", 
+            String.format("Beneficiary %s (Account: %s) has been successfully added to your list.", 
+                b.getNickname(), b.getAccountNumber()));
         return BeneficiaryResponse.builder()
             .id(b.getId()).nickname(b.getNickname()).accountNumber(b.getAccountNumber())
             .ifscCode(b.getIfscCode()).bankName(b.getBankName()).beneficiaryName(b.getBeneficiaryName())
@@ -141,5 +150,7 @@ public class UserService {
         if (!b.getUser().getId().equals(userId)) throw new BankingException("Unauthorized", 403);
         b.setIsActive(false);
         benefRepo.save(b);
+        notificationService.sendActivityNotification(b.getUser(), "Beneficiary Removed", 
+            String.format("Beneficiary %s has been removed from your beneficiary list.", b.getNickname()));
     }
 }

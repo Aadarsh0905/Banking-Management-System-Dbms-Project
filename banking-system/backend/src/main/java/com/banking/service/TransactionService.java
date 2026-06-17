@@ -362,6 +362,9 @@ public class TransactionService {
                 .build();
 
         st = scheduledRepo.save(st);
+        notificationService.sendActivityNotification(from.getUser(), "Transfer Scheduled", 
+            String.format("A recurring transfer of ₹%,.2f to account %s has been scheduled. Frequency: %s, Next date: %s.", 
+                amount, to.getAccountNumber(), freq, nextDate));
         return Map.<String, Object>of(
             "id", st.getId(),
             "fromAccount", from.getAccountNumber(),

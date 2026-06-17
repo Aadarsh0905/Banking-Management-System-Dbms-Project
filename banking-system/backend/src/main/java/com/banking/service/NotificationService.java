@@ -36,6 +36,25 @@ public class NotificationService {
     }
 
     @Async
+    @Transactional
+    public void sendActivityNotification(User user, String title, String message) {
+        if (user != null) {
+            sendEmail(user.getEmail(), title, "<p>" + message + "</p>");
+            saveInApp(user, title, message);
+        }
+    }
+
+    @Async
+    @Transactional
+    public void sendActivityNotification(Long userId, String title, String message) {
+        User user = userRepo.findById(userId).orElse(null);
+        if (user != null) {
+            sendEmail(user.getEmail(), title, "<p>" + message + "</p>");
+            saveInApp(user, title, message);
+        }
+    }
+
+    @Async
     public void sendTransactionAlert(User user, Transaction txn) {
         String msg = String.format("Transaction of ₹%.2f [%s] on your account. Ref: %s",
             txn.getAmount(), txn.getTransactionType(), txn.getTransactionRef());

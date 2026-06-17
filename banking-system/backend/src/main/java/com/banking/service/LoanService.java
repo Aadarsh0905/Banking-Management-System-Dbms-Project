@@ -95,6 +95,9 @@ public class LoanService {
             .build();
 
         app = loanAppRepo.save(app);
+        notificationService.sendActivityNotification(user, "Loan Application Submitted", 
+            String.format("Your loan application for ₹%,.2f (%s) has been submitted. Application No: %s.", 
+                req.amountRequested, lt.getTypeName(), app.getApplicationNo()));
         return mapAppToResponse(app, lt.getInterestRate());
     }
 
@@ -370,6 +373,10 @@ public class LoanService {
             loan.setStatus(Loan.LoanStatus.CLOSED);
         }
         loanRepo.save(loan);
+
+        notificationService.sendActivityNotification(loan.getUser(), "Loan EMI Paid", 
+            String.format("EMI payment of ₹%,.2f has been received for Loan %s. Outstanding balance: ₹%,.2f. Status: %s", 
+                emi.getEmiAmount(), loan.getLoanAccountNumber(), loan.getOutstandingBalance(), loan.getStatus().name()));
 
         return TransactionResponse.builder()
                 .id(txn.getId())

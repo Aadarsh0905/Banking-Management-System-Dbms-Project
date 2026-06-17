@@ -32,6 +32,7 @@ public class CardService {
     private final UserRepository userRepo;
     private final TransactionRepository txnRepo;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
 
     @Transactional
     public CardResponse requestCard(Long userId, CardRequest req) {
@@ -71,6 +72,8 @@ public class CardService {
             .build();
 
         card = cardRepo.save(card);
+        notificationService.sendActivityNotification(u, "Card Request Submitted", 
+            String.format("Your request for a new %s card has been submitted. Status: PENDING.", card.getCardType().name()));
         return mapToResponse(card);
     }
 
@@ -96,6 +99,11 @@ public class CardService {
         card.setStatus(Card.CardStatus.ACTIVE);
         card.setActivatedAt(LocalDateTime.now());
         cardRepo.save(card);
+
+        String maskedCard = "XXXX-XXXX-XXXX-" + actualCardNo.substring(actualCardNo.length() - 4);
+        notificationService.sendActivityNotification(card.getUser(), "Card Issued", 
+            String.format("Your new %s card (%s) has been successfully issued and activated.", 
+                card.getCardType().name(), maskedCard));
     }
 
     @Transactional
@@ -107,6 +115,10 @@ public class CardService {
         }
         card.setStatus(Card.CardStatus.CANCELLED);
         cardRepo.save(card);
+
+        notificationService.sendActivityNotification(card.getUser(), "Card Request Rejected", 
+            String.format("Your request for a new %s card has been rejected/cancelled by the bank.", 
+                card.getCardType().name()));
     }
 
     @Transactional
@@ -117,6 +129,12 @@ public class CardService {
         card.setBlockedAt(LocalDateTime.now());
         card.setBlockReason(reason);
         cardRepo.save(card);
+
+        String cardNo = card.getCardNumber();
+        String maskedCard = cardNo.length() >= 4 ? "XXXX-XXXX-XXXX-" + cardNo.substring(cardNo.length() - 4) : cardNo;
+        notificationService.sendActivityNotification(card.getUser(), "Card Blocked", 
+            String.format("Your %s card (%s) has been BLOCKED. Reason: %s.", 
+                card.getCardType().name(), maskedCard, reason));
     }
 
     @Transactional
@@ -127,17 +145,32 @@ public class CardService {
         card.setBlockedAt(null);
         card.setBlockReason(null);
         cardRepo.save(card);
+
+        String cardNo = card.getCardNumber();
+        String maskedCard = cardNo.length() >= 4 ? "XXXX-XXXX-XXXX-" + cardNo.substring(cardNo.length() - 4) : cardNo;
+        notificationService.sendActivityNotification(card.getUser(), "Card Unblocked", 
+            String.format("Your %s card (%s) has been unblocked and is now active.", 
+                card.getCardType().name(), maskedCard));
     }
 
     @Transactional
     public void setPin(Long userId, SetPinRequest req) {
         Card card = getAndValidate(userId, req.cardId);
         card.setPinHash(passwordEncoder.encode(req.pin));
+        boolean wasActivated = false;
         if (card.getStatus() == Card.CardStatus.REQUESTED) {
             card.setStatus(Card.CardStatus.ACTIVE);
             card.setActivatedAt(LocalDateTime.now());
+            wasActivated = true;
         }
         cardRepo.save(card);
+
+        String cardNo = card.getCardNumber();
+        String maskedCard = cardNo.length() >= 4 ? "XXXX-XXXX-XXXX-" + cardNo.substring(cardNo.length() - 4) : cardNo;
+        String msg = wasActivated 
+            ? String.format("Your %s card (%s) has been activated and PIN was set successfully.", card.getCardType().name(), maskedCard)
+            : String.format("PIN for your %s card (%s) has been updated successfully.", card.getCardType().name(), maskedCard);
+        notificationService.sendActivityNotification(card.getUser(), "Card PIN Updated", msg);
     }
 
     @Transactional
@@ -146,7 +179,15 @@ public class CardService {
         if (settings.containsKey("isOnlineEnabled"))         card.setIsOnlineEnabled(settings.get("isOnlineEnabled"));
         if (settings.containsKey("isInternationalEnabled"))  card.setIsInternationalEnabled(settings.get("isInternationalEnabled"));
         if (settings.containsKey("isContactlessEnabled"))    card.setIsContactlessEnabled(settings.get("isContactlessEnabled"));
-        return mapToResponse(cardRepo.save(card));
+        card = cardRepo.save(card);
+
+        String cardNo = card.getCardNumber();
+        String maskedCard = cardNo.length() >= 4 ? "XXXX-XXXX-XXXX-" + cardNo.substring(cardNo.length() - 4) : cardNo;
+        notificationService.sendActivityNotification(card.getUser(), "Card Settings Updated", 
+            String.format("Your transaction settings (Online: %b, International: %b, Contactless: %b) for card %s have been updated.", 
+                card.getIsOnlineEnabled(), card.getIsInternationalEnabled(), card.getIsContactlessEnabled(), maskedCard));
+
+        return mapToResponse(card);
     }
 
     public Map<String, Object> getAnalytics(Long userId, Long cardId) {

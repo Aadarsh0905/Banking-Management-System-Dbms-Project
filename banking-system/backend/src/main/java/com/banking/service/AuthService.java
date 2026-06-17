@@ -164,6 +164,9 @@ public class AuthService {
         user.setPasswordResetToken(null);
         user.setPasswordResetExpires(null);
         userRepo.save(user);
+
+        notificationService.sendActivityNotification(user, "Password Changed Successfully", 
+            "The password for your banking account has been successfully reset. If you did not make this change, please contact support immediately.");
     }
 
     public AuthDTOs.AuthResponse refreshToken(String refreshToken) {

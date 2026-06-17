@@ -38,6 +38,7 @@ public class UpiService {
     private final UserRepository userRepo;
     private final TransactionService txnService;
     private final TransactionRepository txnRepo;
+    private final NotificationService notificationService;
 
     @Transactional
     public UpiResponse createUpiId(Long userId, CreateUpiRequest req) {
@@ -53,6 +54,9 @@ public class UpiService {
             .user(u).account(acc).upiId(req.upiId)
             .isDefault(isFirst).isActive(true).build();
         upi = upiRepo.save(upi);
+        notificationService.sendActivityNotification(u, "UPI ID Created", 
+            String.format("A new UPI ID %s has been created and linked to your bank account %s.", 
+                upi.getUpiId(), acc.getAccountNumber()));
         return mapToResponse(upi);
     }
 
@@ -111,6 +115,9 @@ public class UpiService {
         if (!upi.getUser().getId().equals(userId)) throw new BankingException("Unauthorized", 403);
         upi.setIsActive(false);
         upiRepo.save(upi);
+
+        notificationService.sendActivityNotification(upi.getUser(), "UPI ID Deactivated", 
+            String.format("Your UPI ID %s has been deactivated.", upi.getUpiId()));
     }
 
     private UpiResponse mapToResponse(UpiId u) {
