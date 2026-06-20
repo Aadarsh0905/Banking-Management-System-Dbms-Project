@@ -731,6 +731,12 @@ export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent]   = useState(false);
   const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const navigate = useNavigate();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -738,9 +744,31 @@ export function ForgotPasswordPage() {
     try {
       await authApi.forgotPassword(email);
       setSent(true);
-      toast.success('Reset email sent!');
+      toast.success('Reset OTP generated! Check server logs.');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Error sending link');
+      toast.error(err.response?.data?.message || 'Error requesting reset');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResetSubmit(e) {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await authApi.resetPassword({ token: otp, newPassword });
+      toast.success('Password reset successfully!');
+      navigate('/login');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error resetting password');
     } finally {
       setLoading(false);
     }
@@ -749,15 +777,91 @@ export function ForgotPasswordPage() {
   return (
     <AuthLayout title="Reset Password" subtitle="Recover Your Portal Account" maxWidth="max-w-md">
       {sent ? (
-        <div className="text-center bg-[#060e17] border border-[#1c3554]/30 p-6 rounded-2xl space-y-4">
-          <div className="inline-flex p-3.5 bg-green-500/10 text-green-400 rounded-full mb-1">
-            <FaCheckCircle className="text-4xl" />
+        <form onSubmit={handleResetSubmit} className="space-y-5">
+          <div className="p-3 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-xl text-[10px] text-center font-semibold uppercase tracking-wider">
+            OTP generated. Please check your server console logs for the reset code.
           </div>
-          <p className="text-green-300 font-bold text-lg">Verification Dispatched</p>
-          <p className="text-slate-400 text-xs leading-relaxed">
-            A password reset link has been sent to <strong>{email}</strong>. Please check your inbox.
-          </p>
-        </div>
+          
+          <div className="focus-glow text-left">
+            <label className="label">One-Time Password (OTP)</label>
+            <div className="relative group">
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={otp}
+                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                className="glass-input pl-11 tracking-widest text-center font-mono text-lg font-bold"
+                placeholder="000000"
+              />
+            </div>
+          </div>
+
+          <div className="focus-glow text-left">
+            <label className="label">New Password</label>
+            <div className="relative group">
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
+              <input
+                type={showPwd ? 'text' : 'password'}
+                required
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                className="glass-input pl-11 pr-10 font-mono"
+                placeholder="New Password (min 8 chars)"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd(s => !s)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                {showPwd ? <FaEyeSlash className="text-base" /> : <FaEye className="text-base" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="focus-glow text-left">
+            <label className="label">Confirm New Password</label>
+            <div className="relative group">
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
+              <input
+                type={showConfirmPwd ? 'text' : 'password'}
+                required
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="glass-input pl-11 pr-10 font-mono"
+                placeholder="Confirm New Password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPwd(s => !s)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                {showConfirmPwd ? <FaEyeSlash className="text-base" /> : <FaEye className="text-base" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full flex items-center justify-center gap-2 group"
+          >
+            {loading ? 'Resetting password...' : (
+              <>
+                Reset Password <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setSent(false)}
+            className="w-full text-slate-400 hover:text-slate-200 text-xs font-semibold uppercase tracking-wider text-center mt-2 hover:underline"
+          >
+            Back
+          </button>
+        </form>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="focus-glow text-left">
@@ -780,9 +884,9 @@ export function ForgotPasswordPage() {
             disabled={loading}
             className="btn-primary w-full flex items-center justify-center gap-2 group"
           >
-            {loading ? 'Sending link...' : (
+            {loading ? 'Sending OTP...' : (
               <>
-                Send Reset Link <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
+                Send Reset OTP <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>

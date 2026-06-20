@@ -184,11 +184,12 @@ public class AuthService {
     public void forgotPassword(String email) {
         User user = userRepo.findByEmail(email)
             .orElseThrow(() -> new BankingException("Email not found", 404));
-        String token = UUID.randomUUID().toString();
-        user.setPasswordResetToken(token);
-        user.setPasswordResetExpires(LocalDateTime.now().plusHours(1));
+        // Generate a 6-digit numeric OTP for forgot password
+        String otp = String.format("%06d", (int)(Math.random() * 1000000));
+        user.setPasswordResetToken(otp);
+        user.setPasswordResetExpires(LocalDateTime.now().plusMinutes(5));
         userRepo.save(user);
-        notificationService.sendPasswordResetEmail(user, token);
+        notificationService.sendPasswordResetOtp(user, otp);
     }
 
     @Transactional
