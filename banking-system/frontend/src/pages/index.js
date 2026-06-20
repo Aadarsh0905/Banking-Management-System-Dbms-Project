@@ -2,7 +2,7 @@
 // These allow components to import from the pages directory directly
 
 // ── Auth Pages ─────────────────────────────────────────────
-export { LoginPage, RegisterPage, ForgotPasswordPage } from './AuthPages';
+export { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './AuthPages';
 
 // ── Main Pages ─────────────────────────────────────────────
 export { DashboardPage, AccountsPage, TransferPage } from './MainPages';

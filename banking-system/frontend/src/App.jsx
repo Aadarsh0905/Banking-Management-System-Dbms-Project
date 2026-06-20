@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { sounds } from './services/sounds';
 
 // Auth
-import { LoginPage, RegisterPage, ForgotPasswordPage } from './pages/AuthPages';
+import { LoginPage, RegisterPage, ForgotPasswordPage, ResetPasswordPage } from './pages/AuthPages';
 
 // Main
 import { DashboardPage, AccountsPage, TransferPage } from './pages/MainPages';
@@ -118,6 +118,7 @@ export default function App() {
             <Route path="/login"           element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/register"        element={<PublicRoute><RegisterPage /></PublicRoute>} />
             <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+            <Route path="/reset-password"  element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
 
             {/* Protected */}
             <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>

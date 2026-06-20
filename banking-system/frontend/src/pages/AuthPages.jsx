@@ -3,7 +3,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { 
   FaEnvelope, 
@@ -723,3 +723,131 @@ export function ForgotPasswordPage() {
     </AuthLayout>
   );
 }
+
+// ── Reset Password Page ──────────────────────────────────────
+export function ResetPasswordPage() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token') || '';
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!token) {
+      toast.error('Reset token is missing from the link.');
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await authApi.resetPassword({ token, newPassword });
+      setSuccess(true);
+      toast.success('Password reset successfully!');
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error resetting password');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <AuthLayout title="Choose New Password" subtitle="Update Your Password Securely" maxWidth="max-w-md">
+      {success ? (
+        <div className="text-center bg-[#060e17] border border-[#1c3554]/30 p-6 rounded-2xl space-y-4">
+          <div className="inline-flex p-3.5 bg-green-500/10 text-green-400 rounded-full mb-1">
+            <FaCheckCircle className="text-4xl" />
+          </div>
+          <p className="text-green-300 font-bold text-lg">Password Changed</p>
+          <p className="text-slate-400 text-xs leading-relaxed">
+            Your password has been successfully reset. Redirecting you to login in a few seconds...
+          </p>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {!token && (
+            <div className="p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl text-xs text-center font-semibold animate-pulse">
+              Warning: Reset token is missing. This submission might fail.
+            </div>
+          )}
+          <div className="focus-glow text-left">
+            <label className="label">New Password</label>
+            <div className="relative group">
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
+              <input
+                type={showPwd ? 'text' : 'password'}
+                required
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+                className="glass-input pl-11 pr-10 font-mono"
+                placeholder="New Password (min 8 chars)"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd(s => !s)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                {showPwd ? <FaEyeSlash className="text-base" /> : <FaEye className="text-base" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="focus-glow text-left">
+            <label className="label">Confirm New Password</label>
+            <div className="relative group">
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
+              <input
+                type={showConfirmPwd ? 'text' : 'password'}
+                required
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+                className="glass-input pl-11 pr-10 font-mono"
+                placeholder="Confirm New Password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPwd(s => !s)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+              >
+                {showConfirmPwd ? <FaEyeSlash className="text-base" /> : <FaEye className="text-base" />}
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full flex items-center justify-center gap-2 group"
+          >
+            {loading ? 'Resetting password...' : (
+              <>
+                Reset Password <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </button>
+        </form>
+      )}
+
+      <p className="text-center mt-6 text-sm font-medium">
+        <Link to="/login" className="text-cyan-400 hover:text-cyan-300 hover:underline tracking-wider uppercase text-xs font-bold">
+          Back to Login
+        </Link>
+      </p>
+    </AuthLayout>
+  );
+}
+
