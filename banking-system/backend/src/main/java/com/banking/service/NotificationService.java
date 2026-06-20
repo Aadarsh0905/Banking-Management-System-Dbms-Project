@@ -110,6 +110,18 @@ public class NotificationService {
     }
 
     @Async
+    public void sendPasswordResetOtp(User user, String otp) {
+        System.out.println("\n========================================= [FORGOT PASSWORD OTP] =========================================");
+        System.out.println("User '" + user.getEmail() + "' requested a password reset OTP.");
+        System.out.println("OTP: " + otp);
+        System.out.println("=========================================================================================================\n");
+        log.info("========================================= [FORGOT PASSWORD OTP] =========================================");
+        log.info("User '{}' requested a password reset OTP.", user.getEmail());
+        log.info("OTP: {}", otp);
+        log.info("=========================================================================================================");
+    }
+
+    @Async
     public void sendOtpEmail(User user, String otp) {
         System.out.println("\n========================================= [LOGIN OTP] =========================================");
         System.out.println("User '" + user.getEmail() + "' generated a login OTP.");
