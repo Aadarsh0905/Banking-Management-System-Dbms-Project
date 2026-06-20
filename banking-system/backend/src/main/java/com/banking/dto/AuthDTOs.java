@@ -36,6 +36,14 @@ public class AuthDTOs {
         public String tokenType = "Bearer";
         public Long expiresIn;
         public UserResponse user;
+        public Boolean otpRequired;
+        public String username;
+    }
+
+    @Data @NoArgsConstructor @AllArgsConstructor
+    public static class VerifyOtpRequest {
+        @NotBlank public String usernameOrEmail;
+        @NotBlank public String otp;
     }
 
     @Data @NoArgsConstructor @AllArgsConstructor

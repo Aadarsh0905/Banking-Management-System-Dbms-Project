@@ -432,7 +432,10 @@ export function LoginPage() {
   const [form, setForm] = useState({ usernameOrEmail: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [usernameForOtp, setUsernameForOtp] = useState('');
+  const { login, verifyOtp } = useAuth();
   const navigate  = useNavigate();
 
   const handleQuickLogin = (username, password) => {
@@ -444,7 +447,31 @@ export function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const user = await login(form);
+      const result = await login(form);
+      if (result && result.otpRequired) {
+        setUsernameForOtp(result.username);
+        setShowOtpInput(true);
+        toast.info('Verification OTP sent to your registered email!');
+      } else {
+        toast.success(`Welcome back, ${result.firstName}! 👋`);
+        if (result.roles?.includes('ROLE_ADMIN')) {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleOtpSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const user = await verifyOtp(usernameForOtp, otp);
       toast.success(`Welcome back, ${user.firstName}! 👋`);
       if (user.roles?.includes('ROLE_ADMIN')) {
         navigate('/admin');
@@ -452,10 +479,57 @@ export function LoginPage() {
         navigate('/dashboard');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      toast.error(err.response?.data?.message || 'OTP Verification failed');
     } finally {
       setLoading(false);
     }
+  }
+
+  if (showOtpInput) {
+    return (
+      <AuthLayout title="OTP Verification" subtitle="Enter Code Sent to Email" maxWidth="max-w-md">
+        <form onSubmit={handleOtpSubmit} className="space-y-5">
+          <div className="focus-glow text-left">
+            <label className="label">One-Time Password (OTP)</label>
+            <div className="relative group">
+              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={otp}
+                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                className="glass-input pl-11 tracking-widest text-center font-mono text-lg font-bold"
+                placeholder="000000"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 leading-normal italic mt-2 text-center">
+              Please enter the 6-digit OTP code printed in your server logs or sent via email.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary w-full flex items-center justify-center gap-2 group"
+          >
+            {loading ? 'Verifying...' : (
+              <>
+                Verify & Login <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setShowOtpInput(false)}
+            className="w-full text-slate-400 hover:text-slate-200 text-xs font-semibold uppercase tracking-wider text-center mt-2 hover:underline"
+          >
+            Back to Password Sign In
+          </button>
+        </form>
+      </AuthLayout>
+    );
   }
 
   return (

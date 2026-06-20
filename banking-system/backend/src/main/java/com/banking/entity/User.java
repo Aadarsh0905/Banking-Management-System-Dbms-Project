@@ -67,6 +67,12 @@ public class User {
     @Column(name = "password_reset_expires")
     private LocalDateTime passwordResetExpires;
 
+    @Column(name = "login_otp")
+    private String loginOtp;
+
+    @Column(name = "login_otp_expires")
+    private LocalDateTime loginOtpExpires;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
         joinColumns = @JoinColumn(name = "user_id"),

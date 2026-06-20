@@ -45,9 +45,15 @@ class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login and receive JWT tokens")
+    @Operation(summary = "Login and request OTP")
     public ResponseEntity<ApiResponse<AuthDTOs.AuthResponse>> login(@Valid @RequestBody AuthDTOs.LoginRequest req) {
-        return ResponseEntity.ok(ApiResponse.success(authService.login(req)));
+        return ResponseEntity.ok(ApiResponse.success("OTP sent to email", authService.login(req)));
+    }
+
+    @PostMapping("/verify-otp")
+    @Operation(summary = "Verify OTP to complete login")
+    public ResponseEntity<ApiResponse<AuthDTOs.AuthResponse>> verifyOtp(@Valid @RequestBody AuthDTOs.VerifyOtpRequest req) {
+        return ResponseEntity.ok(ApiResponse.success("OTP verification successful", authService.verifyOtp(req)));
     }
 
     @PostMapping("/forgot-password")

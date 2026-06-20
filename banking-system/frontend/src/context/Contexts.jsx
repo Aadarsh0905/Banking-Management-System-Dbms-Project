@@ -45,6 +45,17 @@ export function AuthProvider({ children }) {
 
   async function login(credentials) {
     const { data } = await authApi.login(credentials);
+    if (data.data.otpRequired) {
+      return data.data;
+    }
+    localStorage.setItem('accessToken',  data.data.accessToken);
+    localStorage.setItem('refreshToken', data.data.refreshToken);
+    setUser(data.data.user);
+    return data.data.user;
+  }
+
+  async function verifyOtp(usernameOrEmail, otp) {
+    const { data } = await authApi.verifyOtp({ usernameOrEmail, otp });
     localStorage.setItem('accessToken',  data.data.accessToken);
     localStorage.setItem('refreshToken', data.data.refreshToken);
     setUser(data.data.user);
@@ -64,7 +75,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user, setUser, loading,
-      login, register, logout, fetchProfile,
+      login, verifyOtp, register, logout, fetchProfile,
       isAdmin:    user?.roles?.includes('ROLE_ADMIN'),
       isEmployee: user?.roles?.includes('ROLE_EMPLOYEE'),
     }}>

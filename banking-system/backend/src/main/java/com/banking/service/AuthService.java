@@ -115,6 +115,7 @@ public class AuthService {
         return mapToUserResponse(user);
     }
 
+    @Transactional
     public AuthDTOs.AuthResponse login(AuthDTOs.LoginRequest req) {
         try {
             authManager.authenticate(
@@ -128,14 +129,46 @@ public class AuthService {
         }
 
         BankUserDetails ud = (BankUserDetails) userDetailsService.loadUserByUsername(req.usernameOrEmail);
+        User user = ud.user();
+
+        // Generate a 6-digit numeric OTP
+        String otp = String.format("%06d", (int)(Math.random() * 1000000));
+        user.setLoginOtp(otp);
+        user.setLoginOtpExpires(LocalDateTime.now().plusMinutes(5));
+        userRepo.save(user);
+
+        notificationService.sendOtpEmail(user, otp);
+
+        return AuthDTOs.AuthResponse.builder()
+            .otpRequired(true)
+            .username(user.getUsername())
+            .build();
+    }
+
+    @Transactional
+    public AuthDTOs.AuthResponse verifyOtp(AuthDTOs.VerifyOtpRequest req) {
+        User user = userRepo.findByUsernameOrEmail(req.usernameOrEmail, req.usernameOrEmail)
+            .orElseThrow(() -> new BankingException("User not found", 404));
+
+        if (user.getLoginOtp() == null || !user.getLoginOtp().equals(req.otp)) {
+            throw new BankingException("Invalid OTP", 400);
+        }
+
+        if (user.getLoginOtpExpires() == null || user.getLoginOtpExpires().isBefore(LocalDateTime.now())) {
+            throw new BankingException("Expired OTP", 400);
+        }
+
+        // Clear OTP on successful validation
+        user.setLoginOtp(null);
+        user.setLoginOtpExpires(null);
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepo.save(user);
+
+        BankUserDetails ud = new BankUserDetails(user);
         String accessToken  = jwtUtil.generateAccessToken(ud);
         String refreshToken = jwtUtil.generateRefreshToken(ud);
 
-        // Update last login
-        ud.user().setLastLoginAt(LocalDateTime.now());
-        userRepo.save(ud.user());
-
-        notificationService.sendActivityNotification(ud.user(), "🔔 New Login Detected", 
+        notificationService.sendActivityNotification(user, "🔔 New Login Detected", 
             String.format("A new login was detected on your account at %s.", 
                 LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm:ss"))));
 
@@ -143,7 +176,7 @@ public class AuthService {
             .accessToken(accessToken)
             .refreshToken(refreshToken)
             .expiresIn(900L)
-            .user(mapToUserResponse(ud.user()))
+            .user(mapToUserResponse(user))
             .build();
     }
 

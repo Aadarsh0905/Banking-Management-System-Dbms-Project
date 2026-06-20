@@ -110,6 +110,20 @@ public class NotificationService {
     }
 
     @Async
+    public void sendOtpEmail(User user, String otp) {
+        System.out.println("\n========================================= [LOGIN OTP] =========================================");
+        System.out.println("User '" + user.getEmail() + "' generated a login OTP.");
+        System.out.println("OTP: " + otp);
+        System.out.println("===============================================================================================\n");
+        log.info("========================================= [LOGIN OTP] =========================================");
+        log.info("User '{}' generated a login OTP.", user.getEmail());
+        log.info("OTP: {}", otp);
+        log.info("===============================================================================================");
+        sendEmail(user.getEmail(), "Your Login Verification OTP",
+            "<h2>Hello, " + user.getFirstName() + "!</h2><p>Your one-time password (OTP) for login is: <strong style='font-size: 18px; color: #ff6600;'>" + otp + "</strong></p><p>This OTP is valid for 5 minutes.</p>");
+    }
+
+    @Async
     @Transactional
     public void sendLoanStatusEmail(Long userId, String email, String appNo, String status) {
         sendEmail(email, "Loan Application Update",
