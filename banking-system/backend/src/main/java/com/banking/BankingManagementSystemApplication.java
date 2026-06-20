@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -65,5 +68,24 @@ public class BankingManagementSystemApplication {
         } else {
             System.out.println("System environment configuration active (no local .env file).");
         }
+    }
+}
+
+@Component
+class MailConfigLogger implements CommandLineRunner {
+    @Value("${spring.mail.host}") private String host;
+    @Value("${spring.mail.port}") private int port;
+    @Value("${spring.mail.username}") private String username;
+    @Value("${spring.profiles.active:dev}") private String activeProfile;
+
+    @Override
+    public void run(String... args) {
+        System.out.println("\n==================================================================");
+        System.out.println("ACTIVE PROFILE: " + activeProfile);
+        System.out.println("SMTP CONFIGURATION ACTIVE:");
+        System.out.println("  SMTP Host:     " + host);
+        System.out.println("  SMTP Port:     " + port);
+        System.out.println("  SMTP Username: " + username);
+        System.out.println("==================================================================\n");
     }
 }
