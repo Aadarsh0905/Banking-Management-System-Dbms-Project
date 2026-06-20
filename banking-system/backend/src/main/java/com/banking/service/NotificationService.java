@@ -39,6 +39,9 @@ public class NotificationService {
     @org.springframework.beans.factory.annotation.Value("${banking.mail.from-name:Banking Management System}")
     private String mailFromName;
 
+    @org.springframework.beans.factory.annotation.Value("${banking.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+
     @Async
     public void sendWelcomeEmail(User user) {
         sendEmail(user.getEmail(),
@@ -91,7 +94,7 @@ public class NotificationService {
 
     @Async
     public void sendPasswordResetEmail(User user, String token) {
-        String link = "http://localhost:3000/reset-password?token=" + token;
+        String link = frontendUrl + "/reset-password?token=" + token;
         System.out.println("========================================= [FORGOT PASSWORD] =========================================");
         System.out.println("User '" + user.getEmail() + "' requested a password reset.");
         System.out.println("Reset Token: " + token);
