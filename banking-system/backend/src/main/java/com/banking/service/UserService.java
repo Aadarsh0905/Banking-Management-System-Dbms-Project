@@ -69,7 +69,7 @@ public class UserService {
             String filename = userId + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
             Path target = dir.resolve(filename);
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-            String url = "/uploads/avatars/" + filename;
+            String url = "/api/uploads/avatars/" + filename;
             User u = userRepo.findById(userId).orElseThrow();
             u.setProfilePictureUrl(url);
             userRepo.save(u);

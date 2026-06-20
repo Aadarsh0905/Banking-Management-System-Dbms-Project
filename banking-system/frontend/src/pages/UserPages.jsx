@@ -75,7 +75,7 @@ export function ProfilePage() {
       {/* Avatar */}
       <div className="glass-card text-center relative overflow-hidden">
         <div className="relative w-24 h-24 mx-auto mb-4">
-          <img src={user?.profilePictureUrl || 'https://via.placeholder.com/100'} alt="Avatar"
+          <img src={user?.profilePictureUrl ? (user.profilePictureUrl.startsWith('/uploads') ? `/api${user.profilePictureUrl}` : user.profilePictureUrl) : 'https://via.placeholder.com/100'} alt="Avatar"
             className="w-24 h-24 rounded-full object-cover border-4 border-white/10" />
           <label className="absolute bottom-0 right-0 bg-gradient-to-tr from-blue-600 to-cyan-500 text-white p-2 rounded-full cursor-pointer hover:from-blue-500 hover:to-cyan-400 transition-all shadow-md">
             <FaCamera />
