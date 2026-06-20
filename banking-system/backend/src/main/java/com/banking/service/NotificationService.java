@@ -30,6 +30,12 @@ public class NotificationService {
     @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
     private String mailFrom;
 
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.host}")
+    private String mailHost;
+
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.port}")
+    private int mailPort;
+
     @org.springframework.beans.factory.annotation.Value("${banking.mail.from-name:Banking Management System}")
     private String mailFromName;
 
@@ -112,6 +118,7 @@ public class NotificationService {
     }
 
     private void sendEmail(String to, String subject, String htmlBody) {
+        System.out.println("SMTP: Attempting to send email to " + to + " via " + mailHost + ":" + mailPort + " using username: " + mailFrom);
         try {
             MimeMessage msg = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
@@ -126,7 +133,18 @@ public class NotificationService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
             mailSender.send(msg);
+            System.out.println("SMTP: Email successfully sent to " + to);
         } catch (Exception e) {
+            System.err.println("\n=== EMAIL SENDING FAILED ===");
+            System.err.println("Recipient: " + to);
+            System.err.println("SMTP Username (From): " + mailFrom);
+            System.err.println("Error Message: " + e.getMessage());
+            System.err.println("Possible Reasons:");
+            System.err.println("1. If running in Docker: You need to restart containers with 'docker-compose down && docker-compose up --build -d' to load the new .env file.");
+            System.err.println("2. If running locally: Restart your Spring Boot application so it reads the new .env file.");
+            System.err.println("3. Gmail Security: Ensure 2-Step Verification is enabled on your Google Account, and 'ykfqhchcorzfnntt' is a valid Google App Password.");
+            System.err.println("4. Network Block: Check if your network/ISP blocks outbound SMTP traffic on port 587.");
+            System.err.println("============================\n");
             log.error("Failed to send email to {}: {}", to, e.getMessage(), e);
         }
     }
