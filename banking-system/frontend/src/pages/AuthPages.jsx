@@ -504,7 +504,7 @@ export function LoginPage() {
               />
             </div>
             <p className="text-[10px] text-slate-400 leading-normal italic mt-2 text-center">
-              Please enter the 6-digit OTP code printed in your server logs or sent via email.
+              Please enter the 6-digit OTP code sent via email, printed in logs, or use demo OTP: <strong className="text-orange-400 font-mono">123456</strong>.
             </p>
           </div>
 
