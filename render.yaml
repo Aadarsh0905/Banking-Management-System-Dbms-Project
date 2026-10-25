@@ -47,4 +47,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://banking-backend.onrender.com/api
+        value: https://banking-backend-tjem.onrender.com/api
