@@ -30,6 +30,8 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         value: "https://*.onrender.com,http://localhost:3000,http://localhost:5173"
+      - key: MANAGEMENT_HEALTH_MAIL_ENABLED
+        value: "false"
 
   # ── 2. React Frontend (Render Static Site) ───────────────
   - type: web
