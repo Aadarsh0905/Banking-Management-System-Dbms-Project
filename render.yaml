@@ -41,5 +41,6 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+    envVars:
       - key: VITE_API_URL
         value: https://banking-backend.onrender.com/api
