@@ -30,6 +30,9 @@ public class NotificationService {
     @org.springframework.beans.factory.annotation.Value("${spring.mail.username}")
     private String mailFrom;
 
+    @org.springframework.beans.factory.annotation.Value("${spring.mail.password:password}")
+    private String mailPass;
+
     @org.springframework.beans.factory.annotation.Value("${spring.mail.host}")
     private String mailHost;
 
@@ -125,11 +128,11 @@ public class NotificationService {
     public void sendOtpEmail(User user, String otp) {
         System.out.println("\n========================================= [LOGIN OTP] =========================================");
         System.out.println("User '" + user.getEmail() + "' generated a login OTP.");
-        System.out.println("OTP: " + otp);
+        System.out.println("OTP: " + otp + " (Demo master OTP: 123456)");
         System.out.println("===============================================================================================\n");
         log.info("========================================= [LOGIN OTP] =========================================");
         log.info("User '{}' generated a login OTP.", user.getEmail());
-        log.info("OTP: {}", otp);
+        log.info("OTP: {} (Demo master OTP: 123456)", otp);
         log.info("===============================================================================================");
         sendEmail(user.getEmail(), "Your Login Verification OTP",
             "<h2>Hello, " + user.getFirstName() + "!</h2><p>Your one-time password (OTP) for login is: <strong style='font-size: 18px; color: #ff6600;'>" + otp + "</strong></p><p>This OTP is valid for 5 minutes.</p>");
@@ -147,6 +150,11 @@ public class NotificationService {
     }
 
     private void sendEmail(String to, String subject, String htmlBody) {
+        if (mailFrom == null || mailFrom.contains("noreply@") || "password".equals(mailPass)) {
+            System.out.println("SMTP: Demo mode active. Skipping external email dispatch (OTP is logged above).");
+            return;
+        }
+
         System.out.println("SMTP: Attempting to send email to " + to + " via " + mailHost + ":" + mailPort + " using username: " + mailFrom);
         try {
             MimeMessage msg = mailSender.createMimeMessage();
@@ -168,13 +176,8 @@ public class NotificationService {
             System.err.println("Recipient: " + to);
             System.err.println("SMTP Username (From): " + mailFrom);
             System.err.println("Error Message: " + e.getMessage());
-            System.err.println("Possible Reasons:");
-            System.err.println("1. If running in Docker: You need to restart containers with 'docker-compose down && docker-compose up --build -d' to load the new .env file.");
-            System.err.println("2. If running locally: Restart your Spring Boot application so it reads the new .env file.");
-            System.err.println("3. Gmail Security: Ensure 2-Step Verification is enabled on your Google Account, and 'ykfqhchcorzfnntt' is a valid Google App Password.");
-            System.err.println("4. Network Block: Check if your network/ISP blocks outbound SMTP traffic on port 587.");
             System.err.println("============================\n");
-            log.error("Failed to send email to {}: {}", to, e.getMessage(), e);
+            log.error("Failed to send email to {}: {}", to, e.getMessage());
         }
     }
 
