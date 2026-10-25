@@ -1,30 +1,10 @@
 # ============================================================
 # Render Blueprint Specification (render.yaml)
 # Full-Stack Banking Management System DBMS Project
-# Deploy directly onto Render without external services
+# Render Free-Tier Web Service + Static Site with TiDB Cloud
 # ============================================================
 services:
-  # ── 1. MySQL 8 Database (Render Private Service) ─────────
-  - type: pserv
-    name: banking-mysql
-    env: docker
-    dockerfilePath: Dockerfile.mysql
-    plan: starter
-    disk:
-      name: mysql-data
-      mountPath: /var/lib/mysql
-      sizeGB: 10
-    envVars:
-      - key: MYSQL_ROOT_PASSWORD
-        value: rootpassword
-      - key: MYSQL_DATABASE
-        value: banking_db
-      - key: MYSQL_USER
-        value: banking_user
-      - key: MYSQL_PASSWORD
-        value: banking_password
-
-  # ── 2. Spring Boot 3 Backend (Render Web Service) ────────
+  # ── 1. Spring Boot 3 Backend (Render Web Service) ────────
   - type: web
     name: banking-backend
     env: docker
@@ -33,18 +13,17 @@ services:
     healthCheckPath: /api/actuator/health
     envVars:
       - key: DB_HOST
-        fromService:
-          type: pserv
-          name: banking-mysql
-          property: host
+        value: gateway01.ap-northeast-1.prod.aws.tidbcloud.com
       - key: DB_PORT
-        value: "3306"
+        value: "4000"
       - key: DB_NAME
         value: banking_db
       - key: DB_USER
-        value: banking_user
+        value: 34f53Yxe3VE5yJg.root
       - key: DB_PASSWORD
-        value: banking_password
+        value: A0n3G4aj4q1dLOpn
+      - key: DB_USE_SSL
+        value: "true"
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
         value: update
       - key: JWT_SECRET
@@ -52,7 +31,7 @@ services:
       - key: CORS_ORIGINS
         value: "https://*.onrender.com,http://localhost:3000,http://localhost:5173"
 
-  # ── 3. React Frontend (Render Static Site) ───────────────
+  # ── 2. React Frontend (Render Static Site) ───────────────
   - type: web
     name: banking-frontend
     runtime: static
@@ -62,6 +41,5 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-    envVars:
       - key: VITE_API_URL
         value: https://banking-backend.onrender.com/api
