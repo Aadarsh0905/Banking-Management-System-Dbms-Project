@@ -1,32 +1,35 @@
-# Backend Dockerfile - Spring Boot Application
-FROM maven:3.9.6-eclipse-temurin-17 AS builder
+# ============================================================
+# Backend Dockerfile - Spring Boot 3 + Java 21
+# Optimized for Render Cloud Web Service & Docker
+# ============================================================
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-# Copy pom.xml and download dependencies
-COPY pom.xml .
-RUN mvn dependency:resolve
+# Copy pom.xml and cache dependencies
+COPY banking-system/backend/pom.xml ./pom.xml
+RUN mvn dependency:go-offline -B || true
 
-# Copy source code
-COPY src ./src
+# Copy backend source code
+COPY banking-system/backend/src ./src
 
-# Build the application
+# Build application JAR skipping tests
 RUN mvn clean package -DskipTests
 
-# Runtime stage
-FROM eclipse-temurin:17-jdk-alpine
+# ── Runtime Stage ──────────────────────────────────────────
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-# Copy the built JAR from builder stage
+# Copy compiled JAR
 COPY --from=builder /app/target/*.jar app.jar
 
-# Expose port
+# Expose default port
 EXPOSE 8080
 
-# Health check
+# Health check (Render monitors /api/actuator/health)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:8080/api/actuator/health || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:${PORT:-8080}/api/actuator/health || exit 1
 
-# Run the application
-ENTRYPOINT ["java", "-Dspring.profiles.active=docker", "-jar", "app.jar"]
+# Start Spring Boot binding to Render's dynamic $PORT
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Xms128m -Xmx400m -jar app.jar"]

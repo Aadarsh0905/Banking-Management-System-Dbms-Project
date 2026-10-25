@@ -1,0 +1,17 @@
+# ============================================================
+# MySQL 8.0 Database Container for Banking Management System
+# Pre-loads schema, procedures, views, triggers, and seed data
+# ============================================================
+FROM mysql:8.0
+
+ENV MYSQL_DATABASE=banking_db \
+    MYSQL_ROOT_PASSWORD=rootpassword \
+    MYSQL_USER=banking_user \
+    MYSQL_PASSWORD=banking_password
+
+# Copy all database init scripts
+# MySQL executes all .sql files in /docker-entrypoint-initdb.d/ alphabetically:
+# 01_schema.sql -> 02_indexes_views_procedures.sql -> 03_seed_data.sql
+COPY banking-system/database/ /docker-entrypoint-initdb.d/
+
+EXPOSE 3306
