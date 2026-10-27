@@ -156,40 +156,40 @@ public class NotificationService {
             "<html lang='en'><head><meta charset='UTF-8'>" +
             "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
             "<title>Your BankPortal Verification Code</title></head>" +
-            "<body style='margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;color:#1e293b;-webkit-font-smoothing:antialiased;'>" +
-            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color:#f1f5f9;padding:40px 16px;'>" +
+            "<body style='margin:0;padding:0;background-color:#000000;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;color:#e2e8f0;-webkit-font-smoothing:antialiased;'>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color:#000000;padding:40px 16px;'>" +
             "<tr><td align='center'>" +
-            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='max-width:540px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #e2e8f0;'>" +
-            "<tr><td style='height:5px;background:linear-gradient(90deg,#ff6600,#ff8533);font-size:0;line-height:0;'>&nbsp;</td></tr>" +
-            "<tr><td style='padding:28px 36px 20px 36px;border-bottom:1px solid #f1f5f9;'>" +
-            "<div style='font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;margin:0 0 6px 0;'>🏦 BankPortal</div>" +
-            "<div style='display:inline-block;font-size:11px;font-weight:700;color:#ea580c;background-color:#fff7ed;border:1px solid #ffedd5;padding:3px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:0.5px;'>Security Verification</div>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='max-width:540px;background-color:#0c192c;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.8);border:1px solid #1c3554;'>" +
+            "<tr><td style='height:4px;background:linear-gradient(90deg,#ff6600,#ff8000,#38bdf8);font-size:0;line-height:0;'>&nbsp;</td></tr>" +
+            "<tr><td style='padding:28px 36px 20px 36px;border-bottom:1px solid #1c3554;'>" +
+            "<div style='font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;margin:0 0 8px 0;'>🏦 BankPortal</div>" +
+            "<div style='display:inline-block;font-size:11px;font-weight:700;color:#ff6600;background-color:#1c130d;border:1px solid #ff660066;padding:3px 12px;border-radius:6px;text-transform:uppercase;letter-spacing:0.8px;'>Security Verification</div>" +
             "</td></tr>" +
             "<tr><td style='padding:28px 36px 32px 36px;'>" +
-            "<h1 style='margin:0 0 12px 0;font-size:20px;font-weight:700;color:#0f172a;line-height:1.3;'>Login Verification Code</h1>" +
-            "<p style='margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#475569;'>Hello <strong style='color:#0f172a;'>" + firstName + "</strong>,</p>" +
-            "<p style='margin:0 0 24px 0;font-size:14px;line-height:1.6;color:#475569;'>We received a sign-in request for your BankPortal account. Please enter the following 6-digit One-Time Password (OTP) to authenticate:</p>" +
+            "<h1 style='margin:0 0 14px 0;font-size:20px;font-weight:700;color:#ffffff;line-height:1.3;'>Login Verification Code</h1>" +
+            "<p style='margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#94a3b8;'>Hello <strong style='color:#38bdf8;'>" + firstName + "</strong>,</p>" +
+            "<p style='margin:0 0 24px 0;font-size:14px;line-height:1.6;color:#94a3b8;'>We received a sign-in request for your BankPortal account. Please enter the following 6-digit One-Time Password (OTP) to authenticate:</p>" +
             "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='margin:0 0 24px 0;'>" +
-            "<tr><td align='center' style='background-color:#0b1320;border-radius:12px;padding:24px 20px;border:1px solid #1e293b;'>" +
-            "<div style='font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;'>6-Digit Security Code</div>" +
-            "<div style='font-family:Consolas,Monaco,\"SF Mono\",Courier,monospace;font-size:38px;font-weight:800;color:#ff6600;letter-spacing:10px;padding-left:10px;line-height:1.2;'>" + otp + "</div>" +
-            "<div style='font-size:11px;color:#64748b;margin-top:8px;'>Valid for <strong style='color:#cbd5e1;'>5 minutes</strong></div>" +
+            "<tr><td align='center' style='background-color:#060e17;border-radius:14px;padding:26px 20px;border:2px solid #ff6600;box-shadow:0 0 25px rgba(255,102,0,0.15);'>" +
+            "<div style='font-size:11px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;'>6-Digit Verification Code</div>" +
+            "<div style='font-family:Consolas,Monaco,\"SF Mono\",Courier,monospace;font-size:40px;font-weight:800;color:#ff6600;letter-spacing:12px;padding-left:12px;line-height:1.2;'>" + otp + "</div>" +
+            "<div style='font-size:11px;color:#64748b;margin-top:10px;'>Expires in <strong style='color:#f97316;'>5 minutes</strong></div>" +
             "</td></tr></table>" +
-            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;margin:0 0 24px 0;'>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color:#060e17;border-radius:12px;border:1px solid #1c3554;margin:0 0 24px 0;'>" +
             "<tr><td style='padding:16px 20px;'>" +
             "<table width='100%' border='0' cellspacing='0' cellpadding='0'>" +
             "<tr><td width='24' valign='top' style='font-size:16px;line-height:1.4;'>⏱️</td>" +
-            "<td style='padding-left:8px;font-size:13px;line-height:1.5;color:#334155;'><strong>Single-Use:</strong> This code expires automatically in 5 minutes.</td></tr>" +
-            "<tr><td colspan='2' style='height:8px;'></td></tr>" +
+            "<td style='padding-left:10px;font-size:13px;line-height:1.5;color:#cbd5e1;'><strong>Single-Use:</strong> This code expires automatically in 5 minutes.</td></tr>" +
+            "<tr><td colspan='2' style='height:10px;'></td></tr>" +
             "<tr><td width='24' valign='top' style='font-size:16px;line-height:1.4;'>🔒</td>" +
-            "<td style='padding-left:8px;font-size:13px;line-height:1.5;color:#334155;'><strong>Confidential:</strong> BankPortal staff will never ask for your OTP or password.</td></tr>" +
+            "<td style='padding-left:10px;font-size:13px;line-height:1.5;color:#cbd5e1;'><strong>Confidential:</strong> BankPortal staff will never ask for your OTP or password.</td></tr>" +
             "</table></td></tr></table>" +
-            "<p style='margin:0;font-size:12px;line-height:1.6;color:#64748b;border-top:1px solid #f1f5f9;padding-top:16px;'>" +
+            "<p style='margin:0;font-size:12px;line-height:1.6;color:#64748b;border-top:1px solid #1c3554;padding-top:18px;'>" +
             "If you did not initiate this login request, please secure your account immediately or contact BankPortal Support." +
             "</p></td></tr>" +
-            "<tr><td style='background-color:#f8fafc;padding:18px 36px;border-top:1px solid #e2e8f0;text-align:center;'>" +
-            "<p style='margin:0 0 4px 0;font-size:11px;color:#64748b;font-weight:600;'>BankPortal Digital Banking &bull; 256-Bit SSL Encrypted</p>" +
-            "<p style='margin:0;font-size:10px;color:#94a3b8;'>This is an automated system notification. Please do not reply directly to this email.</p>" +
+            "<tr><td style='background-color:#071221;padding:20px 36px;border-top:1px solid #1c3554;text-align:center;'>" +
+            "<p style='margin:0 0 4px 0;font-size:11px;color:#94a3b8;font-weight:600;'>BankPortal Digital Banking &bull; 256-Bit SSL Encrypted</p>" +
+            "<p style='margin:0;font-size:10px;color:#64748b;'>This is an automated system notification. Please do not reply directly to this email.</p>" +
             "</td></tr></table>" +
             "</td></tr></table>" +
             "</body></html>";
