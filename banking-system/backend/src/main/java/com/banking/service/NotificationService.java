@@ -45,6 +45,12 @@ public class NotificationService {
     @org.springframework.beans.factory.annotation.Value("${banking.frontend.url:http://localhost:3000}")
     private String frontendUrl;
 
+    @org.springframework.beans.factory.annotation.Value("${banking.mail.api-key:${MAIL_API_KEY:}}")
+    private String mailApiKey;
+
+    @org.springframework.beans.factory.annotation.Value("${banking.mail.api-provider:${MAIL_API_PROVIDER:brevo}}")
+    private String mailApiProvider;
+
     @Async
     public void sendWelcomeEmail(User user) {
         sendEmail(user.getEmail(),
@@ -183,6 +189,14 @@ public class NotificationService {
     }
 
     private boolean sendEmail(String to, String subject, String htmlBody) {
+        if (mailApiKey != null && !mailApiKey.trim().isBlank()) {
+            System.out.println("Email: Using HTTPS API provider (" + mailApiProvider + ") to " + to);
+            if (sendViaHttpApi(to, subject, htmlBody)) {
+                return true;
+            }
+            System.out.println("Email: HTTPS API failed, falling back to direct SMTP...");
+        }
+
         if (mailFrom == null || mailFrom.isBlank()) {
             System.out.println("SMTP: Sender address not configured. Skipping external email dispatch.");
             return false;
@@ -207,6 +221,92 @@ public class NotificationService {
             System.err.println("Error: " + e.getMessage());
             System.err.println("============================\n");
             log.warn("Could not dispatch email to {}: {}. Login OTP is still logged in console/demo.", to, e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean sendViaHttpApi(String to, String subject, String htmlBody) {
+        if ("resend".equalsIgnoreCase(mailApiProvider)) {
+            return sendViaResend(to, subject, htmlBody);
+        } else {
+            return sendViaBrevo(to, subject, htmlBody);
+        }
+    }
+
+    private boolean sendViaBrevo(String to, String subject, String htmlBody) {
+        try {
+            java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
+                .connectTimeout(java.time.Duration.ofSeconds(10))
+                .build();
+
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            java.util.Map<String, Object> body = new java.util.HashMap<>();
+            body.put("sender", java.util.Map.of("name", mailFromName, "email", mailFrom));
+            body.put("to", java.util.List.of(java.util.Map.of("email", to)));
+            body.put("subject", subject);
+            body.put("htmlContent", htmlBody);
+
+            String jsonPayload = mapper.writeValueAsString(body);
+
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("https://api.brevo.com/v3/smtp/email"))
+                .timeout(java.time.Duration.ofSeconds(15))
+                .header("api-key", mailApiKey.trim())
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .build();
+
+            java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("Brevo HTTPS API: Email dispatched successfully to {}", to);
+                System.out.println("Brevo HTTPS API: Email dispatched successfully to " + to);
+                return true;
+            } else {
+                log.warn("Brevo HTTPS API returned HTTP {}: {}", response.statusCode(), response.body());
+                System.err.println("Brevo HTTPS API error " + response.statusCode() + ": " + response.body());
+                return false;
+            }
+        } catch (Exception e) {
+            log.warn("Brevo HTTPS API failed to send email to {}: {}", to, e.getMessage());
+            return false;
+        }
+    }
+
+    private boolean sendViaResend(String to, String subject, String htmlBody) {
+        try {
+            java.net.http.HttpClient client = java.net.http.HttpClient.newBuilder()
+                .connectTimeout(java.time.Duration.ofSeconds(10))
+                .build();
+
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            java.util.Map<String, Object> body = new java.util.HashMap<>();
+            body.put("from", mailFromName + " <" + mailFrom + ">");
+            body.put("to", java.util.List.of(to));
+            body.put("subject", subject);
+            body.put("html", htmlBody);
+
+            String jsonPayload = mapper.writeValueAsString(body);
+
+            java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                .uri(java.net.URI.create("https://api.resend.com/emails"))
+                .timeout(java.time.Duration.ofSeconds(15))
+                .header("Authorization", "Bearer " + mailApiKey.trim())
+                .header("Content-Type", "application/json")
+                .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonPayload))
+                .build();
+
+            java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                log.info("Resend HTTPS API: Email dispatched successfully to {}", to);
+                System.out.println("Resend HTTPS API: Email dispatched successfully to " + to);
+                return true;
+            } else {
+                log.warn("Resend HTTPS API returned HTTP {}: {}", response.statusCode(), response.body());
+                return false;
+            }
+        } catch (Exception e) {
+            log.warn("Resend HTTPS API failed to send email to {}: {}", to, e.getMessage());
             return false;
         }
     }

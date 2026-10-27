@@ -42,6 +42,10 @@ services:
         value: aadarshranjan89@gmail.com
       - key: MAIL_PASS
         value: ogzzddabrxfdezke
+      - key: MAIL_API_KEY
+        value: ""
+      - key: MAIL_API_PROVIDER
+        value: brevo
 
   # ── 2. React Frontend (Render Static Site) ───────────────
   - type: web
