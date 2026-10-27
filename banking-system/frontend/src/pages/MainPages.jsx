@@ -284,6 +284,35 @@ export function AccountsPage() {
   }
 
   useEffect(() => {
+    // Detect return from Stripe hosted Checkout
+    const query = new URLSearchParams(window.location.search);
+    const paymentStatus = query.get('payment_status');
+    const sessionId = query.get('session_id');
+    const accNum = query.get('acc');
+    const amt = query.get('amt');
+
+    if (paymentStatus === 'success' && sessionId) {
+      toast.info('Verifying Stripe checkout payment...');
+      paymentApi.verifyStripePayment(sessionId)
+        .then(() => {
+          toast.success(`🎉 Deposit successful! ${amt ? '₹' + (+amt).toLocaleString('en-IN') : 'Funds'} credited to account ${accNum || ''}.`);
+          accountApi.getAll().then(r => setAccounts(r.data.data || []));
+        })
+        .catch((err) => {
+          const msg = err.response?.data?.message || '';
+          if (msg.toLowerCase().includes('already')) {
+            toast.success(`🎉 Deposit confirmed! ${amt ? '₹' + (+amt).toLocaleString('en-IN') : 'Funds'} credited.`);
+          } else {
+            toast.info(`Deposit status: ${msg || 'Processed'}`);
+          }
+          accountApi.getAll().then(r => setAccounts(r.data.data || []));
+        });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'cancelled') {
+      toast.warn('Stripe checkout was cancelled. No deposit was processed.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     setLoading(true);
     Promise.all([
       accountApi.getAll().then(r => setAccounts(r.data.data || [])),

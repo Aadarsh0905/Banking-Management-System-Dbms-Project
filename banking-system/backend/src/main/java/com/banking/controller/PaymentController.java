@@ -24,6 +24,15 @@ public class PaymentController {
 
     private final StripeService stripeService;
 
+    @GetMapping("/config")
+    @Operation(summary = "Get Stripe public configuration")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> getConfig() {
+        return ResponseEntity.ok(ApiResponse.success(java.util.Map.of(
+                "publishableKey", stripeService.getEffectivePublishableKey(),
+                "configured", stripeService.getEffectiveSecretKey() != null && stripeService.getEffectiveSecretKey().startsWith("sk_")
+        )));
+    }
+
     @PostMapping("/checkout")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create Stripe Checkout session for bank deposit")
