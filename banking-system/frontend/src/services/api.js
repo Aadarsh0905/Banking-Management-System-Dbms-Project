@@ -69,7 +69,7 @@ export const userApi = {
   getBeneficiaries:  ()    => API.get('/users/beneficiaries'),
   addBeneficiary:    (d)   => API.post('/users/beneficiaries', d),
   removeBeneficiary: (id)  => API.delete(`/users/beneficiaries/${id}`),
-  uploadAvatar:      (f)   => API.post('/users/me/avatar', f, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  uploadAvatar:      (f)   => API.post('/users/me/avatar', f),
 };
 
 // ── Accounts ───────────────────────────────────────────────

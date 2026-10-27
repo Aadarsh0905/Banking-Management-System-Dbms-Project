@@ -119,7 +119,7 @@ export function ProfilePage() {
 
           <label className="absolute bottom-0 right-0 bg-gradient-to-tr from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white p-2.5 rounded-full cursor-pointer transition-all shadow-md active:scale-95 border border-white/20">
             <FaCamera className="text-xs" />
-            <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} className="hidden" />
+            <input type="file" accept="image/*" onClick={(e) => { e.target.value = null; }} onChange={handleAvatarUpload} disabled={uploading} className="hidden" />
           </label>
         </div>
         <h2 className="text-xl font-bold text-white">{user?.firstName} {user?.lastName}</h2>
