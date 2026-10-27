@@ -43,7 +43,7 @@ services:
       - key: MAIL_PASS
         value: ogzzddabrxfdezke
       - key: MAIL_API_KEY
-        value: ""
+        sync: false
       - key: MAIL_API_PROVIDER
         value: brevo
 
