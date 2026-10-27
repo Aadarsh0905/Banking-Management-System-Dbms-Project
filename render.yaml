@@ -34,6 +34,14 @@ services:
         value: "false"
       - key: SPRING_MAIL_TEST_CONNECTION
         value: "false"
+      - key: MAIL_HOST
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USER
+        value: aadarshranjan89@gmail.com
+      - key: MAIL_PASS
+        value: ykfqhchcorzfnntt
 
   # ── 2. React Frontend (Render Static Site) ───────────────
   - type: web

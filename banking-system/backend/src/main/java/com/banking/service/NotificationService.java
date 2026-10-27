@@ -126,16 +126,50 @@ public class NotificationService {
 
     @Async
     public void sendOtpEmail(User user, String otp) {
-        System.out.println("\n========================================= [LOGIN OTP] =========================================");
-        System.out.println("User '" + user.getEmail() + "' generated a login OTP.");
-        System.out.println("OTP: " + otp + " (Demo master OTP: 123456)");
-        System.out.println("===============================================================================================\n");
-        log.info("========================================= [LOGIN OTP] =========================================");
-        log.info("User '{}' generated a login OTP.", user.getEmail());
-        log.info("OTP: {} (Demo master OTP: 123456)", otp);
-        log.info("===============================================================================================");
-        sendEmail(user.getEmail(), "Your Login Verification OTP",
-            "<h2>Hello, " + user.getFirstName() + "!</h2><p>Your one-time password (OTP) for login is: <strong style='font-size: 18px; color: #ff6600;'>" + otp + "</strong></p><p>This OTP is valid for 5 minutes.</p>");
+        String recipient = user.getEmail();
+        String firstName = (user.getFirstName() != null && !user.getFirstName().isBlank()) ? user.getFirstName() : user.getUsername();
+
+        System.out.println("\n========================================= [LOGIN OTP DISPATCH] =========================================");
+        System.out.println("Recipient Email: " + recipient);
+        System.out.println("Username:        " + user.getUsername());
+        System.out.println("Generated OTP:   " + otp + " (Demo master OTP fallback: 123456)");
+        System.out.println("=========================================================================================================\n");
+        log.info("========================================= [LOGIN OTP DISPATCH] =========================================");
+        log.info("Recipient Email: {}", recipient);
+        log.info("Username:        {}", user.getUsername());
+        log.info("Generated OTP:   {} (Demo master OTP fallback: 123456)", otp);
+        log.info("=========================================================================================================");
+
+        String subject = "Your BankPortal Login OTP: " + otp;
+        String htmlBody = "<!DOCTYPE html>" +
+            "<html><head><meta charset='UTF-8'></head>" +
+            "<body style='margin:0;padding:24px;background-color:#0b1320;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif;color:#e2e8f0;'>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0'>" +
+            "<tr><td align='center'>" +
+            "<table width='100%' style='max-width:540px;background-color:#0f1d32;border:1px solid #1e3a5f;border-radius:16px;padding:32px;box-shadow:0 10px 25px rgba(0,0,0,0.5);'>" +
+            "<tr><td>" +
+            "<div style='margin-bottom:24px;'>" +
+            "<span style='background:#ff6600;color:#ffffff;font-size:18px;font-weight:bold;padding:6px 12px;border-radius:8px;margin-right:10px;'>🏦 BankPortal</span>" +
+            "<span style='font-size:12px;color:#38bdf8;font-weight:700;text-transform:uppercase;letter-spacing:1px;'>Security Verification</span>" +
+            "</div>" +
+            "<h2 style='color:#ffffff;margin-top:0;font-size:22px;font-weight:700;'>Login Verification Code</h2>" +
+            "<p style='color:#94a3b8;font-size:14px;line-height:1.6;'>Hello <strong>" + firstName + "</strong>,</p>" +
+            "<p style='color:#94a3b8;font-size:14px;line-height:1.6;'>You requested to sign in to your BankPortal account. Please use the following One-Time Password (OTP) to complete your verification:</p>" +
+            "<div style='text-align:center;margin:28px 0;'>" +
+            "<div style='display:inline-block;padding:16px 36px;background:#060e18;border:2px dashed #ff6600;border-radius:12px;font-size:36px;font-weight:bold;color:#ff6600;letter-spacing:8px;font-family:monospace;'>" + otp + "</div>" +
+            "</div>" +
+            "<div style='color:#cbd5e1;font-size:13px;line-height:1.6;background:#060e18;padding:14px 18px;border-radius:10px;border-left:4px solid #ff6600;margin-bottom:20px;'>" +
+            "⏱️ <strong>This OTP is valid for 5 minutes.</strong><br/>" +
+            "🔒 Never share this code or your banking password with anyone, including bank representatives." +
+            "</div>" +
+            "<p style='color:#64748b;font-size:12px;border-top:1px solid #1e3a5f;padding-top:16px;margin-top:20px;'>" +
+            "If you did not request this OTP, please contact BankPortal Security immediately." +
+            "</p>" +
+            "</td></tr></table>" +
+            "</td></tr></table>" +
+            "</body></html>";
+
+        sendEmail(recipient, subject, htmlBody);
     }
 
     @Async
@@ -150,34 +184,29 @@ public class NotificationService {
     }
 
     private void sendEmail(String to, String subject, String htmlBody) {
-        if (mailFrom == null || mailFrom.contains("noreply@") || "password".equals(mailPass)) {
-            System.out.println("SMTP: Demo mode active. Skipping external email dispatch (OTP is logged above).");
+        if (mailFrom == null || mailFrom.isBlank()) {
+            System.out.println("SMTP: Sender address not configured. Skipping external email dispatch.");
             return;
         }
 
-        System.out.println("SMTP: Attempting to send email to " + to + " via " + mailHost + ":" + mailPort + " using username: " + mailFrom);
+        System.out.println("SMTP: Sending email to " + to + " via " + mailHost + ":" + mailPort + " using " + mailFrom);
         try {
             MimeMessage msg = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(msg, true, "UTF-8");
-            if (mailFrom != null && !mailFrom.isBlank()) {
-                if (mailFrom.contains("@")) {
-                    helper.setFrom(mailFrom, mailFromName);
-                } else {
-                    helper.setFrom("noreply@banking.com", mailFromName);
-                }
-            }
+            helper.setFrom(mailFrom, mailFromName);
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
             mailSender.send(msg);
-            System.out.println("SMTP: Email successfully sent to " + to);
+            System.out.println("SMTP: Email successfully dispatched to " + to);
+            log.info("SMTP: Email successfully dispatched to {}", to);
         } catch (Exception e) {
             System.err.println("\n=== EMAIL SENDING FAILED ===");
             System.err.println("Recipient: " + to);
-            System.err.println("SMTP Username (From): " + mailFrom);
-            System.err.println("Error Message: " + e.getMessage());
+            System.err.println("SMTP Username: " + mailFrom);
+            System.err.println("Error: " + e.getMessage());
             System.err.println("============================\n");
-            log.error("Failed to send email to {}: {}", to, e.getMessage());
+            log.warn("Could not dispatch email to {}: {}. Login OTP is still logged in console/demo.", to, e.getMessage());
         }
     }
 

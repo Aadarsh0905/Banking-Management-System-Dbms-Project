@@ -14,7 +14,9 @@ import {
   FaPhone, 
   FaLock, 
   FaArrowRight,
-  FaCheckCircle
+  FaCheckCircle,
+  FaShieldAlt,
+  FaRedo
 } from 'react-icons/fa';
 import { useAuth } from '../context/Contexts';
 import { authApi } from '../services/api';
@@ -432,11 +434,25 @@ export function LoginPage() {
   const [form, setForm] = useState({ usernameOrEmail: '', password: '' });
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState('');
   const [usernameForOtp, setUsernameForOtp] = useState('');
-  const { login, verifyOtp } = useAuth();
+  const [maskedEmail, setMaskedEmail] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const { login, verifyOtp, resendOtp } = useAuth();
   const navigate  = useNavigate();
+
+  // 30-second cooldown timer for resending OTP
+  useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(c => c - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   const handleQuickLogin = (username, password) => {
     setForm({ usernameOrEmail: username, password: password });
@@ -449,9 +465,15 @@ export function LoginPage() {
     try {
       const result = await login(form);
       if (result && result.otpRequired) {
-        setUsernameForOtp(result.username);
+        setUsernameForOtp(result.username || form.usernameOrEmail);
+        setMaskedEmail(result.maskedEmail || result.email || '');
         setShowOtpInput(true);
-        toast.info('Verification OTP sent to your registered email!');
+        setCountdown(30);
+        toast.info(
+          result.maskedEmail 
+            ? `Security OTP dispatched to ${result.maskedEmail}!` 
+            : 'Verification OTP sent to your registered email!'
+        );
       } else {
         toast.success(`Welcome back, ${result.firstName}! 👋`);
         if (result.roles?.includes('ROLE_ADMIN')) {
@@ -469,6 +491,10 @@ export function LoginPage() {
 
   async function handleOtpSubmit(e) {
     e.preventDefault();
+    if (!otp || otp.length < 6) {
+      toast.warning('Please enter the full 6-digit verification code');
+      return;
+    }
     setLoading(true);
     try {
       const user = await verifyOtp(usernameForOtp, otp);
@@ -479,53 +505,118 @@ export function LoginPage() {
         navigate('/dashboard');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'OTP Verification failed');
+      toast.error(err.response?.data?.message || 'OTP verification failed');
     } finally {
       setLoading(false);
     }
   }
 
+  async function handleResendOtp() {
+    if (countdown > 0 || resendLoading) return;
+    setResendLoading(true);
+    try {
+      const res = await resendOtp(usernameForOtp);
+      if (res?.maskedEmail) {
+        setMaskedEmail(res.maskedEmail);
+      }
+      setCountdown(30);
+      toast.success(`New OTP sent to ${res?.maskedEmail || 'your registered email'}!`);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
+    } finally {
+      setResendLoading(false);
+    }
+  }
+
   if (showOtpInput) {
     return (
-      <AuthLayout title="OTP Verification" subtitle="Enter Code Sent to Email" maxWidth="max-w-md">
+      <AuthLayout title="Two-Factor Security" subtitle="Registered Email Verification" maxWidth="max-w-md">
         <form onSubmit={handleOtpSubmit} className="space-y-5">
+          
+          {/* Email Notification Callout */}
+          <div className="bg-[#060e17] border border-cyan-500/30 rounded-2xl p-4 text-left relative overflow-hidden">
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 bg-orange-500/10 border border-orange-500/30 text-[#ff6600] rounded-xl mt-0.5">
+                <FaEnvelope className="text-lg" />
+              </div>
+              <div className="flex-1">
+                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block">Security Code Sent</span>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  We've sent a 6-digit verification code to your registered email address:
+                </p>
+                <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/80 border border-slate-700/60 rounded-lg text-xs font-mono text-orange-400 font-bold">
+                  <span>{maskedEmail || 'your registered email'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="focus-glow text-left">
-            <label className="label">One-Time Password (OTP)</label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="label mb-0">6-Digit Verification Code</label>
+              <span className="text-[10px] text-slate-400 font-mono">Expires in 5 min</span>
+            </div>
             <div className="relative group">
               <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
               <input
                 type="text"
                 required
+                autoFocus
                 maxLength={6}
                 value={otp}
                 onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                className="glass-input pl-11 tracking-widest text-center font-mono text-lg font-bold"
-                placeholder="000000"
+                className="glass-input pl-11 tracking-[0.5em] text-center font-mono text-xl font-black text-white placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
+                placeholder="• • • • • •"
               />
             </div>
-            <p className="text-[10px] text-slate-400 leading-normal italic mt-2 text-center">
-              Please enter the 6-digit OTP code sent via email, printed in logs, or use demo OTP: <strong className="text-orange-400 font-mono">123456</strong>.
+            
+            {/* Demo / Testing notice */}
+            <p className="text-[10px] text-slate-400 leading-normal italic mt-2.5 text-center bg-[#071328]/50 p-2 rounded-xl border border-[#1c3554]/30">
+              Please enter the OTP from your email inbox or spam folder. For quick local testing, demo master OTP is <strong className="text-orange-400 font-mono">123456</strong>.
             </p>
           </div>
 
           <button
             type="submit"
-            disabled={loading}
-            className="btn-primary w-full flex items-center justify-center gap-2 group"
+            disabled={loading || otp.length !== 6}
+            className="btn-primary w-full flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Verifying...' : (
               <>
-                Verify & Login <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
+                Verify & Sign In <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
               </>
             )}
           </button>
+
+          {/* Resend OTP Bar */}
+          <div className="flex items-center justify-between text-xs pt-1 border-t border-white/5">
+            <span className="text-slate-400">Didn't receive the code?</span>
+            {countdown > 0 ? (
+              <span className="text-slate-400 font-mono text-[11px]">
+                Resend in <strong className="text-orange-400">{countdown}s</strong>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={resendLoading}
+                className="text-cyan-400 hover:text-cyan-300 font-bold hover:underline flex items-center gap-1.5 transition-colors disabled:opacity-50"
+              >
+                <FaRedo className={`text-[10px] ${resendLoading ? 'animate-spin' : ''}`} />
+                {resendLoading ? 'Sending...' : 'Resend Code'}
+              </button>
+            )}
+          </div>
           
           <button
             type="button"
-            onClick={() => setShowOtpInput(false)}
-            className="w-full text-slate-400 hover:text-slate-200 text-xs font-semibold uppercase tracking-wider text-center mt-2 hover:underline"
+            onClick={() => {
+              setShowOtpInput(false);
+              setOtp('');
+            }}
+            className="w-full text-slate-400 hover:text-slate-200 text-xs font-semibold uppercase tracking-wider text-center pt-2 hover:underline block"
           >
-            Back to Password Sign In
+            ← Back to Password Sign In
           </button>
         </form>
       </AuthLayout>

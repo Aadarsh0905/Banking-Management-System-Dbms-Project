@@ -56,6 +56,12 @@ class AuthController {
         return ResponseEntity.ok(ApiResponse.success("OTP verification successful", authService.verifyOtp(req)));
     }
 
+    @PostMapping("/resend-otp")
+    @Operation(summary = "Resend login OTP to registered email")
+    public ResponseEntity<ApiResponse<AuthDTOs.AuthResponse>> resendOtp(@Valid @RequestBody AuthDTOs.ResendOtpRequest req) {
+        return ResponseEntity.ok(ApiResponse.success("A new OTP has been sent to your registered email", authService.resendOtp(req.usernameOrEmail)));
+    }
+
     @PostMapping("/forgot-password")
     @Operation(summary = "Request password reset email")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody AuthDTOs.ForgotPasswordRequest req) {

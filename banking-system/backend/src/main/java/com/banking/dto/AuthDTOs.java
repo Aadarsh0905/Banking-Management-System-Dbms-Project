@@ -38,12 +38,19 @@ public class AuthDTOs {
         public UserResponse user;
         public Boolean otpRequired;
         public String username;
+        public String email;
+        public String maskedEmail;
     }
 
     @Data @NoArgsConstructor @AllArgsConstructor
     public static class VerifyOtpRequest {
         @NotBlank public String usernameOrEmail;
         @NotBlank public String otp;
+    }
+
+    @Data @NoArgsConstructor @AllArgsConstructor
+    public static class ResendOtpRequest {
+        @NotBlank public String usernameOrEmail;
     }
 
     @Data @NoArgsConstructor @AllArgsConstructor

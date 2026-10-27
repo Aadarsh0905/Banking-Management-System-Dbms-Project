@@ -62,6 +62,11 @@ export function AuthProvider({ children }) {
     return data.data.user;
   }
 
+  async function resendOtp(usernameOrEmail) {
+    const { data } = await authApi.resendOtp(usernameOrEmail);
+    return data.data;
+  }
+
   async function register(payload) {
     const { data } = await authApi.register(payload);
     return data;
@@ -75,7 +80,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user, setUser, loading,
-      login, verifyOtp, register, logout, fetchProfile,
+      login, verifyOtp, resendOtp, register, logout, fetchProfile,
       isAdmin:    user?.roles?.includes('ROLE_ADMIN'),
       isEmployee: user?.roles?.includes('ROLE_EMPLOYEE'),
     }}>

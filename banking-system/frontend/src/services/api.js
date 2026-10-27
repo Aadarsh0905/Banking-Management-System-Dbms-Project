@@ -39,6 +39,7 @@ export const authApi = {
   forgotPassword: (email) => API.post('/auth/forgot-password', { email }),
   resetPassword:  (data)  => API.post('/auth/reset-password', data),
   verifyOtp:      (data)  => API.post('/auth/verify-otp', data),
+  resendOtp:      (usernameOrEmail) => API.post('/auth/resend-otp', { usernameOrEmail }),
   refresh:  (token) => API.post('/auth/refresh', { refreshToken: token }),
   addDemoMoney: (accountId, amount) => API.post(`/auth/add-money-demo?accountId=${accountId}&amount=${amount}`),
 };

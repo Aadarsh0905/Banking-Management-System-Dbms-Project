@@ -139,10 +139,55 @@ public class AuthService {
 
         notificationService.sendOtpEmail(user, otp);
 
+        String maskedEmail = maskEmail(user.getEmail());
+
         return AuthDTOs.AuthResponse.builder()
             .otpRequired(true)
             .username(user.getUsername())
+            .email(user.getEmail())
+            .maskedEmail(maskedEmail)
             .build();
+    }
+
+    @Transactional
+    public AuthDTOs.AuthResponse resendOtp(String usernameOrEmail) {
+        User user = userRepo.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+            .orElseThrow(() -> new BankingException("User not found with provided username or email", 404));
+
+        if (Boolean.TRUE.equals(user.getIsLocked())) {
+            throw new BankingException("Account is locked due to multiple failed login attempts. Please contact support.", 423);
+        }
+        if (Boolean.FALSE.equals(user.getIsActive())) {
+            throw new BankingException("Account is disabled.", 403);
+        }
+
+        String otp = String.format("%06d", (int)(Math.random() * 1000000));
+        user.setLoginOtp(otp);
+        user.setLoginOtpExpires(LocalDateTime.now().plusMinutes(5));
+        userRepo.save(user);
+
+        notificationService.sendOtpEmail(user, otp);
+
+        return AuthDTOs.AuthResponse.builder()
+            .otpRequired(true)
+            .username(user.getUsername())
+            .email(user.getEmail())
+            .maskedEmail(maskEmail(user.getEmail()))
+            .build();
+    }
+
+    public static String maskEmail(String email) {
+        if (email == null || !email.contains("@")) return email;
+        int atIdx = email.indexOf("@");
+        String prefix = email.substring(0, atIdx);
+        String domain = email.substring(atIdx);
+        if (prefix.length() <= 2) {
+            return prefix.charAt(0) + "*" + domain;
+        }
+        int keepStart = Math.min(2, prefix.length());
+        int keepEnd = Math.min(2, Math.max(0, prefix.length() - keepStart));
+        int maskCount = Math.max(3, prefix.length() - keepStart - keepEnd);
+        return prefix.substring(0, keepStart) + "*".repeat(maskCount) + prefix.substring(prefix.length() - keepEnd) + domain;
     }
 
     @Transactional
