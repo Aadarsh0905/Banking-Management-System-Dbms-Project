@@ -86,7 +86,7 @@ function AuthLayout({ children, title, subtitle, activeTab, maxWidth = 'max-w-md
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] flex flex-col lg:flex-row overflow-hidden font-sans text-slate-100 select-none page-transition">
+    <div className="min-h-screen bg-[#000000] flex flex-col lg:flex-row overflow-hidden font-sans text-slate-100 select-text page-transition">
       
       {/* Column 1: Interactive Dashboard Style Sidebar (Only on large screens) */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#020813] to-[#071328] border-r border-[#1c3554]/40 p-12 flex-col justify-between relative overflow-hidden">
@@ -614,7 +614,7 @@ export function LoginPage() {
                   return (
                     <div
                       key={idx}
-                      className={`w-11 h-14 sm:w-12 sm:h-16 flex items-center justify-center rounded-xl border-2 font-mono text-2xl font-bold transition-all duration-200 select-none ${
+                      className={`w-11 h-14 sm:w-12 sm:h-16 flex items-center justify-center rounded-xl border-2 font-mono text-2xl font-bold transition-all duration-200 select-text ${
                         isCurrent
                           ? 'border-orange-500 bg-orange-500/10 shadow-[0_0_15px_rgba(255,102,0,0.35)] text-white scale-105'
                           : isFilled

@@ -9,9 +9,13 @@
   * { 
     box-sizing: border-box; 
     transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    user-select: text;
+    -webkit-user-select: text;
   }
   html { 
-    scroll-behavior: smooth; 
+    scroll-behavior: smooth;
+    user-select: text;
+    -webkit-user-select: text;
   }
   body {
     background-color: #000000; /* Pure dark black background */
@@ -19,6 +23,8 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     background-attachment: fixed;
+    user-select: text;
+    -webkit-user-select: text;
   }
   
   /* Minimal High-Performance Scrollbar matching dark blue-black style */
