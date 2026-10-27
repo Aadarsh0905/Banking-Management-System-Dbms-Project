@@ -6,6 +6,22 @@ import axios from 'axios';
 export const baseURL = import.meta.env.VITE_API_URL || 'https://banking-backend-tjem.onrender.com/api';
 const API = axios.create({ baseURL });
 
+/**
+ * Resolves avatar image URLs properly whether relative (/api/uploads/...) or absolute.
+ */
+export function getAvatarUrl(url) {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
+    return url;
+  }
+  const apiBase = (baseURL || '').replace(/\/api\/?$/, '');
+  const cleanPath = url.startsWith('/') ? url : `/${url}`;
+  if (cleanPath.startsWith('/api/')) {
+    return `${apiBase}${cleanPath}`;
+  }
+  return `${apiBase}/api${cleanPath}`;
+}
+
 // Attach token
 API.interceptors.request.use(config => {
   const token = localStorage.getItem('accessToken');

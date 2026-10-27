@@ -62,6 +62,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(500).body(ApiResponse.error("Database error", 500));
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        return ResponseEntity.status(404).body(ApiResponse.error("Requested resource not found: " + ex.getResourcePath(), 404));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneral(Exception ex) {
         return ResponseEntity.status(500).body(ApiResponse.error("Internal server error: " + ex.getMessage(), 500));

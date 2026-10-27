@@ -26,7 +26,7 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa';
 import { useAuth, useTheme } from '../context/Contexts';
-import { notifApi } from '../services/api';
+import { notifApi, getAvatarUrl } from '../services/api';
 import { toast } from 'react-toastify';
 
 function Sidebar({ open }) {
@@ -191,11 +191,20 @@ function Navbar({ onToggleSidebar }) {
           )}
         </button>
 
-        <button onClick={() => navigate('/profile')} className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#1c3554] transition-colors">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
+        <button onClick={() => navigate('/profile')} className="hidden sm:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#1c3554] transition-all group">
+          {user?.profilePictureUrl ? (
+            <img
+              src={getAvatarUrl(user.profilePictureUrl)}
+              alt="Avatar"
+              onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex'; }}
+              className="w-7 h-7 rounded-full object-cover border border-orange-500/40 shadow-sm"
+            />
+          ) : null}
+          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-orange-600 to-amber-500 items-center justify-center text-white text-xs font-bold shadow-sm"
+               style={{ display: user?.profilePictureUrl ? 'none' : 'flex' }}>
             {user?.firstName?.[0]}{user?.lastName?.[0]}
           </div>
-          <span className="text-sm font-semibold text-slate-300">{user?.firstName} {user?.lastName}</span>
+          <span className="text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">{user?.firstName} {user?.lastName}</span>
         </button>
 
         <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-red-500/30 bg-red-500/10 hover:bg-red-600 hover:text-white text-red-400 text-sm font-bold transition-all active:scale-[0.97] shadow-sm hover:shadow-red-600/10">

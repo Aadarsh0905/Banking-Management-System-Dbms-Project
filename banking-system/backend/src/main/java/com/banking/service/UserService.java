@@ -8,9 +8,11 @@ import com.banking.dto.UserResponse;
 import com.banking.entity.Beneficiary;
 import com.banking.entity.KycDetails;
 import com.banking.entity.User;
+import com.banking.entity.UserAvatar;
 import com.banking.exception.BankingException;
 import com.banking.repository.BeneficiaryRepository;
 import com.banking.repository.KycRepository;
+import com.banking.repository.UserAvatarRepository;
 import com.banking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,6 +39,7 @@ public class UserService {
     private final UserRepository userRepo;
     private final KycRepository kycRepo;
     private final BeneficiaryRepository benefRepo;
+    private final UserAvatarRepository userAvatarRepo;
     private final AuthService authService;
     private final NotificationService notificationService;
 
@@ -63,19 +68,52 @@ public class UserService {
 
     @Transactional
     public String uploadAvatar(Long userId, MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new BankingException("Please select a file to upload", 400);
+        }
         try {
-            Path dir = Paths.get(uploadDir, "avatars");
-            Files.createDirectories(dir);
-            String filename = userId + "_" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
-            Path target = dir.resolve(filename);
-            Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+            String originalFilename = file.getOriginalFilename();
+            String ext = ".jpg";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                String potentialExt = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+                if (List.of(".jpg", ".jpeg", ".png", ".webp", ".gif").contains(potentialExt)) {
+                    ext = potentialExt;
+                }
+            }
+            String filename = "avatar_" + userId + "_" + System.currentTimeMillis() + ext;
+            byte[] fileBytes = file.getBytes();
+            String contentType = file.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                contentType = "image/jpeg";
+            }
+
+            // 1. Save to persistent DB so avatar survives cloud container reboots
+            UserAvatar avatar = userAvatarRepo.findByUserId(userId)
+                    .orElse(UserAvatar.builder().userId(userId).build());
+            avatar.setFilename(filename);
+            avatar.setContentType(contentType);
+            avatar.setData(fileBytes);
+            avatar.setUpdatedAt(LocalDateTime.now());
+            userAvatarRepo.save(avatar);
+
+            // 2. Save to local disk cache
+            try {
+                Path dir = Paths.get(uploadDir, "avatars");
+                Files.createDirectories(dir);
+                Path target = dir.resolve(filename);
+                Files.write(target, fileBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (Exception e) {
+                log.warn("Could not cache avatar to disk: {}", e.getMessage());
+            }
+
+            // 3. Update user profile picture URL
             String url = "/api/uploads/avatars/" + filename;
             User u = userRepo.findById(userId).orElseThrow();
             u.setProfilePictureUrl(url);
             userRepo.save(u);
             return url;
         } catch (IOException e) {
-            throw new BankingException("Failed to upload file", 500);
+            throw new BankingException("Failed to upload file: " + e.getMessage(), 500);
         }
     }
 

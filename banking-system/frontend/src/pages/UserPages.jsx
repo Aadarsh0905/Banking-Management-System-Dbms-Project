@@ -18,7 +18,7 @@ import {
   FaUniversity,
 } from 'react-icons/fa';
 import { useAuth } from '../context/Contexts';
-import { notifApi, userApi, accountApi, baseURL } from '../services/api';
+import { notifApi, userApi, accountApi, baseURL, getAvatarUrl } from '../services/api';
 import { DashboardSkeleton } from '../components/Skeletons';
 
 
@@ -27,7 +27,13 @@ export function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ firstName: '', lastName: '', phone: '', gender: '' });
   const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [imgError, setImgError] = useState(false);
   const [accounts, setAccounts] = useState([]);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [user?.profilePictureUrl]);
 
   useEffect(() => {
     if (user) setForm({ firstName: user.firstName, lastName: user.lastName, phone: user.phone, gender: user.gender });
@@ -54,15 +60,32 @@ export function ProfilePage() {
   async function handleAvatarUpload(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file (JPG, PNG, WebP)');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image size must be less than 10MB');
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+    setImgError(false);
+    setUploading(true);
+
     const formData = new FormData();
     formData.append('file', file);
-    setUploading(true);
     try {
       await userApi.uploadAvatar(formData);
       await fetchProfile();
-      toast.success('Avatar uploaded!');
-    } catch (err) { toast.error('Upload failed'); }
-    finally { setUploading(false); }
+      toast.success('Profile photo updated successfully!');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Avatar upload failed');
+      setPreviewUrl(null);
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
@@ -74,11 +97,28 @@ export function ProfilePage() {
 
       {/* Avatar */}
       <div className="glass-card text-center relative overflow-hidden">
-        <div className="relative w-24 h-24 mx-auto mb-4">
-          <img src={user?.profilePictureUrl ? (user.profilePictureUrl.startsWith('/uploads') ? `${baseURL.replace(/\/api\/?$/, '')}/api${user.profilePictureUrl}` : user.profilePictureUrl) : 'https://via.placeholder.com/100'} alt="Avatar"
-            className="w-24 h-24 rounded-full object-cover border-4 border-white/10" />
-          <label className="absolute bottom-0 right-0 bg-gradient-to-tr from-blue-600 to-cyan-500 text-white p-2 rounded-full cursor-pointer hover:from-blue-500 hover:to-cyan-400 transition-all shadow-md">
-            <FaCamera />
+        <div className="relative w-24 h-24 mx-auto mb-4 group">
+          {previewUrl || (user?.profilePictureUrl && !imgError) ? (
+            <img
+              src={previewUrl || getAvatarUrl(user.profilePictureUrl)}
+              alt="Avatar"
+              onError={() => setImgError(true)}
+              className="w-24 h-24 rounded-full object-cover border-4 border-orange-500/30 shadow-lg shadow-orange-500/10"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-orange-600 via-amber-600 to-yellow-500 flex items-center justify-center text-white text-2xl font-black border-4 border-white/10 shadow-lg shadow-orange-500/20">
+              {user?.firstName?.[0]?.toUpperCase()}{user?.lastName?.[0]?.toUpperCase() || <FaUser />}
+            </div>
+          )}
+
+          {uploading && (
+            <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center backdrop-blur-xs">
+              <div className="w-7 h-7 border-2 border-orange-400 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          )}
+
+          <label className="absolute bottom-0 right-0 bg-gradient-to-tr from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white p-2.5 rounded-full cursor-pointer transition-all shadow-md active:scale-95 border border-white/20">
+            <FaCamera className="text-xs" />
             <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} className="hidden" />
           </label>
         </div>
