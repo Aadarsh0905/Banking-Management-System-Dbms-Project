@@ -38,7 +38,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/auth/**", "/v3/api-docs/**", "/swagger-ui/**",
-                    "/swagger-ui.html", "/actuator/health", "/uploads/**"
+                    "/swagger-ui.html", "/actuator/health", "/uploads/**", "/payments/stripe/webhook", "/payments/stripe/verify"
                 ).permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")

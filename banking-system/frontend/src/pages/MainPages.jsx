@@ -18,10 +18,11 @@ import {
   FaFileAlt,
   FaCalendarAlt,
   FaArrowRight,
-  FaInfoCircle
+  FaInfoCircle,
+  FaShieldAlt
 } from 'react-icons/fa';
 import { useAuth } from '../context/Contexts';
-import { accountApi, loanApi, txnApi, authApi } from '../services/api';
+import { accountApi, loanApi, txnApi, authApi, paymentApi } from '../services/api';
 import { DashboardSkeleton, AccountsSkeleton, TableSkeleton } from '../components/Skeletons';
 
 Chart.register(...registerables);
@@ -220,7 +221,8 @@ export function AccountsPage() {
   const [passbookTxns, setPassbookTxns] = useState([]);
   const [loadingPassbook, setLoadingPassbook] = useState(false);
   const [addMoneyAccount, setAddMoneyAccount] = useState(null);
-  const [addMoneyAmount, setAddMoneyAmount] = useState('10000');
+  const [addMoneyAmount, setAddMoneyAmount] = useState('5000');
+  const [processingPayment, setProcessingPayment] = useState(false);
   const [loading, setLoading] = useState(true);
 
   async function requestCloseAccount(acc) {
@@ -238,18 +240,33 @@ export function AccountsPage() {
     }
   }
 
-  async function submitAddDemoMoney() {
+  async function handleStripeCheckout() {
     if (!addMoneyAmount || isNaN(addMoneyAmount) || +addMoneyAmount <= 0) {
-      toast.error("Please enter a valid amount");
+      toast.error("Please enter a valid deposit amount (min ₹1.00)");
       return;
     }
+    setProcessingPayment(true);
     try {
-      await authApi.addDemoMoney(addMoneyAccount.id, +addMoneyAmount);
-      toast.success(`Demo money of ₹${(+addMoneyAmount).toLocaleString('en-IN')} added successfully!`);
-      setAddMoneyAccount(null);
-      accountApi.getAll().then(r => setAccounts(r.data.data || []));
+      const res = await paymentApi.createStripeCheckout({
+        accountId: addMoneyAccount.id,
+        amount: +addMoneyAmount,
+        currency: 'inr'
+      });
+      const data = res.data?.data;
+      if (data?.checkoutUrl) {
+        toast.info("Redirecting to Stripe Secure Checkout...");
+        window.location.href = data.checkoutUrl;
+      } else if (data?.mock) {
+        toast.info("Processing Demo Stripe Deposit...");
+        await paymentApi.verifyStripePayment(data.sessionId, addMoneyAccount.id, +addMoneyAmount);
+        toast.success(`🎉 Successfully deposited ₹${(+addMoneyAmount).toLocaleString('en-IN')} via Stripe (Demo Mode)!`);
+        setAddMoneyAccount(null);
+        accountApi.getAll().then(r => setAccounts(r.data.data || []));
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add demo money');
+      toast.error(err.response?.data?.message || 'Stripe Checkout initiation failed');
+    } finally {
+      setProcessingPayment(false);
     }
   }
 
@@ -403,7 +420,7 @@ export function AccountsPage() {
               </button>
               <button onClick={() => { setAddMoneyAccount(acc); setAddMoneyAmount('10000'); }}
                 className="flex items-center justify-center gap-1 border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/25 text-[11px] font-semibold py-2 rounded-xl text-emerald-400 transition-all">
-                <FaPlus /> Add Demo
+                <FaCreditCard className="text-indigo-400" /> Deposit / Stripe
               </button>
               {acc.status === 'ACTIVE' ? (
                 <button onClick={() => requestCloseAccount(acc)}
@@ -516,34 +533,95 @@ export function AccountsPage() {
       )}
 
       {addMoneyAccount && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="glass-frosted rounded-[2.5rem] p-8 w-full max-w-md modal-transition border border-white/10 shadow-2xl">
-            <h2 className="font-extrabold text-xl text-white mb-2">Add Demo Money</h2>
-            <p className="text-xs text-slate-400 mb-6">
-              Add demo funds instantly to account <span className="font-mono text-slate-200">{addMoneyAccount.accountNumber}</span>. No authentication required.
-            </p>
-            <div className="space-y-4">
-              <div>
-                <label className="label">Amount (₹)</label>
-                <input 
-                  type="number" 
-                  value={addMoneyAmount} 
-                  onChange={e => setAddMoneyAmount(e.target.value)} 
-                  className="glass-input" 
-                  placeholder="Enter amount (e.g. 10000)" 
-                />
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="glass-frosted rounded-[2.5rem] p-6 md:p-8 w-full max-w-lg modal-transition border border-white/10 shadow-2xl relative overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#635bff] to-[#7a73ff] flex items-center justify-center text-white shadow-lg shadow-[#635bff]/30">
+                  <FaCreditCard className="text-lg" />
+                </div>
+                <div>
+                  <h2 className="font-extrabold text-xl text-white">Deposit via Stripe</h2>
+                  <p className="text-[11px] text-slate-400 font-medium">Secure Checkout Gateway</p>
+                </div>
               </div>
-              <div className="flex gap-3 mt-6">
-                <button 
-                  onClick={submitAddDemoMoney} 
-                  className="flex-1 btn-primary text-sm bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow-lg shadow-emerald-500/20"
+              <button onClick={() => setAddMoneyAccount(null)} className="text-slate-400 hover:text-white p-2">✕</button>
+            </div>
+
+            {/* Target Account Badge */}
+            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 mb-5 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Crediting Account</p>
+                <p className="font-mono text-sm font-bold text-white mt-0.5">{addMoneyAccount.accountNumber}</p>
+              </div>
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-cyan-400 border border-cyan-500/20">
+                {addMoneyAccount.accountType}
+              </span>
+            </div>
+
+            {/* Amount Input */}
+            <div className="space-y-3">
+              <div>
+                <label className="label text-xs font-semibold text-slate-300">Deposit Amount (₹ INR)</label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-lg">₹</span>
+                  <input
+                    type="number"
+                    value={addMoneyAmount}
+                    onChange={e => setAddMoneyAmount(e.target.value)}
+                    className="glass-input pl-10 text-xl font-bold tracking-tight text-white"
+                    placeholder="Enter amount"
+                    min="1"
+                  />
+                </div>
+              </div>
+
+              {/* Quick Select Chips */}
+              <div className="flex flex-wrap gap-2 pt-1">
+                {[500, 1000, 2000, 5000, 10000, 25000].map(amt => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setAddMoneyAmount(amt.toString())}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                      +addMoneyAmount === amt
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md shadow-orange-500/20 border border-orange-400/40'
+                        : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/5'
+                    }`}
+                  >
+                    +₹{amt.toLocaleString('en-IN')}
+                  </button>
+                ))}
+              </div>
+
+              {/* Supported payment methods banner */}
+              <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/5 flex items-center justify-between text-xs text-slate-400 mt-4">
+                <span className="flex items-center gap-1.5">
+                  <FaShieldAlt className="text-emerald-400 text-sm" /> 256-Bit Encrypted
+                </span>
+                <span className="text-[11px] font-semibold text-slate-400">
+                  Cards • Apple Pay • Google Pay
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-3">
+                <button
+                  onClick={handleStripeCheckout}
+                  disabled={processingPayment}
+                  className="flex-1 py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-[#635bff] via-[#7a73ff] to-[#635bff] text-white hover:opacity-95 transition-all shadow-lg shadow-[#635bff]/25 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
                 >
-                  Add Money
+                  {processingPayment ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>Pay with Stripe Checkout →</>
+                  )}
                 </button>
-                <button 
-                  type="button" 
-                  onClick={() => setAddMoneyAccount(null)} 
-                  className="flex-1 btn-secondary text-sm"
+                <button
+                  type="button"
+                  onClick={() => setAddMoneyAccount(null)}
+                  className="btn-secondary text-sm px-5 py-3 rounded-2xl"
                 >
                   Cancel
                 </button>

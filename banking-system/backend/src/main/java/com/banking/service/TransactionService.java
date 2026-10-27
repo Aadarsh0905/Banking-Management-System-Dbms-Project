@@ -113,6 +113,43 @@ public class TransactionService {
     }
 
     @Transactional
+    public TransactionResponse depositViaStripe(Long accountId, BigDecimal amount, String stripeSessionId, boolean isMock) {
+        Account acc = accountRepo.findById(accountId)
+            .orElseThrow(() -> new BankingException("Account not found", 404));
+        if (acc.getStatus() != Account.AccountStatus.ACTIVE)
+            throw new BankingException("Account is not active", 400);
+
+        BigDecimal before = acc.getBalance();
+        acc.setBalance(before.add(amount));
+        acc.setAvailableBalance(acc.getAvailableBalance().add(amount));
+        acc.setLastTransactionAt(LocalDateTime.now());
+        accountRepo.save(acc);
+
+        String desc = isMock 
+                ? "Stripe Online Deposit (Demo) - " + stripeSessionId 
+                : "Stripe Online Deposit - " + stripeSessionId;
+
+        Transaction txn = Transaction.builder()
+            .transactionRef(generateRef())
+            .toAccount(acc)
+            .transactionType(Transaction.TransactionType.DEPOSIT)
+            .amount(amount)
+            .currency(acc.getCurrency() != null ? acc.getCurrency() : "INR")
+            .balanceBefore(before)
+            .balanceAfter(acc.getBalance())
+            .description(desc)
+            .status(Transaction.TransactionStatus.SUCCESS)
+            .channel(Transaction.Channel.NETBANKING)
+            .initiatedAt(LocalDateTime.now())
+            .completedAt(LocalDateTime.now())
+            .build();
+
+        txn = txnRepo.save(txn);
+        notificationService.sendTransactionAlert(acc.getUser(), txn);
+        return mapToResponse(txn);
+    }
+
+    @Transactional
     public TransactionResponse withdraw(WithdrawalRequest req, Long userId) {
         Account acc = accountRepo.findById(req.accountId)
             .orElseThrow(() -> new BankingException("Account not found", 404));
