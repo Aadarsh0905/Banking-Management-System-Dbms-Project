@@ -72,9 +72,14 @@ public class PaymentController {
     public ResponseEntity<ApiResponse<TransactionResponse>> directDeposit(
             @AuthenticationPrincipal BankUserDetails ud,
             @Valid @RequestBody DirectDepositRequest req) {
+        if (ud == null) {
+            throw new com.banking.exception.BankingException("User authentication required", 401);
+        }
+        boolean isAdmin = ud.getAuthorities() != null && ud.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equalsIgnoreCase("ROLE_ADMIN") || a.getAuthority().equalsIgnoreCase("ADMIN"));
         return ResponseEntity.ok(ApiResponse.success(
             "Deposit processed successfully",
-            transactionService.depositDirect(ud.getId(), req.getAccountId(), req.getAmount(), req.getMethod(), req.getReference())
+            transactionService.depositDirect(ud.getId(), isAdmin, req.getAccountId(), req.getAmount(), req.getMethod(), req.getReference())
         ));
     }
 

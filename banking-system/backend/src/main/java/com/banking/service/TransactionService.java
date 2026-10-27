@@ -146,16 +146,27 @@ public class TransactionService {
             .build();
 
         txn = txnRepo.save(txn);
-        notificationService.sendTransactionAlert(acc.getUser(), txn);
+        try {
+            if (acc.getUser() != null) {
+                notificationService.sendTransactionAlert(acc.getUser(), txn);
+            }
+        } catch (Exception e) {
+            log.warn("Could not dispatch transaction notification: {}", e.getMessage());
+        }
         return mapToResponse(txn);
     }
 
     @Transactional
     public TransactionResponse depositDirect(Long userId, Long accountId, BigDecimal amount, String method, String reference) {
+        return depositDirect(userId, false, accountId, amount, method, reference);
+    }
+
+    @Transactional
+    public TransactionResponse depositDirect(Long userId, boolean isAdmin, Long accountId, BigDecimal amount, String method, String reference) {
         Account acc = accountRepo.findByIdWithAssociations(accountId)
             .orElseGet(() -> accountRepo.findById(accountId)
                 .orElseThrow(() -> new BankingException("Account not found", 404)));
-        if (!acc.getUser().getId().equals(userId)) {
+        if (!isAdmin && userId != null && acc.getUser() != null && !acc.getUser().getId().equals(userId)) {
             throw new BankingException("Unauthorized access to account", 403);
         }
         if (acc.getStatus() != Account.AccountStatus.ACTIVE) {
@@ -165,16 +176,17 @@ public class TransactionService {
             throw new BankingException("Minimum deposit amount is ₹1.00", 400);
         }
 
-        BigDecimal before = acc.getBalance();
+        BigDecimal before = acc.getBalance() != null ? acc.getBalance() : BigDecimal.ZERO;
+        BigDecimal avail = acc.getAvailableBalance() != null ? acc.getAvailableBalance() : BigDecimal.ZERO;
         acc.setBalance(before.add(amount));
-        acc.setAvailableBalance(acc.getAvailableBalance().add(amount));
+        acc.setAvailableBalance(avail.add(amount));
         acc.setLastTransactionAt(LocalDateTime.now());
         accountRepo.save(acc);
 
         String ref = generateRef();
         String safeMethod = (method != null && !method.isBlank()) ? method.trim().toUpperCase() : "UPI";
         String desc = safeMethod + " Deposit - " + (reference != null && !reference.isBlank() ? reference.trim() : ref);
-        Transaction.Channel ch = "NETBANKING".equalsIgnoreCase(safeMethod) ? Transaction.Channel.NETBANKING : Transaction.Channel.UPI;
+        Transaction.Channel ch = safeMethod.contains("NETBANKING") ? Transaction.Channel.NETBANKING : Transaction.Channel.UPI;
 
         Transaction txn = Transaction.builder()
             .transactionRef(ref)
@@ -192,7 +204,13 @@ public class TransactionService {
             .build();
 
         txn = txnRepo.save(txn);
-        notificationService.sendTransactionAlert(acc.getUser(), txn);
+        try {
+            if (acc.getUser() != null) {
+                notificationService.sendTransactionAlert(acc.getUser(), txn);
+            }
+        } catch (Exception e) {
+            log.warn("Could not dispatch transaction notification: {}", e.getMessage());
+        }
         return mapToResponse(txn);
     }
 
