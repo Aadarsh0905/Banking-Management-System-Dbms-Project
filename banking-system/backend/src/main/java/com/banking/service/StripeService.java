@@ -45,7 +45,7 @@ public class StripeService {
     @Value("${stripe.webhook.secret:}")
     private String webhookSecret;
 
-    @Value("${banking.frontend.url:https://banking-frontend.onrender.com}")
+    @Value("${banking.frontend.url:}")
     private String frontendUrl;
 
     @PostConstruct
@@ -144,9 +144,14 @@ public class StripeService {
                 // Amount in smallest currency unit (e.g. cents/paise: multiply by 100)
                 long unitAmount = req.getAmount().multiply(new BigDecimal("100")).longValue();
 
-                String baseFrontend = (req.getReturnUrl() != null && !req.getReturnUrl().isBlank()) 
-                        ? req.getReturnUrl().trim() 
-                        : frontendUrl;
+                String baseFrontend = null;
+                if (req.getReturnUrl() != null && !req.getReturnUrl().isBlank()) {
+                    baseFrontend = req.getReturnUrl().trim();
+                } else if (frontendUrl != null && !frontendUrl.isBlank()) {
+                    baseFrontend = frontendUrl.trim();
+                } else {
+                    baseFrontend = "http://localhost:5173";
+                }
                 String cleanFrontendUrl = baseFrontend.replaceAll("/+$", "");
                 String successUrl = cleanFrontendUrl + "/accounts?payment_status=success&session_id={CHECKOUT_SESSION_ID}&acc=" 
                         + acc.getAccountNumber() + "&amt=" + req.getAmount();

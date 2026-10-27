@@ -38,7 +38,22 @@ public class PaymentController {
     @Operation(summary = "Create Stripe Checkout session for bank deposit")
     public ResponseEntity<ApiResponse<StripeCheckoutResponse>> createCheckout(
             @AuthenticationPrincipal BankUserDetails ud,
-            @Valid @RequestBody StripeCheckoutRequest req) {
+            @Valid @RequestBody StripeCheckoutRequest req,
+            jakarta.servlet.http.HttpServletRequest request) {
+        if (req.getReturnUrl() == null || req.getReturnUrl().isBlank()) {
+            String origin = request.getHeader("Origin");
+            if (origin != null && !origin.isBlank()) {
+                req.setReturnUrl(origin);
+            } else {
+                String referer = request.getHeader("Referer");
+                if (referer != null && !referer.isBlank()) {
+                    try {
+                        java.net.URI uri = java.net.URI.create(referer);
+                        req.setReturnUrl(uri.getScheme() + "://" + uri.getAuthority());
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
         return ResponseEntity.ok(ApiResponse.success(stripeService.createCheckoutSession(ud.getId(), req)));
     }
 

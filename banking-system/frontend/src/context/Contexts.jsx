@@ -36,8 +36,11 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await userApi.getProfile();
       setUser(data.data);
-    } catch {
-      localStorage.clear();
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.clear();
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
