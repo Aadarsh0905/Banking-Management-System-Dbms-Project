@@ -441,6 +441,7 @@ export function LoginPage() {
   const [maskedEmail, setMaskedEmail] = useState('');
   const [emailSent, setEmailSent] = useState(true);
   const [devOtp, setDevOtp] = useState('');
+  const [emailStatus, setEmailStatus] = useState('');
   const [countdown, setCountdown] = useState(0);
   const { login, verifyOtp, resendOtp } = useAuth();
   const navigate  = useNavigate();
@@ -471,6 +472,7 @@ export function LoginPage() {
         setMaskedEmail(result.maskedEmail || result.email || '');
         setEmailSent(result.emailSent !== false);
         setDevOtp(result.devOtp || '');
+        setEmailStatus(result.emailStatus || '');
         setShowOtpInput(true);
         setCountdown(30);
         if (result.emailSent !== false) {
@@ -534,6 +536,7 @@ export function LoginPage() {
       }
       setEmailSent(res?.emailSent !== false);
       setDevOtp(res?.devOtp || '');
+      setEmailStatus(res?.emailStatus || '');
       setCountdown(30);
       if (res?.emailSent !== false) {
         toast.success(`New OTP sent to ${res?.maskedEmail || 'your registered email'}!`);
@@ -587,6 +590,11 @@ export function LoginPage() {
               {devOtp && (
                 <div className="mt-2 pt-2 border-t border-amber-500/20 text-slate-200 text-xs">
                   Generated OTP for this session: <strong className="text-orange-400 font-mono text-sm tracking-widest">{devOtp}</strong>
+                </div>
+              )}
+              {emailStatus && (
+                <div className="mt-1.5 text-[10px] text-amber-300/80 font-mono break-all">
+                  Diagnostic: {emailStatus}
                 </div>
               )}
             </div>

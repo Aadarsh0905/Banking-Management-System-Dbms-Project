@@ -51,6 +51,12 @@ public class NotificationService {
     @org.springframework.beans.factory.annotation.Value("${banking.mail.api-provider:${MAIL_API_PROVIDER:brevo}}")
     private String mailApiProvider;
 
+    private volatile String lastEmailStatus = "Not attempted";
+
+    public String getLastEmailStatus() {
+        return lastEmailStatus;
+    }
+
     @Async
     public void sendWelcomeEmail(User user) {
         sendEmail(user.getEmail(),
@@ -192,12 +198,16 @@ public class NotificationService {
         if (mailApiKey != null && !mailApiKey.trim().isBlank()) {
             System.out.println("Email: Using HTTPS API provider (" + mailApiProvider + ") to " + to);
             if (sendViaHttpApi(to, subject, htmlBody)) {
+                lastEmailStatus = "Delivered via " + mailApiProvider + " HTTPS API to " + to;
                 return true;
             }
             System.out.println("Email: HTTPS API failed, falling back to direct SMTP...");
+        } else {
+            lastEmailStatus = "MAIL_API_KEY is not configured or empty on server. Attempting direct SMTP...";
         }
 
         if (mailFrom == null || mailFrom.isBlank()) {
+            lastEmailStatus = "SMTP sender address not configured.";
             System.out.println("SMTP: Sender address not configured. Skipping external email dispatch.");
             return false;
         }
@@ -213,14 +223,17 @@ public class NotificationService {
             mailSender.send(msg);
             System.out.println("SMTP: Email successfully dispatched to " + to);
             log.info("SMTP: Email successfully dispatched to {}", to);
+            lastEmailStatus = "Delivered via SMTP to " + to;
             return true;
         } catch (Exception e) {
+            String errMsg = e.getMessage() != null ? e.getMessage() : e.toString();
+            lastEmailStatus = (lastEmailStatus.contains("HTTP") ? lastEmailStatus + " | " : "") + "SMTP error: " + errMsg;
             System.err.println("\n=== EMAIL SENDING FAILED ===");
             System.err.println("Recipient: " + to);
             System.err.println("SMTP Username: " + mailFrom);
-            System.err.println("Error: " + e.getMessage());
+            System.err.println("Error: " + errMsg);
             System.err.println("============================\n");
-            log.warn("Could not dispatch email to {}: {}. Login OTP is still logged in console/demo.", to, e.getMessage());
+            log.warn("Could not dispatch email to {}: {}. Login OTP is still logged in console/demo.", to, errMsg);
             return false;
         }
     }
@@ -259,15 +272,18 @@ public class NotificationService {
 
             java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                lastEmailStatus = "Brevo HTTP " + response.statusCode() + " OK";
                 log.info("Brevo HTTPS API: Email dispatched successfully to {}", to);
                 System.out.println("Brevo HTTPS API: Email dispatched successfully to " + to);
                 return true;
             } else {
+                lastEmailStatus = "Brevo HTTP " + response.statusCode() + ": " + response.body();
                 log.warn("Brevo HTTPS API returned HTTP {}: {}", response.statusCode(), response.body());
                 System.err.println("Brevo HTTPS API error " + response.statusCode() + ": " + response.body());
                 return false;
             }
         } catch (Exception e) {
+            lastEmailStatus = "Brevo exception: " + e.getMessage();
             log.warn("Brevo HTTPS API failed to send email to {}: {}", to, e.getMessage());
             return false;
         }
@@ -298,14 +314,17 @@ public class NotificationService {
 
             java.net.http.HttpResponse<String> response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                lastEmailStatus = "Resend HTTP " + response.statusCode() + " OK";
                 log.info("Resend HTTPS API: Email dispatched successfully to {}", to);
                 System.out.println("Resend HTTPS API: Email dispatched successfully to " + to);
                 return true;
             } else {
+                lastEmailStatus = "Resend HTTP " + response.statusCode() + ": " + response.body();
                 log.warn("Resend HTTPS API returned HTTP {}: {}", response.statusCode(), response.body());
                 return false;
             }
         } catch (Exception e) {
+            lastEmailStatus = "Resend exception: " + e.getMessage();
             log.warn("Resend HTTPS API failed to send email to {}: {}", to, e.getMessage());
             return false;
         }

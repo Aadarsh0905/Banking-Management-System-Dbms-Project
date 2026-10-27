@@ -148,6 +148,7 @@ public class AuthService {
             .maskedEmail(maskedEmail)
             .emailSent(emailSent)
             .devOtp(emailSent ? null : otp)
+            .emailStatus(notificationService.getLastEmailStatus())
             .build();
     }
 
@@ -177,6 +178,7 @@ public class AuthService {
             .maskedEmail(maskEmail(user.getEmail()))
             .emailSent(emailSent)
             .devOtp(emailSent ? null : otp)
+            .emailStatus(notificationService.getLastEmailStatus())
             .build();
     }
 
