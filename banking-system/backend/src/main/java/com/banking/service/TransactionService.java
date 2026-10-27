@@ -114,8 +114,9 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse depositViaStripe(Long accountId, BigDecimal amount, String stripeSessionId, boolean isMock) {
-        Account acc = accountRepo.findById(accountId)
-            .orElseThrow(() -> new BankingException("Account not found", 404));
+        Account acc = accountRepo.findByIdWithAssociations(accountId)
+            .orElseGet(() -> accountRepo.findById(accountId)
+                .orElseThrow(() -> new BankingException("Account not found", 404)));
         if (acc.getStatus() != Account.AccountStatus.ACTIVE)
             throw new BankingException("Account is not active", 400);
 

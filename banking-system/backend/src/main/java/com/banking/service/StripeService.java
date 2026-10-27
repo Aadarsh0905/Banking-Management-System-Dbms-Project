@@ -110,9 +110,11 @@ public class StripeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public StripeCheckoutResponse createCheckoutSession(Long userId, StripeCheckoutRequest req) {
-        Account acc = accountRepo.findById(req.getAccountId())
-                .orElseThrow(() -> new BankingException("Account not found", 404));
+        Account acc = accountRepo.findByIdWithAssociations(req.getAccountId())
+                .orElseGet(() -> accountRepo.findById(req.getAccountId())
+                        .orElseThrow(() -> new BankingException("Account not found", 404)));
 
         if (!acc.getUser().getId().equals(userId)) {
             throw new BankingException("Unauthorized access to account", 403);
@@ -121,6 +123,13 @@ public class StripeService {
         if (acc.getStatus() != Account.AccountStatus.ACTIVE) {
             throw new BankingException("Account is not active", 400);
         }
+
+        String typeName = "Account";
+        try {
+            if (acc.getAccountType() != null && acc.getAccountType().getTypeName() != null) {
+                typeName = acc.getAccountType().getTypeName();
+            }
+        } catch (Exception ignored) {}
 
         String currency = (req.getCurrency() != null && !req.getCurrency().isBlank()) 
                 ? req.getCurrency().toLowerCase() : "inr";
@@ -154,7 +163,7 @@ public class StripeService {
                                                         .setProductData(
                                                                 SessionCreateParams.LineItem.PriceData.ProductData.builder()
                                                                         .setName("BankPortal Deposit: " + acc.getAccountNumber())
-                                                                        .setDescription("Instant Digital Deposit to " + acc.getAccountType().getTypeName())
+                                                                        .setDescription("Instant Digital Deposit to " + typeName)
                                                                         .build()
                                                         )
                                                         .build()
