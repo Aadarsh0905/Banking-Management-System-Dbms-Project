@@ -137,7 +137,7 @@ public class AuthService {
         user.setLoginOtpExpires(LocalDateTime.now().plusMinutes(5));
         userRepo.save(user);
 
-        notificationService.sendOtpEmail(user, otp);
+        boolean emailSent = notificationService.sendOtpEmail(user, otp);
 
         String maskedEmail = maskEmail(user.getEmail());
 
@@ -146,6 +146,8 @@ public class AuthService {
             .username(user.getUsername())
             .email(user.getEmail())
             .maskedEmail(maskedEmail)
+            .emailSent(emailSent)
+            .devOtp(emailSent ? null : otp)
             .build();
     }
 
@@ -166,13 +168,15 @@ public class AuthService {
         user.setLoginOtpExpires(LocalDateTime.now().plusMinutes(5));
         userRepo.save(user);
 
-        notificationService.sendOtpEmail(user, otp);
+        boolean emailSent = notificationService.sendOtpEmail(user, otp);
 
         return AuthDTOs.AuthResponse.builder()
             .otpRequired(true)
             .username(user.getUsername())
             .email(user.getEmail())
             .maskedEmail(maskEmail(user.getEmail()))
+            .emailSent(emailSent)
+            .devOtp(emailSent ? null : otp)
             .build();
     }
 

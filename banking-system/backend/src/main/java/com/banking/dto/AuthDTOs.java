@@ -40,6 +40,8 @@ public class AuthDTOs {
         public String username;
         public String email;
         public String maskedEmail;
+        public Boolean emailSent;
+        public String devOtp;
     }
 
     @Data @NoArgsConstructor @AllArgsConstructor

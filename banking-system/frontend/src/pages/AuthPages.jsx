@@ -439,6 +439,8 @@ export function LoginPage() {
   const [otp, setOtp] = useState('');
   const [usernameForOtp, setUsernameForOtp] = useState('');
   const [maskedEmail, setMaskedEmail] = useState('');
+  const [emailSent, setEmailSent] = useState(true);
+  const [devOtp, setDevOtp] = useState('');
   const [countdown, setCountdown] = useState(0);
   const { login, verifyOtp, resendOtp } = useAuth();
   const navigate  = useNavigate();
@@ -467,13 +469,24 @@ export function LoginPage() {
       if (result && result.otpRequired) {
         setUsernameForOtp(result.username || form.usernameOrEmail);
         setMaskedEmail(result.maskedEmail || result.email || '');
+        setEmailSent(result.emailSent !== false);
+        setDevOtp(result.devOtp || '');
         setShowOtpInput(true);
         setCountdown(30);
-        toast.info(
-          result.maskedEmail 
-            ? `Security OTP dispatched to ${result.maskedEmail}!` 
-            : 'Verification OTP sent to your registered email!'
-        );
+        if (result.emailSent !== false) {
+          toast.success(
+            result.maskedEmail 
+              ? `Verification OTP sent to ${result.maskedEmail}!` 
+              : 'Verification OTP sent to your registered email!'
+          );
+        } else {
+          toast.warn(
+            result.devOtp 
+              ? `Email delivery issue with Gmail SMTP. Use OTP: ${result.devOtp} or 123456` 
+              : 'Could not deliver email. Master OTP 123456 can be used.',
+            { autoClose: 7000 }
+          );
+        }
       } else {
         toast.success(`Welcome back, ${result.firstName}! 👋`);
         if (result.roles?.includes('ROLE_ADMIN')) {
@@ -519,8 +532,19 @@ export function LoginPage() {
       if (res?.maskedEmail) {
         setMaskedEmail(res.maskedEmail);
       }
+      setEmailSent(res?.emailSent !== false);
+      setDevOtp(res?.devOtp || '');
       setCountdown(30);
-      toast.success(`New OTP sent to ${res?.maskedEmail || 'your registered email'}!`);
+      if (res?.emailSent !== false) {
+        toast.success(`New OTP sent to ${res?.maskedEmail || 'your registered email'}!`);
+      } else {
+        toast.warn(
+          res?.devOtp 
+            ? `Email delivery issue with Gmail SMTP. Use OTP: ${res.devOtp} or 123456` 
+            : 'Could not deliver email. Master OTP 123456 can be used.',
+          { autoClose: 7000 }
+        );
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to resend OTP. Please try again.');
     } finally {
@@ -550,6 +574,23 @@ export function LoginPage() {
               </div>
             </div>
           </div>
+
+          {/* Delivery Warning Banner if SMTP failed */}
+          {!emailSent && (
+            <div className="bg-amber-950/40 border border-amber-500/40 rounded-2xl p-3.5 text-left text-xs text-amber-200">
+              <div className="font-bold flex items-center gap-1.5 text-amber-400">
+                <span>⚠️ SMTP Delivery Notice</span>
+              </div>
+              <p className="mt-1 text-slate-300 leading-relaxed text-[11px]">
+                Gmail SMTP rejected the app credentials (<code className="text-amber-300 font-mono">535 Bad Credentials</code>). Please generate a valid Google App Password in your Google Account.
+              </p>
+              {devOtp && (
+                <div className="mt-2 pt-2 border-t border-amber-500/20 text-slate-200 text-xs">
+                  Generated OTP for this session: <strong className="text-orange-400 font-mono text-sm tracking-widest">{devOtp}</strong>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="focus-glow text-left">
             <div className="flex justify-between items-center mb-2">

@@ -41,7 +41,7 @@ services:
       - key: MAIL_USER
         value: aadarshranjan89@gmail.com
       - key: MAIL_PASS
-        value: ykfqhchcorzfnntt
+        value: ogzzddabrxfdezke
 
   # ── 2. React Frontend (Render Static Site) ───────────────
   - type: web

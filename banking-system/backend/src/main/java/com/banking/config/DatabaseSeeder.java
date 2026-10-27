@@ -256,7 +256,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             log.info("Seeding Customer User: Aadarsh...");
             userRepo.save(User.builder()
                 .username("Aadarsh")
-                .email("aadarsh@email.com")
+                .email("aadarshranjan89@gmail.com")
                 .passwordHash(passwordEncoder.encode("Aadarsh@123"))
                 .firstName("Aadarsh")
                 .lastName("Ranjan")
@@ -268,6 +268,14 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .emailVerified(true)
                 .roles(Set.of(customerRole))
                 .build());
+        } else {
+            userRepo.findByUsername("Aadarsh").ifPresent(u -> {
+                if (!"aadarshranjan89@gmail.com".equalsIgnoreCase(u.getEmail())) {
+                    log.info("Updating Aadarsh email to aadarshranjan89@gmail.com...");
+                    u.setEmail("aadarshranjan89@gmail.com");
+                    userRepo.save(u);
+                }
+            });
         }
 
 

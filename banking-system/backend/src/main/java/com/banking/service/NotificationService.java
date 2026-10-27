@@ -124,8 +124,7 @@ public class NotificationService {
         log.info("=========================================================================================================");
     }
 
-    @Async
-    public void sendOtpEmail(User user, String otp) {
+    public boolean sendOtpEmail(User user, String otp) {
         String recipient = user.getEmail();
         String firstName = (user.getFirstName() != null && !user.getFirstName().isBlank()) ? user.getFirstName() : user.getUsername();
 
@@ -169,7 +168,7 @@ public class NotificationService {
             "</td></tr></table>" +
             "</body></html>";
 
-        sendEmail(recipient, subject, htmlBody);
+        return sendEmail(recipient, subject, htmlBody);
     }
 
     @Async
@@ -183,10 +182,10 @@ public class NotificationService {
         }
     }
 
-    private void sendEmail(String to, String subject, String htmlBody) {
+    private boolean sendEmail(String to, String subject, String htmlBody) {
         if (mailFrom == null || mailFrom.isBlank()) {
             System.out.println("SMTP: Sender address not configured. Skipping external email dispatch.");
-            return;
+            return false;
         }
 
         System.out.println("SMTP: Sending email to " + to + " via " + mailHost + ":" + mailPort + " using " + mailFrom);
@@ -200,6 +199,7 @@ public class NotificationService {
             mailSender.send(msg);
             System.out.println("SMTP: Email successfully dispatched to " + to);
             log.info("SMTP: Email successfully dispatched to {}", to);
+            return true;
         } catch (Exception e) {
             System.err.println("\n=== EMAIL SENDING FAILED ===");
             System.err.println("Recipient: " + to);
@@ -207,6 +207,7 @@ public class NotificationService {
             System.err.println("Error: " + e.getMessage());
             System.err.println("============================\n");
             log.warn("Could not dispatch email to {}: {}. Login OTP is still logged in console/demo.", to, e.getMessage());
+            return false;
         }
     }
 
