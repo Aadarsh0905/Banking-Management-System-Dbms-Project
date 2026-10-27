@@ -19,7 +19,12 @@ import {
   FaCalendarAlt,
   FaArrowRight,
   FaInfoCircle,
-  FaShieldAlt
+  FaShieldAlt,
+  FaGooglePay,
+  FaQrcode,
+  FaMobileAlt,
+  FaCheckCircle,
+  FaWallet
 } from 'react-icons/fa';
 import { useAuth } from '../context/Contexts';
 import { accountApi, loanApi, txnApi, authApi, paymentApi } from '../services/api';
@@ -223,8 +228,35 @@ export function AccountsPage() {
   const [loadingPassbook, setLoadingPassbook] = useState(false);
   const [addMoneyAccount, setAddMoneyAccount] = useState(null);
   const [addMoneyAmount, setAddMoneyAmount] = useState('5000');
+  const [paymentMethod, setPaymentMethod] = useState('phonepe');
+  const [upiVpa, setUpiVpa] = useState('');
+  const [selectedBank, setSelectedBank] = useState('HDFC Bank');
   const [processingPayment, setProcessingPayment] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  async function handleDirectDeposit(method, reference) {
+    if (!addMoneyAmount || isNaN(addMoneyAmount) || +addMoneyAmount <= 0) {
+      toast.error("Please enter a valid deposit amount (min ₹1.00)");
+      return;
+    }
+    setProcessingPayment(true);
+    try {
+      await paymentApi.directDeposit({
+        accountId: addMoneyAccount.id,
+        amount: +addMoneyAmount,
+        method: method,
+        reference: reference
+      });
+      sounds.playCoin();
+      toast.success(`🎉 Successfully deposited ₹${(+addMoneyAmount).toLocaleString('en-IN')} via ${method}!`);
+      setAddMoneyAccount(null);
+      accountApi.getAll().then(r => setAccounts(r.data.data || []));
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Deposit failed');
+    } finally {
+      setProcessingPayment(false);
+    }
+  }
 
   async function requestCloseAccount(acc) {
     if (acc.balance > 0) {
@@ -567,24 +599,29 @@ export function AccountsPage() {
       )}
 
       {addMoneyAccount && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="glass-frosted rounded-[2.5rem] p-6 md:p-8 w-full max-w-lg modal-transition border border-white/10 shadow-2xl relative overflow-hidden">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto">
+          <div className="glass-frosted rounded-[2.5rem] p-5 sm:p-7 w-full max-w-xl modal-transition border border-white/10 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto">
             {/* Header */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#635bff] to-[#7a73ff] flex items-center justify-center text-white shadow-lg shadow-[#635bff]/30">
-                  <FaCreditCard className="text-lg" />
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-orange-500 via-amber-400 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/25">
+                  <FaHandHoldingUsd className="text-xl" />
                 </div>
                 <div>
-                  <h2 className="font-extrabold text-xl text-white">Deposit via Stripe</h2>
-                  <p className="text-[11px] text-slate-400 font-medium">Secure Checkout Gateway</p>
+                  <h2 className="font-extrabold text-xl text-white">Deposit Funds</h2>
+                  <p className="text-[11px] text-slate-400 font-medium">Choose your preferred payment method</p>
                 </div>
               </div>
-              <button onClick={() => setAddMoneyAccount(null)} className="text-slate-400 hover:text-white p-2">✕</button>
+              <button 
+                onClick={() => setAddMoneyAccount(null)} 
+                className="text-slate-400 hover:text-white p-2 text-xl font-bold transition-colors"
+              >
+                ✕
+              </button>
             </div>
 
             {/* Target Account Badge */}
-            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 mb-5 flex items-center justify-between">
+            <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 mb-4 flex items-center justify-between">
               <div>
                 <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Crediting Account</p>
                 <p className="font-mono text-sm font-bold text-white mt-0.5">{addMoneyAccount.accountNumber}</p>
@@ -595,7 +632,7 @@ export function AccountsPage() {
             </div>
 
             {/* Amount Input */}
-            <div className="space-y-3">
+            <div className="space-y-3 mb-5">
               <div>
                 <label className="label text-xs font-semibold text-slate-300">Deposit Amount (₹ INR)</label>
                 <div className="relative">
@@ -628,20 +665,348 @@ export function AccountsPage() {
                   </button>
                 ))}
               </div>
+            </div>
 
-              {/* Supported payment methods banner */}
-              <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/5 flex items-center justify-between text-xs text-slate-400 mt-4">
-                <span className="flex items-center gap-1.5">
-                  <FaShieldAlt className="text-emerald-400 text-sm" /> 256-Bit Encrypted
-                </span>
-                <span className="text-[11px] font-semibold text-slate-400">
-                  Cards • Apple Pay • Google Pay
-                </span>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 pt-3">
+            {/* Payment Method Selector Grid */}
+            <div className="mb-5">
+              <label className="label text-xs font-semibold text-slate-300 mb-2 block">
+                Select Payment Method
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {/* PhonePe */}
                 <button
+                  type="button"
+                  onClick={() => { setPaymentMethod('phonepe'); setUpiVpa(''); }}
+                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                    paymentMethod === 'phonepe'
+                      ? 'bg-purple-950/40 border-purple-500 shadow-md shadow-purple-500/20 ring-1 ring-purple-500'
+                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-white text-sm shadow-sm">
+                      <FaMobileAlt />
+                    </div>
+                    {paymentMethod === 'phonepe' && <FaCheckCircle className="text-purple-400 text-xs" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">PhonePe</p>
+                    <p className="text-[10px] text-purple-300/80">UPI / Mobile</p>
+                  </div>
+                </button>
+
+                {/* Google Pay */}
+                <button
+                  type="button"
+                  onClick={() => { setPaymentMethod('gpay'); setUpiVpa(''); }}
+                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                    paymentMethod === 'gpay'
+                      ? 'bg-blue-950/40 border-blue-500 shadow-md shadow-blue-500/20 ring-1 ring-blue-500'
+                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white text-base shadow-sm">
+                      <FaGooglePay />
+                    </div>
+                    {paymentMethod === 'gpay' && <FaCheckCircle className="text-blue-400 text-xs" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Google Pay</p>
+                    <p className="text-[10px] text-blue-300/80">GPay UPI</p>
+                  </div>
+                </button>
+
+                {/* Paytm / Any UPI */}
+                <button
+                  type="button"
+                  onClick={() => { setPaymentMethod('paytm'); setUpiVpa(''); }}
+                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                    paymentMethod === 'paytm'
+                      ? 'bg-cyan-950/40 border-cyan-500 shadow-md shadow-cyan-500/20 ring-1 ring-cyan-500'
+                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-lg bg-cyan-600 flex items-center justify-center text-white text-xs shadow-sm">
+                      <FaWallet />
+                    </div>
+                    {paymentMethod === 'paytm' && <FaCheckCircle className="text-cyan-400 text-xs" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Paytm / UPI</p>
+                    <p className="text-[10px] text-cyan-300/80">Any UPI ID</p>
+                  </div>
+                </button>
+
+                {/* Scan & Pay QR */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('qr')}
+                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                    paymentMethod === 'qr'
+                      ? 'bg-emerald-950/40 border-emerald-500 shadow-md shadow-emerald-500/20 ring-1 ring-emerald-500'
+                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center text-white text-xs shadow-sm">
+                      <FaQrcode />
+                    </div>
+                    {paymentMethod === 'qr' && <FaCheckCircle className="text-emerald-400 text-xs" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">UPI QR Code</p>
+                    <p className="text-[10px] text-emerald-300/80">Scan & Pay</p>
+                  </div>
+                </button>
+
+                {/* Net Banking */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('netbanking')}
+                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                    paymentMethod === 'netbanking'
+                      ? 'bg-amber-950/40 border-amber-500 shadow-md shadow-amber-500/20 ring-1 ring-amber-500'
+                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-lg bg-amber-600 flex items-center justify-center text-white text-xs shadow-sm">
+                      <FaUniversity />
+                    </div>
+                    {paymentMethod === 'netbanking' && <FaCheckCircle className="text-amber-400 text-xs" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Net Banking</p>
+                    <p className="text-[10px] text-amber-300/80">All Major Banks</p>
+                  </div>
+                </button>
+
+                {/* Cards & Stripe */}
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('stripe')}
+                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between ${
+                    paymentMethod === 'stripe'
+                      ? 'bg-indigo-950/40 border-indigo-500 shadow-md shadow-indigo-500/20 ring-1 ring-indigo-500'
+                      : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="w-7 h-7 rounded-lg bg-[#635bff] flex items-center justify-center text-white text-xs shadow-sm">
+                      <FaCreditCard />
+                    </div>
+                    {paymentMethod === 'stripe' && <FaCheckCircle className="text-indigo-400 text-xs" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Cards / Stripe</p>
+                    <p className="text-[10px] text-indigo-300/80">Visa, RuPay, MC</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Active Payment Method Details Panel */}
+            <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 mb-5 space-y-3">
+              {/* 1. PhonePe */}
+              {paymentMethod === 'phonepe' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-purple-400 flex items-center gap-1.5">
+                      <FaMobileAlt /> PhonePe UPI Payment
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">Instant Verification</span>
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-slate-400 font-medium mb-1 block">
+                      PhonePe UPI ID / Mobile Number
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={upiVpa}
+                        onChange={e => setUpiVpa(e.target.value)}
+                        placeholder="yourname@ybl or 9876543210@ybl"
+                        className="glass-input text-sm font-mono py-2.5"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 text-[10px]">
+                    <span className="text-slate-500 self-center">Handles:</span>
+                    {['@ybl', '@ibl', '@axl'].map(h => (
+                      <button
+                        key={h}
+                        type="button"
+                        onClick={() => setUpiVpa(prev => (prev ? prev.split('@')[0] : 'user') + h)}
+                        className="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 text-slate-400 font-mono transition-colors"
+                      >
+                        {h}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 2. Google Pay */}
+              {paymentMethod === 'gpay' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
+                      <FaGooglePay className="text-lg" /> Google Pay Payment
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">Instant Verification</span>
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-slate-400 font-medium mb-1 block">
+                      Google Pay UPI ID
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={upiVpa}
+                        onChange={e => setUpiVpa(e.target.value)}
+                        placeholder="yourname@okhdfcbank"
+                        className="glass-input text-sm font-mono py-2.5"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 text-[10px]">
+                    <span className="text-slate-500 self-center">Handles:</span>
+                    {['@okhdfcbank', '@okaxis', '@oksbi', '@okicici'].map(h => (
+                      <button
+                        key={h}
+                        type="button"
+                        onClick={() => setUpiVpa(prev => (prev ? prev.split('@')[0] : 'user') + h)}
+                        className="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-blue-500/20 hover:text-blue-300 text-slate-400 font-mono transition-colors"
+                      >
+                        {h}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Paytm / Any UPI */}
+              {paymentMethod === 'paytm' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                      <FaWallet /> Paytm / BHIM / Any UPI
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">Instant Verification</span>
+                  </div>
+                  <div>
+                    <label className="text-[11px] text-slate-400 font-medium mb-1 block">
+                      Virtual Payment Address (VPA)
+                    </label>
+                    <input
+                      type="text"
+                      value={upiVpa}
+                      onChange={e => setUpiVpa(e.target.value)}
+                      placeholder="mobile@paytm or name@upi"
+                      className="glass-input text-sm font-mono py-2.5"
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 text-[10px]">
+                    <span className="text-slate-500 self-center">Handles:</span>
+                    {['@paytm', '@upi', '@apl', '@ptaxis'].map(h => (
+                      <button
+                        key={h}
+                        type="button"
+                        onClick={() => setUpiVpa(prev => (prev ? prev.split('@')[0] : 'user') + h)}
+                        className="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-cyan-500/20 hover:text-cyan-300 text-slate-400 font-mono transition-colors"
+                      >
+                        {h}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. Scan & Pay QR */}
+              {paymentMethod === 'qr' && (
+                <div className="flex flex-col items-center text-center space-y-3 py-1">
+                  <div className="p-3 bg-white rounded-2xl shadow-xl inline-block border-2 border-emerald-500/30">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=${encodeURIComponent(`upi://pay?pa=bankportal@icici&pn=BankPortal%20Digital%20Banking&am=${addMoneyAmount}&cu=INR&tn=Deposit%20to%20${addMoneyAccount.accountNumber}`)}`}
+                      alt="UPI QR Code"
+                      className="w-40 h-40 object-contain mx-auto"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-white">Scan with PhonePe, Google Pay, or Paytm</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Point your camera to deposit ₹{(+addMoneyAmount).toLocaleString('en-IN')}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* 5. Net Banking */}
+              {paymentMethod === 'netbanking' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                      <FaUniversity /> Indian Netbanking Gateway
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">Direct Gateway</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      'State Bank of India',
+                      'HDFC Bank',
+                      'ICICI Bank',
+                      'Axis Bank',
+                      'Kotak Mahindra Bank',
+                      'Punjab National Bank'
+                    ].map(bank => (
+                      <button
+                        key={bank}
+                        type="button"
+                        onClick={() => setSelectedBank(bank)}
+                        className={`p-2.5 rounded-xl border text-xs font-semibold transition-all text-left flex items-center justify-between ${
+                          selectedBank === bank
+                            ? 'bg-amber-500/10 border-amber-500 text-amber-300 ring-1 ring-amber-500'
+                            : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] text-slate-300'
+                        }`}
+                      >
+                        <span className="truncate">{bank}</span>
+                        {selectedBank === bank && <FaCheckCircle className="text-amber-400 text-xs ml-1 flex-shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 6. Stripe Gateway */}
+              {paymentMethod === 'stripe' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-indigo-400 flex items-center gap-1.5">
+                      <FaCreditCard /> Stripe Global Checkout
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                      <FaShieldAlt /> 256-Bit SSL
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Pay securely using Visa, MasterCard, RuPay, American Express, Apple Pay, or Google Pay.
+                  </p>
+                  <div className="flex flex-wrap gap-2 text-[10px] text-slate-400 font-mono pt-1">
+                    <span className="px-2 py-1 rounded-md bg-white/5 border border-white/5">Visa</span>
+                    <span className="px-2 py-1 rounded-md bg-white/5 border border-white/5">MasterCard</span>
+                    <span className="px-2 py-1 rounded-md bg-white/5 border border-white/5">RuPay</span>
+                    <span className="px-2 py-1 rounded-md bg-white/5 border border-white/5">Apple Pay</span>
+                    <span className="px-2 py-1 rounded-md bg-white/5 border border-white/5">Google Pay</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-1">
+              {paymentMethod === 'stripe' ? (
+                <button
+                  type="button"
                   onClick={handleStripeCheckout}
                   disabled={processingPayment}
                   className="flex-1 py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-[#635bff] via-[#7a73ff] to-[#635bff] text-white hover:opacity-95 transition-all shadow-lg shadow-[#635bff]/25 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
@@ -649,17 +1014,83 @@ export function AccountsPage() {
                   {processingPayment ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    <>Pay with Stripe Checkout →</>
+                    <>Pay ₹{(+addMoneyAmount).toLocaleString('en-IN')} with Stripe Checkout →</>
                   )}
                 </button>
+              ) : paymentMethod === 'phonepe' ? (
                 <button
                   type="button"
-                  onClick={() => setAddMoneyAccount(null)}
-                  className="btn-secondary text-sm px-5 py-3 rounded-2xl"
+                  onClick={() => handleDirectDeposit('PhonePe UPI', upiVpa || 'phonepe_app@upi')}
+                  disabled={processingPayment}
+                  className="flex-1 py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white hover:opacity-95 transition-all shadow-lg shadow-purple-600/25 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
                 >
-                  Cancel
+                  {processingPayment ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>Pay ₹{(+addMoneyAmount).toLocaleString('en-IN')} with PhonePe →</>
+                  )}
                 </button>
-              </div>
+              ) : paymentMethod === 'gpay' ? (
+                <button
+                  type="button"
+                  onClick={() => handleDirectDeposit('Google Pay UPI', upiVpa || 'gpay_app@upi')}
+                  disabled={processingPayment}
+                  className="flex-1 py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 text-white hover:opacity-95 transition-all shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
+                >
+                  {processingPayment ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>Pay ₹{(+addMoneyAmount).toLocaleString('en-IN')} with Google Pay →</>
+                  )}
+                </button>
+              ) : paymentMethod === 'paytm' ? (
+                <button
+                  type="button"
+                  onClick={() => handleDirectDeposit('Paytm UPI', upiVpa || 'paytm_app@upi')}
+                  disabled={processingPayment}
+                  className="flex-1 py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-cyan-600 via-blue-600 to-cyan-600 text-white hover:opacity-95 transition-all shadow-lg shadow-cyan-600/25 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
+                >
+                  {processingPayment ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>Pay ₹{(+addMoneyAmount).toLocaleString('en-IN')} with Paytm / UPI →</>
+                  )}
+                </button>
+              ) : paymentMethod === 'qr' ? (
+                <button
+                  type="button"
+                  onClick={() => handleDirectDeposit('UPI QR Scan', 'Scan & Pay QR')}
+                  disabled={processingPayment}
+                  className="flex-1 py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 text-white hover:opacity-95 transition-all shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
+                >
+                  {processingPayment ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>I Have Scanned & Paid ₹{(+addMoneyAmount).toLocaleString('en-IN')} ✓</>
+                  )}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleDirectDeposit('Netbanking - ' + selectedBank, selectedBank)}
+                  disabled={processingPayment}
+                  className="flex-1 py-3.5 px-4 rounded-2xl font-black text-sm bg-gradient-to-r from-amber-600 via-orange-600 to-amber-600 text-white hover:opacity-95 transition-all shadow-lg shadow-amber-600/25 flex items-center justify-center gap-2 active:scale-98 disabled:opacity-50"
+                >
+                  {processingPayment ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>Pay ₹{(+addMoneyAmount).toLocaleString('en-IN')} via {selectedBank} →</>
+                  )}
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setAddMoneyAccount(null)}
+                className="btn-secondary text-sm px-5 py-3.5 rounded-2xl"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

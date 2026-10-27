@@ -151,6 +151,52 @@ public class TransactionService {
     }
 
     @Transactional
+    public TransactionResponse depositDirect(Long userId, Long accountId, BigDecimal amount, String method, String reference) {
+        Account acc = accountRepo.findByIdWithAssociations(accountId)
+            .orElseGet(() -> accountRepo.findById(accountId)
+                .orElseThrow(() -> new BankingException("Account not found", 404)));
+        if (!acc.getUser().getId().equals(userId)) {
+            throw new BankingException("Unauthorized access to account", 403);
+        }
+        if (acc.getStatus() != Account.AccountStatus.ACTIVE) {
+            throw new BankingException("Account is not active", 400);
+        }
+        if (amount == null || amount.compareTo(BigDecimal.ONE) < 0) {
+            throw new BankingException("Minimum deposit amount is ₹1.00", 400);
+        }
+
+        BigDecimal before = acc.getBalance();
+        acc.setBalance(before.add(amount));
+        acc.setAvailableBalance(acc.getAvailableBalance().add(amount));
+        acc.setLastTransactionAt(LocalDateTime.now());
+        accountRepo.save(acc);
+
+        String ref = generateRef();
+        String safeMethod = (method != null && !method.isBlank()) ? method.trim().toUpperCase() : "UPI";
+        String desc = safeMethod + " Deposit - " + (reference != null && !reference.isBlank() ? reference.trim() : ref);
+        Transaction.Channel ch = "NETBANKING".equalsIgnoreCase(safeMethod) ? Transaction.Channel.NETBANKING : Transaction.Channel.UPI;
+
+        Transaction txn = Transaction.builder()
+            .transactionRef(ref)
+            .toAccount(acc)
+            .transactionType(Transaction.TransactionType.DEPOSIT)
+            .amount(amount)
+            .currency(acc.getCurrency() != null ? acc.getCurrency() : "INR")
+            .balanceBefore(before)
+            .balanceAfter(acc.getBalance())
+            .description(desc)
+            .status(Transaction.TransactionStatus.SUCCESS)
+            .channel(ch)
+            .initiatedAt(LocalDateTime.now())
+            .completedAt(LocalDateTime.now())
+            .build();
+
+        txn = txnRepo.save(txn);
+        notificationService.sendTransactionAlert(acc.getUser(), txn);
+        return mapToResponse(txn);
+    }
+
+    @Transactional
     public TransactionResponse withdraw(WithdrawalRequest req, Long userId) {
         Account acc = accountRepo.findById(req.accountId)
             .orElseThrow(() -> new BankingException("Account not found", 404));

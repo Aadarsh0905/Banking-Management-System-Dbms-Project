@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
 
     private final StripeService stripeService;
+    private final com.banking.service.TransactionService transactionService;
 
     @GetMapping("/config")
     @Operation(summary = "Get Stripe public configuration")
@@ -63,6 +64,18 @@ public class PaymentController {
             @Valid @RequestBody StripeVerifyRequest req) {
         return ResponseEntity.ok(ApiResponse.success("Deposit processed successfully", 
                 stripeService.verifyAndCredit(req.getSessionId(), req.getAccountId(), req.getAmount())));
+    }
+
+    @PostMapping("/direct-deposit")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Instant deposit via UPI (PhonePe, Google Pay, Paytm, QR) or Netbanking")
+    public ResponseEntity<ApiResponse<TransactionResponse>> directDeposit(
+            @AuthenticationPrincipal BankUserDetails ud,
+            @Valid @RequestBody DirectDepositRequest req) {
+        return ResponseEntity.ok(ApiResponse.success(
+            "Deposit processed successfully",
+            transactionService.depositDirect(ud.getId(), req.getAccountId(), req.getAmount(), req.getMethod(), req.getReference())
+        ));
     }
 
     @PostMapping("/webhook")

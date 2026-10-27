@@ -173,10 +173,11 @@ export const adminApi = {
   rejectTermination:    (id)     => API.patch(`/admin/accounts/${id}/reject-termination`),
 };
 
-// ── Payments (Stripe) ─────────────────────────────────────────
+// ── Payments (Stripe & Multi-Option UPI) ─────────────────────
 export const paymentApi = {
   createStripeCheckout: (data) => API.post('/payments/stripe/checkout', data),
   verifyStripePayment: (sessionId, accountId, amount) => API.post('/payments/stripe/verify', { sessionId, accountId, amount }),
+  directDeposit: (data) => API.post('/payments/stripe/direct-deposit', data),
 };
 
 export default API;
