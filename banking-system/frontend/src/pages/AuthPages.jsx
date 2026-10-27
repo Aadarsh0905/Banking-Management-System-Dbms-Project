@@ -482,8 +482,8 @@ export function LoginPage() {
         } else {
           toast.warn(
             result.devOtp 
-              ? `Email delivery issue with Gmail SMTP. Use OTP: ${result.devOtp} or 123456` 
-              : 'Could not deliver email. Master OTP 123456 can be used.',
+              ? `Cloud SMTP timed out (Render Free Tier blocks port 587). Use OTP: ${result.devOtp} or 123456` 
+              : 'Cloud SMTP timed out. Master OTP 123456 can be used.',
             { autoClose: 7000 }
           );
         }
@@ -540,8 +540,8 @@ export function LoginPage() {
       } else {
         toast.warn(
           res?.devOtp 
-            ? `Email delivery issue with Gmail SMTP. Use OTP: ${res.devOtp} or 123456` 
-            : 'Could not deliver email. Master OTP 123456 can be used.',
+            ? `Cloud SMTP timed out (Render Free Tier blocks port 587). Use OTP: ${res.devOtp} or 123456` 
+            : 'Cloud SMTP timed out. Master OTP 123456 can be used.',
           { autoClose: 7000 }
         );
       }
@@ -579,10 +579,10 @@ export function LoginPage() {
           {!emailSent && (
             <div className="bg-amber-950/40 border border-amber-500/40 rounded-2xl p-3.5 text-left text-xs text-amber-200">
               <div className="font-bold flex items-center gap-1.5 text-amber-400">
-                <span>⚠️ SMTP Delivery Notice</span>
+                <span>⚠️ Cloud SMTP Delivery Notice</span>
               </div>
               <p className="mt-1 text-slate-300 leading-relaxed text-[11px]">
-                Gmail SMTP rejected the app credentials (<code className="text-amber-300 font-mono">535 Bad Credentials</code>). Please generate a valid Google App Password in your Google Account.
+                Direct SMTP (port 587) timed out. Render Free Tier blocks outbound SMTP traffic by default. Use the generated OTP below or run the backend locally for live email delivery to your inbox.
               </p>
               {devOtp && (
                 <div className="mt-2 pt-2 border-t border-amber-500/20 text-slate-200 text-xs">
