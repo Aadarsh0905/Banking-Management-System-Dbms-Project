@@ -19,6 +19,7 @@ import java.io.FileReader;
 @EnableCaching
 public class BankingManagementSystemApplication {
     public static void main(String[] args) {
+        System.setProperty("java.net.preferIPv4Stack", "true");
         loadEnvFile();
         SpringApplication.run(BankingManagementSystemApplication.class, args);
     }

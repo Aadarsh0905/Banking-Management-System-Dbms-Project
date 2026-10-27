@@ -32,4 +32,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:${PORT:-8080}/api/actuator/health || exit 1
 
 # Start Spring Boot binding to Render's dynamic $PORT
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Xms128m -Xmx400m -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Djava.net.preferIPv4Stack=true -Dserver.port=${PORT:-8080} -Dspring.profiles.active=prod -Xms128m -Xmx400m -jar app.jar"]
