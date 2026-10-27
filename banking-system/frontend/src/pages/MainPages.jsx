@@ -23,6 +23,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '../context/Contexts';
 import { accountApi, loanApi, txnApi, authApi, paymentApi } from '../services/api';
+import { sounds } from '../services/sounds';
 import { DashboardSkeleton, AccountsSkeleton, TableSkeleton } from '../components/Skeletons';
 
 Chart.register(...registerables);
@@ -260,6 +261,7 @@ export function AccountsPage() {
       } else if (data?.mock) {
         toast.info("Processing Demo Stripe Deposit...");
         await paymentApi.verifyStripePayment(data.sessionId, addMoneyAccount.id, +addMoneyAmount);
+        sounds.playCoin();
         toast.success(`🎉 Successfully deposited ₹${(+addMoneyAmount).toLocaleString('en-IN')} via Stripe (Demo Mode)!`);
         setAddMoneyAccount(null);
         accountApi.getAll().then(r => setAccounts(r.data.data || []));
@@ -296,12 +298,14 @@ export function AccountsPage() {
       toast.info('Verifying Stripe checkout payment...');
       paymentApi.verifyStripePayment(sessionId)
         .then(() => {
+          sounds.playCoin();
           toast.success(`🎉 Deposit successful! ${amt ? '₹' + (+amt).toLocaleString('en-IN') : 'Funds'} credited to account ${accNum || ''}.`);
           accountApi.getAll().then(r => setAccounts(r.data.data || []));
         })
         .catch((err) => {
           const msg = err.response?.data?.message || '';
           if (msg.toLowerCase().includes('already')) {
+            sounds.playCoin();
             toast.success(`🎉 Deposit confirmed! ${amt ? '₹' + (+amt).toLocaleString('en-IN') : 'Funds'} credited.`);
           } else {
             toast.info(`Deposit status: ${msg || 'Processed'}`);

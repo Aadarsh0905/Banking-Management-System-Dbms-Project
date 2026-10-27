@@ -62,6 +62,57 @@ class SoundEffects {
     }
   }
 
+  // Play a crisp metallic coin chime sound
+  playCoin() {
+    try {
+      this.init();
+      if (this.ctx && this.ctx.state === 'suspended') {
+        const resumeAndPlay = () => {
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume().then(() => this.playCoin());
+          }
+          window.removeEventListener('click', resumeAndPlay);
+          window.removeEventListener('keydown', resumeAndPlay);
+          window.removeEventListener('touchstart', resumeAndPlay);
+        };
+        window.addEventListener('click', resumeAndPlay, { once: true });
+        window.addEventListener('keydown', resumeAndPlay, { once: true });
+        window.addEventListener('touchstart', resumeAndPlay, { once: true });
+        return;
+      }
+
+      const now = this.ctx.currentTime;
+      // High-pitched bright golden coin sound (B5 -> E6 chime + coin rattle)
+      const playChime = (freq, time, dur, vol = 0.12) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, time);
+        gain.gain.setValueAtTime(vol, time);
+        gain.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+        osc.start(time);
+        osc.stop(time + dur);
+      };
+
+      // Classic satisfying two-tone coin ding (B5 -> E6)
+      playChime(987.77, now, 0.22, 0.15);         // B5
+      playChime(1318.51, now + 0.08, 0.45, 0.22); // E6
+
+      // Metallic shimmer harmonics for realistic coin ring
+      playChime(2637.02, now + 0.08, 0.35, 0.08);
+      playChime(3951.07, now + 0.10, 0.25, 0.05);
+
+      // Followed by a gold coins rattle cascade
+      setTimeout(() => {
+        try { this.playSuccess(); } catch (e) {}
+      }, 120);
+    } catch (e) {
+      console.warn("Coin sound failed:", e);
+    }
+  }
+
   // Play a premium metallic coin spill / cash register sound effect
   playSuccess() {
     try {

@@ -27,6 +27,7 @@ import {
 } from 'react-icons/fa';
 import { useAuth, useTheme } from '../context/Contexts';
 import { notifApi, getAvatarUrl, paymentApi } from '../services/api';
+import { sounds } from '../services/sounds';
 import { toast } from 'react-toastify';
 
 function Sidebar({ open }) {
@@ -231,11 +232,13 @@ export default function Layout() {
     if (paymentStatus === 'success' && sessionId) {
       paymentApi.verifyStripePayment(sessionId)
         .then(() => {
+          sounds.playCoin();
           toast.success(`🎉 Deposit successful! ${amt ? '₹' + (+amt).toLocaleString('en-IN') : 'Funds'} credited to your account.`);
         })
         .catch((err) => {
           const msg = err.response?.data?.message || '';
           if (msg.toLowerCase().includes('already')) {
+            sounds.playCoin();
             toast.success(`🎉 Deposit confirmed! ${amt ? '₹' + (+amt).toLocaleString('en-IN') : 'Funds'} credited.`);
           }
         });
