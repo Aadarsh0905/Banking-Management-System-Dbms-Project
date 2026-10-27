@@ -162,12 +162,9 @@ public class NotificationService {
             "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='max-width:540px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #e2e8f0;'>" +
             "<tr><td style='height:5px;background:linear-gradient(90deg,#ff6600,#ff8533);font-size:0;line-height:0;'>&nbsp;</td></tr>" +
             "<tr><td style='padding:28px 36px 20px 36px;border-bottom:1px solid #f1f5f9;'>" +
-            "<table width='100%' border='0' cellspacing='0' cellpadding='0'>" +
-            "<tr><td align='left' valign='middle'>" +
-            "<span style='font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;'>🏦 BankPortal</span>" +
-            "</td><td align='right' valign='middle'>" +
-            "<span style='display:inline-block;font-size:11px;font-weight:700;color:#ea580c;background-color:#fff7ed;border:1px solid #ffedd5;padding:4px 12px;border-radius:9999px;text-transform:uppercase;letter-spacing:0.5px;'>Security Verification</span>" +
-            "</td></tr></table></td></tr>" +
+            "<div style='font-size:22px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;margin:0 0 6px 0;'>🏦 BankPortal</div>" +
+            "<div style='display:inline-block;font-size:11px;font-weight:700;color:#ea580c;background-color:#fff7ed;border:1px solid #ffedd5;padding:3px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:0.5px;'>Security Verification</div>" +
+            "</td></tr>" +
             "<tr><td style='padding:28px 36px 32px 36px;'>" +
             "<h1 style='margin:0 0 12px 0;font-size:20px;font-weight:700;color:#0f172a;line-height:1.3;'>Login Verification Code</h1>" +
             "<p style='margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#475569;'>Hello <strong style='color:#0f172a;'>" + firstName + "</strong>,</p>" +
