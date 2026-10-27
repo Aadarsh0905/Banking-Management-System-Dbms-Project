@@ -153,29 +153,46 @@ public class NotificationService {
 
         String subject = "Your BankPortal Login OTP: " + otp;
         String htmlBody = "<!DOCTYPE html>" +
-            "<html><head><meta charset='UTF-8'></head>" +
-            "<body style='margin:0;padding:24px;background-color:#0b1320;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,sans-serif;color:#e2e8f0;'>" +
-            "<table width='100%' border='0' cellspacing='0' cellpadding='0'>" +
+            "<html lang='en'><head><meta charset='UTF-8'>" +
+            "<meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
+            "<title>Your BankPortal Verification Code</title></head>" +
+            "<body style='margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif;color:#1e293b;-webkit-font-smoothing:antialiased;'>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color:#f1f5f9;padding:40px 16px;'>" +
             "<tr><td align='center'>" +
-            "<table width='100%' style='max-width:540px;background-color:#0f1d32;border:1px solid #1e3a5f;border-radius:16px;padding:32px;box-shadow:0 10px 25px rgba(0,0,0,0.5);'>" +
-            "<tr><td>" +
-            "<div style='margin-bottom:24px;'>" +
-            "<span style='background:#ff6600;color:#ffffff;font-size:18px;font-weight:bold;padding:6px 12px;border-radius:8px;margin-right:10px;'>🏦 BankPortal</span>" +
-            "<span style='font-size:12px;color:#38bdf8;font-weight:700;text-transform:uppercase;letter-spacing:1px;'>Security Verification</span>" +
-            "</div>" +
-            "<h2 style='color:#ffffff;margin-top:0;font-size:22px;font-weight:700;'>Login Verification Code</h2>" +
-            "<p style='color:#94a3b8;font-size:14px;line-height:1.6;'>Hello <strong>" + firstName + "</strong>,</p>" +
-            "<p style='color:#94a3b8;font-size:14px;line-height:1.6;'>You requested to sign in to your BankPortal account. Please use the following One-Time Password (OTP) to complete your verification:</p>" +
-            "<div style='text-align:center;margin:28px 0;'>" +
-            "<div style='display:inline-block;padding:16px 36px;background:#060e18;border:2px dashed #ff6600;border-radius:12px;font-size:36px;font-weight:bold;color:#ff6600;letter-spacing:8px;font-family:monospace;'>" + otp + "</div>" +
-            "</div>" +
-            "<div style='color:#cbd5e1;font-size:13px;line-height:1.6;background:#060e18;padding:14px 18px;border-radius:10px;border-left:4px solid #ff6600;margin-bottom:20px;'>" +
-            "⏱️ <strong>This OTP is valid for 5 minutes.</strong><br/>" +
-            "🔒 Never share this code or your banking password with anyone, including bank representatives." +
-            "</div>" +
-            "<p style='color:#64748b;font-size:12px;border-top:1px solid #1e3a5f;padding-top:16px;margin-top:20px;'>" +
-            "If you did not request this OTP, please contact BankPortal Security immediately." +
-            "</p>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='max-width:540px;background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.06);border:1px solid #e2e8f0;'>" +
+            "<tr><td style='height:5px;background:linear-gradient(90deg,#ff6600,#ff8533);font-size:0;line-height:0;'>&nbsp;</td></tr>" +
+            "<tr><td style='padding:28px 36px 20px 36px;border-bottom:1px solid #f1f5f9;'>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0'>" +
+            "<tr><td align='left' valign='middle'>" +
+            "<span style='font-size:20px;font-weight:800;color:#0f172a;letter-spacing:-0.5px;'>🏦 BankPortal</span>" +
+            "</td><td align='right' valign='middle'>" +
+            "<span style='display:inline-block;font-size:11px;font-weight:700;color:#ea580c;background-color:#fff7ed;border:1px solid #ffedd5;padding:4px 12px;border-radius:9999px;text-transform:uppercase;letter-spacing:0.5px;'>Security Verification</span>" +
+            "</td></tr></table></td></tr>" +
+            "<tr><td style='padding:28px 36px 32px 36px;'>" +
+            "<h1 style='margin:0 0 12px 0;font-size:20px;font-weight:700;color:#0f172a;line-height:1.3;'>Login Verification Code</h1>" +
+            "<p style='margin:0 0 14px 0;font-size:14px;line-height:1.6;color:#475569;'>Hello <strong style='color:#0f172a;'>" + firstName + "</strong>,</p>" +
+            "<p style='margin:0 0 24px 0;font-size:14px;line-height:1.6;color:#475569;'>We received a sign-in request for your BankPortal account. Please enter the following 6-digit One-Time Password (OTP) to authenticate:</p>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='margin:0 0 24px 0;'>" +
+            "<tr><td align='center' style='background-color:#0b1320;border-radius:12px;padding:24px 20px;border:1px solid #1e293b;'>" +
+            "<div style='font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;'>6-Digit Security Code</div>" +
+            "<div style='font-family:Consolas,Monaco,\"SF Mono\",Courier,monospace;font-size:38px;font-weight:800;color:#ff6600;letter-spacing:10px;padding-left:10px;line-height:1.2;'>" + otp + "</div>" +
+            "<div style='font-size:11px;color:#64748b;margin-top:8px;'>Valid for <strong style='color:#cbd5e1;'>5 minutes</strong></div>" +
+            "</td></tr></table>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0' style='background-color:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;margin:0 0 24px 0;'>" +
+            "<tr><td style='padding:16px 20px;'>" +
+            "<table width='100%' border='0' cellspacing='0' cellpadding='0'>" +
+            "<tr><td width='24' valign='top' style='font-size:16px;line-height:1.4;'>⏱️</td>" +
+            "<td style='padding-left:8px;font-size:13px;line-height:1.5;color:#334155;'><strong>Single-Use:</strong> This code expires automatically in 5 minutes.</td></tr>" +
+            "<tr><td colspan='2' style='height:8px;'></td></tr>" +
+            "<tr><td width='24' valign='top' style='font-size:16px;line-height:1.4;'>🔒</td>" +
+            "<td style='padding-left:8px;font-size:13px;line-height:1.5;color:#334155;'><strong>Confidential:</strong> BankPortal staff will never ask for your OTP or password.</td></tr>" +
+            "</table></td></tr></table>" +
+            "<p style='margin:0;font-size:12px;line-height:1.6;color:#64748b;border-top:1px solid #f1f5f9;padding-top:16px;'>" +
+            "If you did not initiate this login request, please secure your account immediately or contact BankPortal Support." +
+            "</p></td></tr>" +
+            "<tr><td style='background-color:#f8fafc;padding:18px 36px;border-top:1px solid #e2e8f0;text-align:center;'>" +
+            "<p style='margin:0 0 4px 0;font-size:11px;color:#64748b;font-weight:600;'>BankPortal Digital Banking &bull; 256-Bit SSL Encrypted</p>" +
+            "<p style='margin:0;font-size:10px;color:#94a3b8;'>This is an automated system notification. Please do not reply directly to this email.</p>" +
             "</td></tr></table>" +
             "</td></tr></table>" +
             "</body></html>";

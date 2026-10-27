@@ -558,27 +558,24 @@ export function LoginPage() {
   if (showOtpInput) {
     return (
       <AuthLayout title="Two-Factor Security" subtitle="Registered Email Verification" maxWidth="max-w-md">
-        <form onSubmit={handleOtpSubmit} className="space-y-5">
+        <form onSubmit={handleOtpSubmit} className="space-y-6">
           
           {/* Email Notification Callout */}
-          <div className="bg-[#060e17] border border-cyan-500/30 rounded-2xl p-4 text-left relative overflow-hidden">
-            <div className="flex items-start gap-3">
-              <div className="p-2.5 bg-orange-500/10 border border-orange-500/30 text-[#ff6600] rounded-xl mt-0.5">
-                <FaEnvelope className="text-lg" />
-              </div>
-              <div className="flex-1">
-                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block">Security Code Sent</span>
-                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                  We've sent a 6-digit verification code to your registered email address:
-                </p>
-                <div className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900/80 border border-slate-700/60 rounded-lg text-xs font-mono text-orange-400 font-bold">
-                  <span>{maskedEmail || 'your registered email'}</span>
-                </div>
-              </div>
+          <div className="bg-[#060e18]/90 border border-cyan-500/30 rounded-2xl p-4 text-center relative overflow-hidden shadow-inner">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-orange-500/10 border border-orange-500/30 text-[#ff6600] mb-2.5">
+              <FaEnvelope className="text-base" />
+            </div>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider mb-1">Security Code Dispatched</h4>
+            <p className="text-xs text-slate-300 leading-relaxed max-w-xs mx-auto">
+              Please enter the 6-digit verification code sent to your registered address:
+            </p>
+            <div className="mt-2.5 inline-flex items-center gap-2 px-3 py-1.5 bg-slate-900/90 border border-cyan-500/30 rounded-xl text-xs font-mono text-cyan-300 font-semibold shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>{maskedEmail || 'your registered email'}</span>
             </div>
           </div>
 
-          {/* Delivery Warning Banner if SMTP failed */}
+          {/* Delivery Notice if SMTP failed on cloud */}
           {!emailSent && (
             <div className="bg-amber-950/40 border border-amber-500/40 rounded-2xl p-3.5 text-left text-xs text-amber-200">
               <div className="font-bold flex items-center gap-1.5 text-amber-400">
@@ -600,37 +597,75 @@ export function LoginPage() {
             </div>
           )}
 
-          <div className="focus-glow text-left">
-            <div className="flex justify-between items-center mb-2">
-              <label className="label mb-0">6-Digit Verification Code</label>
-              <span className="text-[10px] text-slate-400 font-mono">Expires in 5 min</span>
+          {/* 6-Slot Interactive OTP Input */}
+          <div className="text-center">
+            <div className="flex justify-between items-center mb-3 px-1">
+              <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Verification Code</label>
+              <span className="text-[11px] text-slate-400 font-mono">Expires in 5 min</span>
             </div>
-            <div className="relative group">
-              <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm group-focus-within:text-cyan-400 transition-colors" />
+
+            <div className="relative group cursor-text" onClick={() => document.getElementById('otp-real-input')?.focus()}>
+              {/* Visible 6 Slots Display */}
+              <div className="flex justify-center items-center gap-2 sm:gap-3">
+                {[0, 1, 2, 3, 4, 5].map(idx => {
+                  const digit = otp[idx] || '';
+                  const isCurrent = idx === otp.length;
+                  const isFilled = idx < otp.length;
+                  return (
+                    <div
+                      key={idx}
+                      className={`w-11 h-14 sm:w-12 sm:h-16 flex items-center justify-center rounded-xl border-2 font-mono text-2xl font-bold transition-all duration-200 select-none ${
+                        isCurrent
+                          ? 'border-orange-500 bg-orange-500/10 shadow-[0_0_15px_rgba(255,102,0,0.35)] text-white scale-105'
+                          : isFilled
+                          ? 'border-cyan-500/70 bg-[#071328] text-cyan-300 shadow-sm'
+                          : 'border-slate-700/60 bg-[#060e18]/80 text-slate-600'
+                      }`}
+                    >
+                      {digit ? (
+                        <span>{digit}</span>
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-slate-600/50"></span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Underlying Real Input */}
               <input
+                id="otp-real-input"
                 type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                pattern="[0-9]*"
+                maxLength={6}
                 required
                 autoFocus
-                maxLength={6}
                 value={otp}
-                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
-                className="glass-input pl-11 tracking-[0.5em] text-center font-mono text-xl font-black text-white placeholder:tracking-normal placeholder:font-normal placeholder:text-sm"
-                placeholder="• • • • • •"
+                onChange={e => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                aria-label="6-Digit Verification Code"
               />
             </div>
             
-            {/* Demo / Testing notice */}
-            <p className="text-[10px] text-slate-400 leading-normal italic mt-2.5 text-center bg-[#071328]/50 p-2 rounded-xl border border-[#1c3554]/30">
-              Please enter the OTP from your email inbox or spam folder. For quick local testing, demo master OTP is <strong className="text-orange-400 font-mono">123456</strong>.
+            {/* Quick Testing Master OTP Hint */}
+            <p className="text-[11px] text-slate-400 mt-3 text-center">
+              Didn't see the code? Check Spam folder &bull; Demo Master OTP: <strong className="text-orange-400 font-mono">123456</strong>
             </p>
           </div>
 
+          {/* Primary Submit Button */}
           <button
             type="submit"
             disabled={loading || otp.length !== 6}
-            className="btn-primary w-full flex items-center justify-center gap-2 group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-primary w-full flex items-center justify-center gap-2 group py-3 text-sm font-bold tracking-wide rounded-xl disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20"
           >
-            {loading ? 'Verifying...' : (
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <FaRedo className="animate-spin text-xs" /> Verifying Code...
+              </span>
+            ) : (
               <>
                 Verify & Sign In <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
               </>
@@ -638,10 +673,10 @@ export function LoginPage() {
           </button>
 
           {/* Resend OTP Bar */}
-          <div className="flex items-center justify-between text-xs pt-1 border-t border-white/5">
-            <span className="text-slate-400">Didn't receive the code?</span>
+          <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800/80">
+            <span className="text-slate-400">Didn't receive the email?</span>
             {countdown > 0 ? (
-              <span className="text-slate-400 font-mono text-[11px]">
+              <span className="text-slate-400 font-mono text-[11px] bg-slate-900/60 px-2 py-0.5 rounded-lg border border-slate-800">
                 Resend in <strong className="text-orange-400">{countdown}s</strong>
               </span>
             ) : (
@@ -649,21 +684,22 @@ export function LoginPage() {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={resendLoading}
-                className="text-cyan-400 hover:text-cyan-300 font-bold hover:underline flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline flex items-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 <FaRedo className={`text-[10px] ${resendLoading ? 'animate-spin' : ''}`} />
-                {resendLoading ? 'Sending...' : 'Resend Code'}
+                {resendLoading ? 'Dispatching...' : 'Resend Code'}
               </button>
             )}
           </div>
           
+          {/* Back Navigation */}
           <button
             type="button"
             onClick={() => {
               setShowOtpInput(false);
               setOtp('');
             }}
-            className="w-full text-slate-400 hover:text-slate-200 text-xs font-semibold uppercase tracking-wider text-center pt-2 hover:underline block"
+            className="w-full text-slate-400 hover:text-slate-200 text-xs font-semibold uppercase tracking-wider text-center pt-1 hover:underline block transition-colors"
           >
             ← Back to Password Sign In
           </button>
