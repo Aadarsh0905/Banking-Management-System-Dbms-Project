@@ -250,7 +250,8 @@ export function AccountsPage() {
       const res = await paymentApi.createStripeCheckout({
         accountId: addMoneyAccount.id,
         amount: +addMoneyAmount,
-        currency: 'inr'
+        currency: 'inr',
+        returnUrl: window.location.origin
       });
       const data = res.data?.data;
       if (data?.checkoutUrl) {

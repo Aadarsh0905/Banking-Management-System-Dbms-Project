@@ -21,6 +21,7 @@ public class StripeDTOs {
         private BigDecimal amount;
 
         private String currency; // default: "inr" or "usd"
+        private String returnUrl;
     }
 
     @Data

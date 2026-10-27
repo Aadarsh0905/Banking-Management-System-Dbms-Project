@@ -26,7 +26,7 @@ import {
   FaTimesCircle,
 } from 'react-icons/fa';
 import { useAuth, useTheme } from '../context/Contexts';
-import { notifApi, getAvatarUrl } from '../services/api';
+import { notifApi, getAvatarUrl, paymentApi } from '../services/api';
 import { toast } from 'react-toastify';
 
 function Sidebar({ open }) {
@@ -220,6 +220,31 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
   const [loadingPage, setLoadingPage] = useState(false);
+
+  useEffect(() => {
+    // Global detection of Stripe checkout return
+    const query = new URLSearchParams(window.location.search);
+    const paymentStatus = query.get('payment_status');
+    const sessionId = query.get('session_id');
+    const amt = query.get('amt');
+
+    if (paymentStatus === 'success' && sessionId) {
+      paymentApi.verifyStripePayment(sessionId)
+        .then(() => {
+          toast.success(`🎉 Deposit successful! ${amt ? '₹' + (+amt).toLocaleString('en-IN') : 'Funds'} credited to your account.`);
+        })
+        .catch((err) => {
+          const msg = err.response?.data?.message || '';
+          if (msg.toLowerCase().includes('already')) {
+            toast.success(`🎉 Deposit confirmed! ${amt ? '₹' + (+amt).toLocaleString('en-IN') : 'Funds'} credited.`);
+          }
+        });
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'cancelled') {
+      toast.warn('Stripe checkout was cancelled.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     setLoadingPage(true);

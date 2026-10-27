@@ -144,7 +144,10 @@ public class StripeService {
                 // Amount in smallest currency unit (e.g. cents/paise: multiply by 100)
                 long unitAmount = req.getAmount().multiply(new BigDecimal("100")).longValue();
 
-                String cleanFrontendUrl = frontendUrl.replaceAll("/+$", "");
+                String baseFrontend = (req.getReturnUrl() != null && !req.getReturnUrl().isBlank()) 
+                        ? req.getReturnUrl().trim() 
+                        : frontendUrl;
+                String cleanFrontendUrl = baseFrontend.replaceAll("/+$", "");
                 String successUrl = cleanFrontendUrl + "/accounts?payment_status=success&session_id={CHECKOUT_SESSION_ID}&acc=" 
                         + acc.getAccountNumber() + "&amt=" + req.getAmount();
                 String cancelUrl = cleanFrontendUrl + "/accounts?payment_status=cancelled";
