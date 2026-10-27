@@ -40,12 +40,13 @@ export function ProfilePage() {
   }, [user]);
 
   useEffect(() => {
+    if (!user) return;
     accountApi.getAll()
       .then(r => setAccounts(r.data.data || []))
       .catch((err) => {
-        toast.error(err.response?.data?.message || 'Failed to load accounts in profile');
+        console.warn('Could not load accounts in profile:', err);
       });
-  }, []);
+  }, [user]);
 
   async function updateProfile(e) {
     e.preventDefault();
