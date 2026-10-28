@@ -29,6 +29,7 @@ import { useAuth, useTheme } from '../context/Contexts';
 import { notifApi, getAvatarUrl, paymentApi } from '../services/api';
 import { sounds } from '../services/sounds';
 import { toast } from 'react-toastify';
+import RenderStatusPill from './RenderStatusPill';
 
 function Sidebar({ open }) {
   const { isAdmin } = useAuth();
@@ -178,9 +179,12 @@ function Navbar({ onToggleSidebar }) {
 
   return (
     <header className="flex-shrink-0 bg-[#0c192c]/80 backdrop-blur-md border-b border-[#1c3554] px-4 py-3 flex items-center justify-between z-10">
-      <button onClick={onToggleSidebar} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-[#1c3554] transition-all">
-        <FaBars className="text-slate-300" />
-      </button>
+      <div className="flex items-center gap-3">
+        <button onClick={onToggleSidebar} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-[#1c3554] transition-all">
+          <FaBars className="text-slate-300" />
+        </button>
+        <RenderStatusPill compact />
+      </div>
 
       <div className="flex items-center gap-3">
         <button onClick={() => navigate('/notifications')} className="relative p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-[#1c3554] transition-all">

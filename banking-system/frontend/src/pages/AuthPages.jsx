@@ -18,7 +18,10 @@ import {
   FaShieldAlt,
   FaRedo
 } from 'react-icons/fa';
+import { SiRender } from 'react-icons/si';
 import { useAuth } from '../context/Contexts';
+import { useServerStatus } from '../context/ServerStatusContext';
+import RenderStatusPill from '../components/RenderStatusPill';
 import { authApi } from '../services/api';
 
 // ── Glassmorphic Background Layout ──────────────────────────
@@ -366,15 +369,12 @@ function AuthLayout({ children, title, subtitle, activeTab, maxWidth = 'max-w-md
           <div className="glass-card border border-[#1c3554] shadow-2xl p-0 overflow-hidden rounded-[2.5rem] flex flex-col">
             
             {/* Header top bar for Professional Dashboard look */}
-            <div className="flex justify-between items-center px-6 md:px-8 py-3 bg-[#060e17] border-b border-[#1c3554] text-[9px] md:text-[10px] font-mono tracking-wider text-slate-400">
+            <div className="flex justify-between items-center px-4 md:px-6 py-2.5 bg-[#060e17] border-b border-[#1c3554] text-[9px] md:text-[10px] font-mono tracking-wider text-slate-400">
+              <RenderStatusPill compact />
               <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-bold text-slate-300">GATEWAY ONLINE</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-cyan-400 uppercase font-bold text-[9px]">NODE: HOST-1</span>
+                <span className="text-cyan-400 uppercase font-bold text-[9px]">RENDER CLOUD</span>
                 <span className="text-slate-600">/</span>
-                <span className="text-orange-500 font-bold text-[9px]">SECURED</span>
+                <span className="text-orange-500 font-bold text-[9px]">TLS SECURED</span>
               </div>
             </div>
 
@@ -444,6 +444,7 @@ export function LoginPage() {
   const [emailStatus, setEmailStatus] = useState('');
   const [countdown, setCountdown] = useState(0);
   const { login, verifyOtp, resendOtp } = useAuth();
+  const { isWaking, elapsedSeconds, isOnline, openModal } = useServerStatus();
   const navigate  = useNavigate();
 
   // 30-second cooldown timer for resending OTP
@@ -459,12 +460,19 @@ export function LoginPage() {
 
   const handleQuickLogin = (username, password) => {
     setForm({ usernameOrEmail: username, password: password });
-    toast.info(`Filled credentials for ${username}`, { autoClose: 1500 });
+    if (isWaking) {
+      toast.info(`Filled credentials for ${username}! Note: Render backend is waking up (${elapsedSeconds}s).`, { autoClose: 3500 });
+    } else {
+      toast.info(`Filled credentials for ${username}`, { autoClose: 1500 });
+    }
   };
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
+    if (isWaking) {
+      toast.info(`Waking up Render backend container (${elapsedSeconds}s)... Request will complete automatically once ready.`, { autoClose: 5000 });
+    }
     try {
       const result = await login(form);
       if (result && result.otpRequired) {
@@ -710,6 +718,42 @@ export function LoginPage() {
 
   return (
     <AuthLayout title="BankPortal" subtitle="Secure Digital Gateway" activeTab="login" maxWidth="max-w-md">
+      {/* Render Cloud Cold-Start Info Banner for Recruiters */}
+      <div 
+        onClick={openModal}
+        className={`mb-5 p-3.5 rounded-2xl border transition-all cursor-pointer text-left ${
+          isOnline
+            ? 'bg-[#0c192c]/90 border-emerald-500/30 hover:border-emerald-500/60'
+            : isWaking
+            ? 'bg-[#0c192c] border-orange-500/40 hover:border-orange-500/70 shadow-lg shadow-orange-500/10'
+            : 'bg-[#0c192c]/80 border-[#1c3554] hover:border-[#2b4c75]'
+        }`}
+      >
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] font-black uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+            <SiRender className="text-[#46e3b7] text-xs" /> Recruiter & Visitor Notice
+          </span>
+          <span className={`text-[9px] font-mono px-2 py-0.5 rounded-md font-bold uppercase ${
+            isOnline ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-orange-500/10 text-orange-400 border border-orange-500/30'
+          }`}>
+            {isOnline ? 'Render: Ready' : `Render: Spin-up (${elapsedSeconds}s)`}
+          </span>
+        </div>
+        <p className="text-[11px] text-slate-300 leading-relaxed">
+          {isOnline ? (
+            'Render backend container is online and fully active. Sub-second response time across all banking operations.'
+          ) : (
+            'Hosted on Render Free Tier. Free containers sleep after 15 min of inactivity. First open / login takes ~45–60s to wake up.'
+          )}
+        </p>
+        <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1.5 mt-1 border-t border-[#1c3554]/50">
+          <span className="text-cyan-400 font-semibold flex items-center gap-1">
+            {isOnline ? '🟢 All services online' : '⚡ Click to view spin-up progress'}
+          </span>
+          <span className="text-slate-500 font-mono">Free Plan ($0/mo)</span>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="focus-glow text-left">
           <label className="label">Username or Email</label>
@@ -758,7 +802,12 @@ export function LoginPage() {
           disabled={loading}
           className="btn-primary w-full mt-2 flex items-center justify-center gap-2 group"
         >
-          {loading ? 'Signing in...' : (
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              {isWaking ? `Waking Render Backend (${elapsedSeconds}s)...` : 'Signing in...'}
+            </span>
+          ) : (
             <>
               Sign In <FaArrowRight className="text-xs group-hover:translate-x-1 transition-transform" />
             </>
